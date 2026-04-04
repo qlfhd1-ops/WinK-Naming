@@ -1,6 +1,9 @@
 "use client";
 
 import { forwardRef } from "react";
+import { QRCodeSVG } from "qrcode.react";
+
+const SITE_URL = "https://wink-naming.vercel.app";
 
 type Props = {
   name: string;
@@ -18,6 +21,7 @@ type Props = {
   recipientName?: string;
   lang?: "ko" | "en" | "ja" | "zh" | "es";
   isFree?: boolean;
+  showQr?: boolean;
 };
 
 const Diamond = ({ style }: { style: React.CSSProperties }) => (
@@ -40,8 +44,10 @@ const NameGiftCard = forwardRef<HTMLDivElement, Props>(function NameGiftCard(pro
     name, hanja, hanjaMeaning,
     english, chinese, chinesePinyin, japaneseKana, japaneseReading,
     meaning, giftMessage, senderName, recipientName,
-    lang = "ko", isFree = false,
+    lang = "ko", isFree = false, showQr = true,
   } = props;
+
+  const qrUrl = `${SITE_URL}?name=${encodeURIComponent(name)}&meaning=${encodeURIComponent(meaning)}`;
 
   const pronounceRows = [
     { label: "EN", value: english, sub: null },
@@ -191,16 +197,64 @@ const NameGiftCard = forwardRef<HTMLDivElement, Props>(function NameGiftCard(pro
         ))}
       </div>
 
-      {/* Footer brand */}
-      <div style={{ textAlign: "right", marginTop: 6 }}>
-        <span style={{
-          fontSize: 9, letterSpacing: "0.18em",
-          color: "rgba(240,208,128,0.35)",
-          textTransform: "uppercase",
-          fontFamily: "'Cormorant Garamond', 'Georgia', serif",
-        }}>
-          wink-naming.vercel.app
-        </span>
+      {/* Footer: QR + brand */}
+      <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginTop: 6 }}>
+
+        {/* QR code */}
+        {showQr && (
+          <div style={{
+            padding: 5,
+            borderRadius: 8,
+            background: "#fff",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.35)",
+            lineHeight: 0,
+          }}>
+            <QRCodeSVG
+              value={qrUrl}
+              size={56}
+              bgColor="#ffffff"
+              fgColor="#0D1A3E"
+              level="M"
+            />
+            <div style={{
+              fontSize: 7,
+              color: "#0D1A3E",
+              textAlign: "center",
+              marginTop: 3,
+              letterSpacing: "0.04em",
+              fontFamily: "sans-serif",
+              lineHeight: 1,
+            }}>
+              Wink Naming
+            </div>
+          </div>
+        )}
+
+        {/* Brand text */}
+        <div style={{ textAlign: "right" }}>
+          <div style={{
+            fontSize: 9, letterSpacing: "0.18em",
+            color: "rgba(240,208,128,0.35)",
+            textTransform: "uppercase",
+            fontFamily: "'Cormorant Garamond', 'Georgia', serif",
+          }}>
+            wink-naming.vercel.app
+          </div>
+          {showQr && (
+            <div style={{
+              fontSize: 8,
+              color: "rgba(200,216,248,0.35)",
+              marginTop: 3,
+              letterSpacing: "0.04em",
+            }}>
+              {lang === "ko" && "QR 스캔 → 이름 정보 확인"}
+              {lang === "en" && "Scan QR to view name details"}
+              {lang === "ja" && "QRで名前情報を確認"}
+              {lang === "zh" && "扫码查看名字详情"}
+              {lang === "es" && "Escanear QR para ver detalles"}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Free user blur overlay */}
