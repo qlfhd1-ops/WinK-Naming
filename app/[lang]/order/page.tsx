@@ -1,0 +1,1307 @@
+"use client";
+
+import { FormEvent, useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { AppLang, isSupportedLang } from "@/lib/lang-config";
+import { createClient } from "@/lib/supabase/browser";
+import { PRICING } from "@/lib/pricing";
+
+// ─── Types ───────────────────────────────────────────────
+type ProductType = "stamp" | "doorplate";
+type Step = "form" | "confirm" | "done";
+
+// ─── Product config ───────────────────────────────────────
+const PRODUCT_PRICE: Record<ProductType, number> = {
+  stamp: PRICING.stamp,
+  doorplate: PRICING.doorplate,
+};
+
+// Material presets
+const STAMP_MATERIALS = ["목인(木印)", "수정(水晶)", "흑단(黑檀)", "상아대용"];
+const DOORPLATE_MATERIALS = ["스테인리스", "원목", "아크릴", "황동"];
+
+// ─── COPY ─────────────────────────────────────────────────
+const COPY = {
+  ko: {
+    chip: "Wink Direct Order",
+    title: "도장 · 문패 바로 주문",
+    sub: "이름 설계 없이 기존 이름으로 바로 도장과 문패를 제작 주문할 수 있습니다.",
+    step1Title: "상품 선택 및 이름 입력",
+    step2Title: "주문자 정보 확인",
+    doneTitle: "주문이 접수되었습니다",
+    doneSub: "입력하신 이메일로 주문 확인 안내를 보내드립니다.",
+    orderNum: "주문번호",
+    doneNotice1: "제작 기간은 영업일 기준 7-10일이며, 배송은 제작 완료 후 순차적으로 진행됩니다.",
+    doneNotice2: "문의 사항은 이메일로 연락 주시면 빠르게 안내드립니다.",
+    productSectionTitle: "제작할 상품 선택 (복수 선택 가능)",
+    stampTitle: "인장 / 도장",
+    stampDesc: "이름을 각인한 개인용 도장으로, 소장 가치 높은 인장을 제작합니다.",
+    stampPoints: ["한글 / 한자 각인", "선택 재질 제작", "전용 보관함 포함"],
+    doorplateTitle: "문패",
+    doorplateDesc: "공간에 이름의 의미를 담은 문패를 제작합니다.",
+    doorplatePoints: ["한글 / 한자 병기 가능", "선택 재질 제작", "맞춤 마운트 포함"],
+    nameSectionTitle: "이름 및 각인 정보",
+    nameLabel: "이름 (한글)",
+    namePh: "예: 김윤슬",
+    hanjaLabel: "한자 표기 (선택)",
+    hanjaPh: "예: 金潤瑟",
+    engravingLabel: "각인 문구 (기본: 이름)",
+    engravingPh: "비워두면 이름으로 각인됩니다",
+    stampMatLabel: "도장 재질 요청",
+    stampMatPh: "직접 입력 또는 아래에서 선택",
+    doorplateMatLabel: "문패 재질 요청",
+    doorplateMatPh: "직접 입력 또는 아래에서 선택",
+    memoLabel: "추가 요청 메모",
+    memoPh: "사이즈, 디자인, 배송 요청 등 자유롭게 작성해 주세요",
+    previewTitle: "각인 미리보기",
+    orderSummaryTitle: "주문 요약",
+    selectedProducts: "선택 상품",
+    engravingInfo: "각인 정보",
+    materialInfo: "재질 요청",
+    totalLabel: "결제 예정 금액",
+    customerSectionTitle: "주문자 정보",
+    custNameLabel: "주문자 이름",
+    custNamePh: "실명으로 입력해 주세요",
+    custEmailLabel: "이메일",
+    custEmailPh: "name@email.com",
+    btnNext: "다음 단계 →",
+    btnBack: "← 이전",
+    btnSubmit: "주문 완료",
+    btnSubmitting: "주문 저장 중...",
+    btnGoCategory: "이름 설계하러 가기",
+    btnGoHome: "홈으로",
+    errSelectProduct: "제작할 상품을 하나 이상 선택해 주세요.",
+    errName: "이름을 입력해 주세요.",
+    errCustName: "주문자 이름을 입력해 주세요.",
+    errEmail: "유효한 이메일을 입력해 주세요.",
+    errServer: "주문 처리 중 오류가 발생했습니다. 다시 시도해 주세요.",
+    trustTitle: "주문 안내",
+    trust1: "결과 확인 후 마음에 드실 때만 주문해 주세요.",
+    trust2: "주문 후 제작이 시작되면 취소가 어렵습니다.",
+    trust3: "한글·한자 각인이 모두 가능합니다.",
+  },
+  en: {
+    chip: "Wink Direct Order",
+    title: "Order Stamp · Door Plate",
+    sub: "Order a stamp or door plate directly with your existing name — no naming session required.",
+    step1Title: "Select Product & Enter Name",
+    step2Title: "Customer Information",
+    doneTitle: "Order Received",
+    doneSub: "We will send a confirmation to your email address.",
+    orderNum: "Order ID",
+    doneNotice1: "Production takes 7-10 business days. Shipping follows after production is complete.",
+    doneNotice2: "For inquiries, please contact us via email.",
+    productSectionTitle: "Choose Products (multiple allowed)",
+    stampTitle: "Name Seal / Stamp",
+    stampDesc: "A personal seal engraved with your name, crafted with lasting value.",
+    stampPoints: ["Korean / Hanja engraving", "Your choice of material", "Storage case included"],
+    doorplateTitle: "Door Plate",
+    doorplateDesc: "A door plate that brings your name's meaning into your space.",
+    doorplatePoints: ["Korean / Hanja dual engraving", "Your choice of material", "Custom mount included"],
+    nameSectionTitle: "Name & Engraving Info",
+    nameLabel: "Name (Korean)",
+    namePh: "e.g. 김윤슬",
+    hanjaLabel: "Hanja (optional)",
+    hanjaPh: "e.g. 金潤瑟",
+    engravingLabel: "Engraving Text (default: name)",
+    engravingPh: "Leave blank to use the name",
+    stampMatLabel: "Stamp Material",
+    stampMatPh: "Type or choose below",
+    doorplateMatLabel: "Door Plate Material",
+    doorplateMatPh: "Type or choose below",
+    memoLabel: "Additional Notes",
+    memoPh: "Size, design, delivery requests, etc.",
+    previewTitle: "Engraving Preview",
+    orderSummaryTitle: "Order Summary",
+    selectedProducts: "Selected Products",
+    engravingInfo: "Engraving Info",
+    materialInfo: "Material",
+    totalLabel: "Estimated Total",
+    customerSectionTitle: "Customer Information",
+    custNameLabel: "Customer Name",
+    custNamePh: "Your full name",
+    custEmailLabel: "Email",
+    custEmailPh: "name@email.com",
+    btnNext: "Next →",
+    btnBack: "← Back",
+    btnSubmit: "Place Order",
+    btnSubmitting: "Saving...",
+    btnGoCategory: "Go to Naming",
+    btnGoHome: "Go Home",
+    errSelectProduct: "Please select at least one product.",
+    errName: "Please enter the name.",
+    errCustName: "Please enter your name.",
+    errEmail: "Please enter a valid email address.",
+    errServer: "An error occurred. Please try again.",
+    trustTitle: "Order Notes",
+    trust1: "Only order if you are satisfied with the design.",
+    trust2: "Cancellation is difficult once production begins.",
+    trust3: "Both Korean and Hanja engraving are available.",
+  },
+  zh: {
+    chip: "Wink Direct Order",
+    title: "印章 · 门牌直接订购",
+    sub: "无需命名流程，直接用现有名字订购印章或门牌。",
+    step1Title: "选择商品并输入名字",
+    step2Title: "订购人信息",
+    doneTitle: "订单已接收",
+    doneSub: "订单确认信息将发送至您的邮箱。",
+    orderNum: "订单号",
+    doneNotice1: "制作周期为7-10个工作日，制作完成后按顺序发货。",
+    doneNotice2: "如有疑问，请通过邮件联系我们。",
+    productSectionTitle: "选择商品（可多选）",
+    stampTitle: "印章",
+    stampDesc: "刻有您名字的个人印章，具有较高的收藏价值。",
+    stampPoints: ["韩文 / 汉字刻印", "可选材质制作", "含专用收纳盒"],
+    doorplateTitle: "门牌",
+    doorplateDesc: "将名字的意义融入空间的定制门牌。",
+    doorplatePoints: ["韩文 / 汉字并刻", "可选材质制作", "含定制安装件"],
+    nameSectionTitle: "名字与刻印信息",
+    nameLabel: "名字（韩文）",
+    namePh: "例：김윤슬",
+    hanjaLabel: "汉字（可选）",
+    hanjaPh: "例：金潤瑟",
+    engravingLabel: "刻印文字（默认：名字）",
+    engravingPh: "留空则使用名字",
+    stampMatLabel: "印章材质要求",
+    stampMatPh: "直接输入或从下方选择",
+    doorplateMatLabel: "门牌材质要求",
+    doorplateMatPh: "直接输入或从下方选择",
+    memoLabel: "补充备注",
+    memoPh: "尺寸、设计、配送要求等",
+    previewTitle: "刻印预览",
+    orderSummaryTitle: "订单摘要",
+    selectedProducts: "已选商品",
+    engravingInfo: "刻印信息",
+    materialInfo: "材质要求",
+    totalLabel: "预计支付金额",
+    customerSectionTitle: "订购人信息",
+    custNameLabel: "订购人姓名",
+    custNamePh: "请输入真实姓名",
+    custEmailLabel: "邮箱",
+    custEmailPh: "name@email.com",
+    btnNext: "下一步 →",
+    btnBack: "← 返回",
+    btnSubmit: "完成订购",
+    btnSubmitting: "保存中...",
+    btnGoCategory: "前往命名流程",
+    btnGoHome: "返回首页",
+    errSelectProduct: "请至少选择一件商品。",
+    errName: "请输入名字。",
+    errCustName: "请输入订购人姓名。",
+    errEmail: "请输入有效的邮箱地址。",
+    errServer: "订单处理时发生错误，请重试。",
+    trustTitle: "订购说明",
+    trust1: "满意后再下单。",
+    trust2: "开始制作后较难取消订单。",
+    trust3: "支持韩文和汉字刻印。",
+  },
+  ja: {
+    chip: "Wink Direct Order",
+    title: "印鑑 · 表札 直接注文",
+    sub: "ネーミング不要。お手元の名前で印鑑や表札をすぐに注文できます。",
+    step1Title: "商品選択・名前入力",
+    step2Title: "注文者情報の確認",
+    doneTitle: "ご注文を受け付けました",
+    doneSub: "注文確認メールをご入力のアドレスにお送りします。",
+    orderNum: "注文番号",
+    doneNotice1: "制作期間は営業日7-10日です。完成後、順次発送いたします。",
+    doneNotice2: "ご不明な点はメールにてお問い合わせください。",
+    productSectionTitle: "商品選択（複数可）",
+    stampTitle: "印鑑",
+    stampDesc: "名前を刻印した個人用印鑑で、所蔵価値の高い仕上がりです。",
+    stampPoints: ["韓国語・漢字彫刻", "素材選択可", "専用ケース付き"],
+    doorplateTitle: "表札",
+    doorplateDesc: "名前の意味を空間に込めた表札を制作します。",
+    doorplatePoints: ["韓国語・漢字併記可", "素材選択可", "カスタムマウント付き"],
+    nameSectionTitle: "名前・彫刻情報",
+    nameLabel: "名前（韓国語）",
+    namePh: "例：김윤슬",
+    hanjaLabel: "漢字（任意）",
+    hanjaPh: "例：金潤瑟",
+    engravingLabel: "彫刻文字（デフォルト：名前）",
+    engravingPh: "空欄の場合は名前で彫刻します",
+    stampMatLabel: "印鑑素材希望",
+    stampMatPh: "直接入力または下から選択",
+    doorplateMatLabel: "表札素材希望",
+    doorplateMatPh: "直接入力または下から選択",
+    memoLabel: "追加要望",
+    memoPh: "サイズ、デザイン、配送要望など自由にご記入ください",
+    previewTitle: "彫刻プレビュー",
+    orderSummaryTitle: "注文サマリー",
+    selectedProducts: "選択商品",
+    engravingInfo: "彫刻情報",
+    materialInfo: "素材希望",
+    totalLabel: "お支払い予定金額",
+    customerSectionTitle: "注文者情報",
+    custNameLabel: "注文者名",
+    custNamePh: "お名前をご入力ください",
+    custEmailLabel: "メール",
+    custEmailPh: "name@email.com",
+    btnNext: "次へ →",
+    btnBack: "← 戻る",
+    btnSubmit: "注文を確定する",
+    btnSubmitting: "保存中...",
+    btnGoCategory: "ネーミングへ",
+    btnGoHome: "ホームへ",
+    errSelectProduct: "商品を1つ以上選択してください。",
+    errName: "名前を入力してください。",
+    errCustName: "注文者名を入力してください。",
+    errEmail: "有効なメールアドレスを入力してください。",
+    errServer: "注文処理中にエラーが発生しました。再度お試しください。",
+    trustTitle: "注文について",
+    trust1: "ご満足いただけた場合のみご注文ください。",
+    trust2: "制作開始後はキャンセルが難しくなります。",
+    trust3: "韓国語・漢字どちらの彫刻も対応しています。",
+  },
+  es: {
+    chip: "Wink Direct Order",
+    title: "Sello · Placa de puerta — Pedido directo",
+    sub: "Pida un sello o placa de puerta directamente con su nombre existente — sin necesidad de sesión de naming.",
+    step1Title: "Seleccionar producto e ingresar nombre",
+    step2Title: "Información del cliente",
+    doneTitle: "Pedido recibido",
+    doneSub: "Enviaremos una confirmación a su dirección de correo.",
+    orderNum: "Número de pedido",
+    doneNotice1: "La producción tarda 7-10 días hábiles. El envío se realiza después de completar la producción.",
+    doneNotice2: "Para consultas, contáctenos por correo electrónico.",
+    productSectionTitle: "Elegir productos (selección múltiple permitida)",
+    stampTitle: "Sello de nombre",
+    stampDesc: "Un sello personal grabado con su nombre, de gran valor coleccionable.",
+    stampPoints: ["Grabado en coreano / Hanja", "Elección de material", "Estuche incluido"],
+    doorplateTitle: "Placa de puerta",
+    doorplateDesc: "Una placa de puerta que lleva el significado de su nombre a su espacio.",
+    doorplatePoints: ["Grabado dual coreano / Hanja", "Elección de material", "Soporte personalizado incluido"],
+    nameSectionTitle: "Nombre e info de grabado",
+    nameLabel: "Nombre (coreano)",
+    namePh: "ej. 김윤슬",
+    hanjaLabel: "Hanja (opcional)",
+    hanjaPh: "ej. 金潤瑟",
+    engravingLabel: "Texto de grabado (por defecto: nombre)",
+    engravingPh: "Dejar en blanco para usar el nombre",
+    stampMatLabel: "Material del sello",
+    stampMatPh: "Escribir o elegir abajo",
+    doorplateMatLabel: "Material de la placa",
+    doorplateMatPh: "Escribir o elegir abajo",
+    memoLabel: "Notas adicionales",
+    memoPh: "Tamaño, diseño, instrucciones de envío, etc.",
+    previewTitle: "Vista previa del grabado",
+    orderSummaryTitle: "Resumen del pedido",
+    selectedProducts: "Productos seleccionados",
+    engravingInfo: "Info de grabado",
+    materialInfo: "Material",
+    totalLabel: "Total estimado",
+    customerSectionTitle: "Información del cliente",
+    custNameLabel: "Nombre del cliente",
+    custNamePh: "Su nombre completo",
+    custEmailLabel: "Correo",
+    custEmailPh: "name@email.com",
+    btnNext: "Siguiente →",
+    btnBack: "← Atrás",
+    btnSubmit: "Realizar pedido",
+    btnSubmitting: "Guardando...",
+    btnGoCategory: "Ir al Naming",
+    btnGoHome: "Inicio",
+    errSelectProduct: "Seleccione al menos un producto.",
+    errName: "Ingrese el nombre.",
+    errCustName: "Ingrese su nombre.",
+    errEmail: "Ingrese un correo válido.",
+    errServer: "Ocurrió un error. Por favor, inténtelo de nuevo.",
+    trustTitle: "Notas del pedido",
+    trust1: "Pida solo si está satisfecho con el diseño.",
+    trust2: "La cancelación es difícil una vez iniciada la producción.",
+    trust3: "El grabado en coreano y Hanja está disponible.",
+  },
+  ru: {
+    chip: "Wink Direct Order",
+    title: "Печать · Табличка — Прямой заказ",
+    sub: "Закажите печать или табличку напрямую с вашим существующим именем — сессия нейминга не нужна.",
+    step1Title: "Выбрать продукт и ввести имя",
+    step2Title: "Информация о покупателе",
+    doneTitle: "Заказ принят",
+    doneSub: "Мы отправим подтверждение на ваш email.",
+    orderNum: "Номер заказа",
+    doneNotice1: "Производство занимает 7-10 рабочих дней. Отправка осуществляется после завершения.",
+    doneNotice2: "По вопросам обращайтесь по email.",
+    productSectionTitle: "Выбрать продукты (возможен множественный выбор)",
+    stampTitle: "Именная печать",
+    stampDesc: "Персональная печать с гравировкой имени, обладающая коллекционной ценностью.",
+    stampPoints: ["Гравировка корейский / Ханджа", "Выбор материала", "Футляр в комплекте"],
+    doorplateTitle: "Именная табличка",
+    doorplateDesc: "Табличка, привносящая смысл имени в ваше пространство.",
+    doorplatePoints: ["Двойная гравировка корейский / Ханджа", "Выбор материала", "Крепление в комплекте"],
+    nameSectionTitle: "Имя и информация о гравировке",
+    nameLabel: "Имя (корейский)",
+    namePh: "напр. 김윤슬",
+    hanjaLabel: "Ханджа (необязательно)",
+    hanjaPh: "напр. 金潤瑟",
+    engravingLabel: "Текст гравировки (по умолчанию: имя)",
+    engravingPh: "Оставьте пустым для использования имени",
+    stampMatLabel: "Материал печати",
+    stampMatPh: "Введите или выберите ниже",
+    doorplateMatLabel: "Материал таблички",
+    doorplateMatPh: "Введите или выберите ниже",
+    memoLabel: "Дополнительные пожелания",
+    memoPh: "Размер, дизайн, пожелания по доставке и т.д.",
+    previewTitle: "Предварительный просмотр",
+    orderSummaryTitle: "Итог заказа",
+    selectedProducts: "Выбранные продукты",
+    engravingInfo: "Информация о гравировке",
+    materialInfo: "Материал",
+    totalLabel: "Итоговая сумма",
+    customerSectionTitle: "Информация о покупателе",
+    custNameLabel: "Имя покупателя",
+    custNamePh: "Ваше полное имя",
+    custEmailLabel: "Email",
+    custEmailPh: "name@email.com",
+    btnNext: "Далее →",
+    btnBack: "← Назад",
+    btnSubmit: "Оформить заказ",
+    btnSubmitting: "Сохранение...",
+    btnGoCategory: "К нейминг",
+    btnGoHome: "На главную",
+    errSelectProduct: "Выберите хотя бы один продукт.",
+    errName: "Введите имя.",
+    errCustName: "Введите ваше имя.",
+    errEmail: "Введите корректный email.",
+    errServer: "Произошла ошибка. Попробуйте снова.",
+    trustTitle: "Примечания по заказу",
+    trust1: "Заказывайте только если удовлетворены дизайном.",
+    trust2: "Отмена затруднена после начала производства.",
+    trust3: "Доступна гравировка на корейском и Ханджа.",
+  },
+  fr: {
+    chip: "Wink Direct Order",
+    title: "Sceau · Plaque — Commande directe",
+    sub: "Commandez un sceau ou une plaque directement avec votre nom existant — sans session de naming.",
+    step1Title: "Sélectionner le produit et saisir le nom",
+    step2Title: "Informations client",
+    doneTitle: "Commande reçue",
+    doneSub: "Nous enverrons une confirmation à votre adresse email.",
+    orderNum: "Numéro de commande",
+    doneNotice1: "La production prend 7 à 10 jours ouvrés. L'expédition suit après la production.",
+    doneNotice2: "Pour toute question, contactez-nous par email.",
+    productSectionTitle: "Choisir les produits (sélection multiple autorisée)",
+    stampTitle: "Sceau de nom",
+    stampDesc: "Un sceau personnel gravé avec votre nom, de grande valeur de collection.",
+    stampPoints: ["Gravure coréen / Hanja", "Choix du matériau", "Étui inclus"],
+    doorplateTitle: "Plaque de porte",
+    doorplateDesc: "Une plaque qui apporte la signification de votre nom dans votre espace.",
+    doorplatePoints: ["Double gravure coréen / Hanja", "Choix du matériau", "Support personnalisé inclus"],
+    nameSectionTitle: "Nom et info de gravure",
+    nameLabel: "Nom (coréen)",
+    namePh: "ex. 김윤슬",
+    hanjaLabel: "Hanja (optionnel)",
+    hanjaPh: "ex. 金潤瑟",
+    engravingLabel: "Texte de gravure (par défaut : nom)",
+    engravingPh: "Laisser vide pour utiliser le nom",
+    stampMatLabel: "Matériau du sceau",
+    stampMatPh: "Saisir ou choisir ci-dessous",
+    doorplateMatLabel: "Matériau de la plaque",
+    doorplateMatPh: "Saisir ou choisir ci-dessous",
+    memoLabel: "Notes supplémentaires",
+    memoPh: "Taille, design, instructions de livraison, etc.",
+    previewTitle: "Aperçu de la gravure",
+    orderSummaryTitle: "Récapitulatif de commande",
+    selectedProducts: "Produits sélectionnés",
+    engravingInfo: "Info de gravure",
+    materialInfo: "Matériau",
+    totalLabel: "Total estimé",
+    customerSectionTitle: "Informations client",
+    custNameLabel: "Nom du client",
+    custNamePh: "Votre nom complet",
+    custEmailLabel: "Email",
+    custEmailPh: "name@email.com",
+    btnNext: "Suivant →",
+    btnBack: "← Retour",
+    btnSubmit: "Passer la commande",
+    btnSubmitting: "Enregistrement...",
+    btnGoCategory: "Aller au naming",
+    btnGoHome: "Accueil",
+    errSelectProduct: "Sélectionnez au moins un produit.",
+    errName: "Saisissez le nom.",
+    errCustName: "Saisissez votre nom.",
+    errEmail: "Saisissez un email valide.",
+    errServer: "Une erreur s'est produite. Veuillez réessayer.",
+    trustTitle: "Notes de commande",
+    trust1: "Commandez seulement si vous êtes satisfait du design.",
+    trust2: "L'annulation est difficile une fois la production commencée.",
+    trust3: "La gravure en coréen et Hanja est disponible.",
+  },
+  ar: {
+    chip: "Wink Direct Order",
+    title: "ختم · لوحة — طلب مباشر",
+    sub: "اطلب ختماً أو لوحة باب مباشرةً باسمك الحالي — لا حاجة لجلسة تسمية.",
+    step1Title: "اختر المنتج وأدخل الاسم",
+    step2Title: "معلومات العميل",
+    doneTitle: "تم استلام الطلب",
+    doneSub: "سنرسل تأكيداً إلى بريدك الإلكتروني.",
+    orderNum: "رقم الطلب",
+    doneNotice1: "تستغرق المعالجة 7-10 أيام عمل. يتم الشحن بعد اكتمال الإنتاج.",
+    doneNotice2: "للاستفسارات، تواصل معنا عبر البريد الإلكتروني.",
+    productSectionTitle: "اختر المنتجات (يمكن الاختيار المتعدد)",
+    stampTitle: "ختم الاسم",
+    stampDesc: "ختم شخصي منقوش باسمك، ذو قيمة تحفية عالية.",
+    stampPoints: ["نقش بالكورية / هانجا", "اختيار المادة", "علبة حفظ مضمنة"],
+    doorplateTitle: "لوحة الباب",
+    doorplateDesc: "لوحة باب تجلب معنى اسمك إلى مساحتك.",
+    doorplatePoints: ["نقش مزدوج كوري / هانجا", "اختيار المادة", "وحدة تثبيت مخصصة مضمنة"],
+    nameSectionTitle: "الاسم ومعلومات النقش",
+    nameLabel: "الاسم (كوري)",
+    namePh: "مثال: 김윤슬",
+    hanjaLabel: "هانجا (اختياري)",
+    hanjaPh: "مثال: 金潤瑟",
+    engravingLabel: "نص النقش (الافتراضي: الاسم)",
+    engravingPh: "اترك فارغاً لاستخدام الاسم",
+    stampMatLabel: "مادة الختم",
+    stampMatPh: "اكتب أو اختر أدناه",
+    doorplateMatLabel: "مادة اللوحة",
+    doorplateMatPh: "اكتب أو اختر أدناه",
+    memoLabel: "ملاحظات إضافية",
+    memoPh: "الحجم، التصميم، تعليمات التسليم، إلخ",
+    previewTitle: "معاينة النقش",
+    orderSummaryTitle: "ملخص الطلب",
+    selectedProducts: "المنتجات المحددة",
+    engravingInfo: "معلومات النقش",
+    materialInfo: "المادة",
+    totalLabel: "الإجمالي المتوقع",
+    customerSectionTitle: "معلومات العميل",
+    custNameLabel: "اسم العميل",
+    custNamePh: "اسمك الكامل",
+    custEmailLabel: "البريد الإلكتروني",
+    custEmailPh: "name@email.com",
+    btnNext: "التالي →",
+    btnBack: "← السابق",
+    btnSubmit: "تقديم الطلب",
+    btnSubmitting: "جارٍ الحفظ...",
+    btnGoCategory: "الذهاب إلى التسمية",
+    btnGoHome: "الرئيسية",
+    errSelectProduct: "اختر منتجاً واحداً على الأقل.",
+    errName: "أدخل الاسم.",
+    errCustName: "أدخل اسمك.",
+    errEmail: "أدخل بريداً إلكترونياً صحيحاً.",
+    errServer: "حدث خطأ. الرجاء المحاولة مجدداً.",
+    trustTitle: "ملاحظات الطلب",
+    trust1: "اطلب فقط إذا كنت راضياً عن التصميم.",
+    trust2: "يصعب الإلغاء بعد بدء الإنتاج.",
+    trust3: "النقش بالكورية وهانجا متاح.",
+  },
+  hi: {
+    chip: "Wink Direct Order",
+    title: "मुहर · दरवाज़ा पट्टिका — सीधा ऑर्डर",
+    sub: "अपने मौजूदा नाम से सीधे मुहर या दरवाज़ा पट्टिका ऑर्डर करें — नामकरण सत्र की जरूरत नहीं।",
+    step1Title: "उत्पाद चुनें और नाम दर्ज करें",
+    step2Title: "ग्राहक जानकारी",
+    doneTitle: "ऑर्डर प्राप्त हुआ",
+    doneSub: "हम आपके ईमेल पर पुष्टि भेजेंगे।",
+    orderNum: "ऑर्डर नंबर",
+    doneNotice1: "उत्पादन में 7-10 कार्य दिवस लगते हैं। उत्पादन पूरा होने के बाद शिपिंग होती है।",
+    doneNotice2: "प्रश्नों के लिए ईमेल से संपर्क करें।",
+    productSectionTitle: "उत्पाद चुनें (एकाधिक चयन संभव)",
+    stampTitle: "नाम मुहर",
+    stampDesc: "आपके नाम की नक्काशी वाली व्यक्तिगत मुहर, संग्रहणीय मूल्य के साथ।",
+    stampPoints: ["कोरियाई / हांजा नक्काशी", "सामग्री का चुनाव", "केस शामिल"],
+    doorplateTitle: "दरवाज़ा पट्टिका",
+    doorplateDesc: "एक पट्टिका जो आपके नाम का अर्थ आपके स्थान में लाती है।",
+    doorplatePoints: ["कोरियाई / हांजा दोहरी नक्काशी", "सामग्री का चुनाव", "कस्टम माउंट शामिल"],
+    nameSectionTitle: "नाम और नक्काशी जानकारी",
+    nameLabel: "नाम (कोरियाई)",
+    namePh: "जैसे 김윤슬",
+    hanjaLabel: "हांजा (वैकल्पिक)",
+    hanjaPh: "जैसे 金潤瑟",
+    engravingLabel: "नक्काशी पाठ (डिफ़ॉल्ट: नाम)",
+    engravingPh: "नाम उपयोग के लिए खाली छोड़ें",
+    stampMatLabel: "मुहर सामग्री",
+    stampMatPh: "टाइप करें या नीचे चुनें",
+    doorplateMatLabel: "पट्टिका सामग्री",
+    doorplateMatPh: "टाइप करें या नीचे चुनें",
+    memoLabel: "अतिरिक्त नोट्स",
+    memoPh: "आकार, डिज़ाइन, डिलीवरी निर्देश आदि",
+    previewTitle: "नक्काशी पूर्वावलोकन",
+    orderSummaryTitle: "ऑर्डर सारांश",
+    selectedProducts: "चुने गए उत्पाद",
+    engravingInfo: "नक्काशी जानकारी",
+    materialInfo: "सामग्री",
+    totalLabel: "अनुमानित कुल",
+    customerSectionTitle: "ग्राहक जानकारी",
+    custNameLabel: "ग्राहक नाम",
+    custNamePh: "आपका पूरा नाम",
+    custEmailLabel: "ईमेल",
+    custEmailPh: "name@email.com",
+    btnNext: "अगला →",
+    btnBack: "← पीछे",
+    btnSubmit: "ऑर्डर दें",
+    btnSubmitting: "सहेजा जा रहा है...",
+    btnGoCategory: "नामकरण पर जाएं",
+    btnGoHome: "होम",
+    errSelectProduct: "कम से कम एक उत्पाद चुनें।",
+    errName: "नाम दर्ज करें।",
+    errCustName: "अपना नाम दर्ज करें।",
+    errEmail: "वैध ईमेल दर्ज करें।",
+    errServer: "त्रुटि हुई। कृपया पुनः प्रयास करें।",
+    trustTitle: "ऑर्डर नोट्स",
+    trust1: "केवल तभी ऑर्डर करें जब डिज़ाइन पसंद आए।",
+    trust2: "उत्पादन शुरू होने के बाद रद्द करना मुश्किल है।",
+    trust3: "कोरियाई और हांजा दोनों नक्काशी उपलब्ध है।",
+  },
+} as const;
+
+type UiLang = keyof typeof COPY;
+function toUiLang(l: string): UiLang {
+  return (l in COPY) ? (l as UiLang) : "ko";
+}
+
+// ─── Helpers ─────────────────────────────────────────────
+function isValidEmail(email: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function formatKRW(n: number) {
+  return `₩${n.toLocaleString("ko-KR")}`;
+}
+
+// ─── Sub-components ───────────────────────────────────────
+function MaterialPill({
+  label,
+  selected,
+  onClick,
+  isLight,
+}: {
+  label: string;
+  selected: boolean;
+  onClick: () => void;
+  isLight: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        padding: "6px 14px",
+        borderRadius: 999,
+        fontSize: 13,
+        fontWeight: 600,
+        cursor: "pointer",
+        border: selected
+          ? "1px solid rgba(201,168,76,0.8)"
+          : isLight
+          ? "1px solid rgba(0,0,0,0.15)"
+          : "1px solid rgba(120,160,255,0.22)",
+        background: selected
+          ? "rgba(201,168,76,0.14)"
+          : isLight
+          ? "rgba(0,0,0,0.04)"
+          : "rgba(255,255,255,0.04)",
+        color: selected
+          ? "rgba(201,140,30,0.98)"
+          : isLight
+          ? "rgba(30,40,60,0.82)"
+          : "rgba(200,215,240,0.8)",
+        transition: "all 0.15s",
+      }}
+    >
+      {label}
+    </button>
+  );
+}
+
+function ProductCard({
+  id,
+  title,
+  desc,
+  points,
+  price,
+  selected,
+  onToggle,
+  isLight,
+}: {
+  id: ProductType;
+  title: string;
+  desc: string;
+  points: readonly string[];
+  price: number;
+  selected: boolean;
+  onToggle: () => void;
+  isLight: boolean;
+}) {
+  const isStamp = id === "stamp";
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      style={{
+        textAlign: "left",
+        padding: "24px 20px",
+        borderRadius: 16,
+        cursor: "pointer",
+        border: selected
+          ? "1.5px solid rgba(201,168,76,0.75)"
+          : isLight
+          ? "1px solid rgba(0,0,0,0.12)"
+          : "1px solid rgba(120,160,255,0.18)",
+        background: selected
+          ? isLight
+            ? "linear-gradient(160deg, rgba(201,168,76,0.12), rgba(240,236,220,0.96))"
+            : "linear-gradient(160deg, rgba(201,168,76,0.10), rgba(11,22,52,0.85))"
+          : isLight
+          ? "linear-gradient(160deg, rgba(240,240,248,0.95), rgba(228,228,240,0.98))"
+          : "linear-gradient(160deg, rgba(15,28,64,0.85), rgba(8,16,40,0.92))",
+        boxShadow: selected
+          ? "0 12px 36px rgba(201,168,76,0.14)"
+          : isLight
+          ? "0 8px 24px rgba(0,0,0,0.07)"
+          : "0 8px 24px rgba(0,0,0,0.2)",
+        transition: "all 0.18s",
+        width: "100%",
+        position: "relative",
+      }}
+    >
+      {selected && (
+        <span
+          style={{
+            position: "absolute",
+            top: 14,
+            right: 14,
+            width: 22,
+            height: 22,
+            borderRadius: "50%",
+            background: "rgba(201,168,76,0.9)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 13,
+            color: "#070e28",
+            fontWeight: 800,
+          }}
+        >
+          ✓
+        </span>
+      )}
+      <div
+        style={{
+          fontSize: 36,
+          marginBottom: 10,
+          opacity: 0.9,
+        }}
+      >
+        {isStamp ? "⬛" : "🏷️"}
+      </div>
+      <div className="wink-card-title" style={{ marginBottom: 6, fontSize: 20 }}>
+        {title}
+      </div>
+      <div className="wink-result-text" style={{ marginBottom: 12, opacity: 0.82 }}>
+        {desc}
+      </div>
+      <ul style={{ margin: 0, padding: 0, listStyle: "none", marginBottom: 14 }}>
+        {(points as readonly string[]).map((pt) => (
+          <li
+            key={pt}
+            style={{
+              fontSize: 13,
+              color: isLight ? "rgba(40,50,70,0.78)" : "rgba(201,214,240,0.76)",
+              marginBottom: 4,
+              paddingLeft: 14,
+              position: "relative",
+            }}
+          >
+            <span
+              style={{
+                position: "absolute",
+                left: 0,
+                color: "rgba(201,168,76,0.85)",
+              }}
+            >
+              ·
+            </span>
+            {pt}
+          </li>
+        ))}
+      </ul>
+      <div className="wink-score-pill" style={{ display: "inline-block" }}>
+        {formatKRW(price)}
+      </div>
+    </button>
+  );
+}
+
+// ─── Main Page ────────────────────────────────────────────
+export default function OrderPage() {
+  const router = useRouter();
+  const params = useParams();
+  const rawLang = String(params.lang ?? "ko");
+  const lang: AppLang = isSupportedLang(rawLang) ? rawLang : "ko";
+  const ui = COPY[toUiLang(rawLang)];
+
+  // ── Theme detection
+  const [isLight, setIsLight] = useState(false);
+  useEffect(() => {
+    const check = () =>
+      setIsLight(document.documentElement.getAttribute("data-theme") === "light");
+    check();
+    const obs = new MutationObserver(check);
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    return () => obs.disconnect();
+  }, []);
+
+  // ── Form state
+  const [step, setStep] = useState<Step>("form");
+  const [products, setProducts] = useState<Set<ProductType>>(new Set());
+  const [previewMode, setPreviewMode] = useState<"stamp" | "doorplate">("stamp");
+  const [name, setName] = useState("");
+  const [hanja, setHanja] = useState("");
+  const [engraving, setEngraving] = useState("");
+  const [stampMat, setStampMat] = useState("");
+  const [doorplateMat, setDoorplateMat] = useState("");
+  const [memo, setMemo] = useState("");
+  const [custName, setCustName] = useState("");
+  const [custEmail, setCustEmail] = useState("");
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [orderId, setOrderId] = useState("");
+
+  const toggleProduct = (p: ProductType) => {
+    setProducts((prev) => {
+      const next = new Set(prev);
+      next.has(p) ? next.delete(p) : next.add(p);
+      if (next.has("stamp")) setPreviewMode("stamp");
+      else if (next.has("doorplate")) setPreviewMode("doorplate");
+      return next;
+    });
+  };
+
+  const displayEngraving = engraving.trim() || name.trim() || "이름";
+  const total = [...products].reduce((s, p) => s + PRODUCT_PRICE[p], 0);
+
+  // ── Step 1 → 2
+  const handleNextStep = () => {
+    setError("");
+    if (products.size === 0) { setError(ui.errSelectProduct); return; }
+    if (!name.trim()) { setError(ui.errName); return; }
+    setStep("confirm");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // ── Submit
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setError("");
+    if (!custName.trim()) { setError(ui.errCustName); return; }
+    if (!isValidEmail(custEmail)) { setError(ui.errEmail); return; }
+
+    setSubmitting(true);
+
+    let userId: string | null = null;
+    try {
+      const sb = createClient();
+      const { data: { user } } = await sb.auth.getUser();
+      userId = user?.id ?? null;
+    } catch { /* ignore */ }
+
+    try {
+      const res = await fetch("/api/direct-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name.trim(),
+          hanja: hanja.trim(),
+          engraving: engraving.trim(),
+          products: [...products],
+          stampMaterial: stampMat.trim(),
+          doorplateMaterial: doorplateMat.trim(),
+          memo: memo.trim(),
+          customer: { name: custName.trim(), email: custEmail.trim() },
+          userId,
+          lang,
+        }),
+      });
+
+      const json = await res.json();
+      if (!res.ok || !json?.ok) throw new Error(json?.error ?? ui.errServer);
+
+      setOrderId(String(json.orderId ?? ""));
+      setStep("done");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : ui.errServer);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // ─── Render: Done ──────────────────────────────────────
+  if (step === "done") {
+    return (
+      <main className="wink-page">
+        <div className="wink-container">
+          <div className="wink-chip">{ui.chip}</div>
+
+          <section
+            className="wink-panel"
+            style={{
+              marginTop: 24,
+              padding: "40px 28px",
+              textAlign: "center",
+              background: isLight
+                ? "radial-gradient(circle at 50% 20%, rgba(201,168,76,0.12), transparent 55%), linear-gradient(180deg, rgba(252,248,238,0.98), rgba(244,240,228,0.99))"
+                : "radial-gradient(circle at 50% 20%, rgba(201,168,76,0.12), transparent 55%), linear-gradient(180deg, rgba(11,22,52,0.94), rgba(6,13,34,0.98))",
+              border: "1px solid rgba(201,168,76,0.28)",
+            }}
+          >
+            <div style={{ fontSize: 52, marginBottom: 16 }}>✨</div>
+            <h1 className="wink-title" style={{ marginBottom: 10 }}>
+              {ui.doneTitle}
+            </h1>
+            <p className="wink-sub" style={{ marginBottom: 20 }}>
+              {ui.doneSub}
+            </p>
+            {orderId && (
+              <div className="wink-score-pill" style={{ display: "inline-block", marginBottom: 20 }}>
+                {ui.orderNum}: {orderId}
+              </div>
+            )}
+            <div
+              className="wink-result-text"
+              style={{ marginBottom: 8, maxWidth: 520, marginInline: "auto" }}
+            >
+              {ui.doneNotice1}
+            </div>
+            <div
+              className="wink-result-text"
+              style={{ maxWidth: 520, marginInline: "auto" }}
+            >
+              {ui.doneNotice2}
+            </div>
+          </section>
+
+          <div className="wink-actions" style={{ marginTop: 24 }}>
+            <button
+              type="button"
+              className="wink-secondary-btn"
+              onClick={() => router.push(`/${lang}/category`)}
+            >
+              {ui.btnGoCategory}
+            </button>
+            <button
+              type="button"
+              className="wink-primary-btn"
+              onClick={() => router.push(`/${lang}`)}
+            >
+              {ui.btnGoHome}
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // ─── Render: Confirm (step 2) ─────────────────────────
+  if (step === "confirm") {
+    return (
+      <main className="wink-page">
+        <div className="wink-container">
+          <div className="wink-chip">{ui.chip}</div>
+          <h1 className="wink-title">{ui.step2Title}</h1>
+
+          {/* Order summary */}
+          <section className="wink-panel" style={{ marginBottom: 20 }}>
+            <div className="wink-section-title" style={{ marginBottom: 14 }}>
+              {ui.orderSummaryTitle}
+            </div>
+
+            <div className="wink-brief-grid">
+              <div>
+                <strong>{ui.selectedProducts}</strong>:{" "}
+                {[...products]
+                  .map((p) => (p === "stamp" ? ui.stampTitle : ui.doorplateTitle))
+                  .join(" + ")}
+              </div>
+              <div>
+                <strong>{ui.engravingInfo}</strong>:{" "}
+                {name.trim()}{hanja.trim() ? ` (${hanja.trim()})` : ""} — {displayEngraving}
+              </div>
+              {(stampMat.trim() || doorplateMat.trim()) && (
+                <div>
+                  <strong>{ui.materialInfo}</strong>:{" "}
+                  {[
+                    products.has("stamp") && stampMat.trim()
+                      ? `${ui.stampTitle}: ${stampMat.trim()}`
+                      : null,
+                    products.has("doorplate") && doorplateMat.trim()
+                      ? `${ui.doorplateTitle}: ${doorplateMat.trim()}`
+                      : null,
+                  ]
+                    .filter(Boolean)
+                    .join(" / ")}
+                </div>
+              )}
+              {memo.trim() && (
+                <div>
+                  <strong>{ui.memoLabel}</strong>: {memo.trim()}
+                </div>
+              )}
+            </div>
+
+            <div
+              className="wink-card-title"
+              style={{ fontSize: 28, marginTop: 16 }}
+            >
+              {ui.totalLabel}: {formatKRW(total)}
+            </div>
+          </section>
+
+          {/* Customer form */}
+          <form onSubmit={handleSubmit} className="wink-form">
+            <section className="wink-panel" style={{ marginBottom: 20 }}>
+              <div className="wink-section-title" style={{ marginBottom: 14 }}>
+                {ui.customerSectionTitle}
+              </div>
+              <div className="wink-form-grid">
+                <div className="wink-field">
+                  <label>{ui.custNameLabel}</label>
+                  <input
+                    className="wink-input"
+                    value={custName}
+                    onChange={(e) => setCustName(e.target.value)}
+                    placeholder={ui.custNamePh}
+                    autoComplete="name"
+                  />
+                </div>
+                <div className="wink-field">
+                  <label>{ui.custEmailLabel}</label>
+                  <input
+                    className="wink-input"
+                    type="email"
+                    value={custEmail}
+                    onChange={(e) => setCustEmail(e.target.value)}
+                    placeholder={ui.custEmailPh}
+                    autoComplete="email"
+                  />
+                </div>
+              </div>
+            </section>
+
+            {/* Trust */}
+            <section className="wink-panel" style={{ marginBottom: 20 }}>
+              <div className="wink-result-label" style={{ marginBottom: 8 }}>{ui.trustTitle}</div>
+              <div className="wink-result-text" style={{ marginBottom: 4 }}>· {ui.trust1}</div>
+              <div className="wink-result-text" style={{ marginBottom: 4 }}>· {ui.trust2}</div>
+              <div className="wink-result-text">· {ui.trust3}</div>
+            </section>
+
+            {error && <div className="wink-error-banner">{error}</div>}
+
+            <div className="wink-actions wink-actions-between">
+              <button
+                type="button"
+                className="wink-secondary-btn"
+                onClick={() => { setStep("form"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+              >
+                {ui.btnBack}
+              </button>
+              <button
+                type="submit"
+                className="wink-primary-btn"
+                disabled={submitting}
+              >
+                {submitting ? ui.btnSubmitting : ui.btnSubmit}
+              </button>
+            </div>
+          </form>
+        </div>
+      </main>
+    );
+  }
+
+  // ─── Render: Form (step 1) ────────────────────────────
+  return (
+    <main className="wink-page">
+      <div className="wink-container">
+        <div className="wink-chip">{ui.chip}</div>
+        <h1 className="wink-title">{ui.title}</h1>
+        <p className="wink-sub">{ui.sub}</p>
+
+        {/* Product selection */}
+        <section className="wink-panel" style={{ marginBottom: 20 }}>
+          <div className="wink-section-title" style={{ marginBottom: 14 }}>
+            {ui.productSectionTitle}
+          </div>
+          <div className="wink-language-grid">
+            <ProductCard
+              id="stamp"
+              title={ui.stampTitle}
+              desc={ui.stampDesc}
+              points={ui.stampPoints}
+              price={PRODUCT_PRICE.stamp}
+              selected={products.has("stamp")}
+              onToggle={() => toggleProduct("stamp")}
+              isLight={isLight}
+            />
+            <ProductCard
+              id="doorplate"
+              title={ui.doorplateTitle}
+              desc={ui.doorplateDesc}
+              points={ui.doorplatePoints}
+              price={PRODUCT_PRICE.doorplate}
+              selected={products.has("doorplate")}
+              onToggle={() => toggleProduct("doorplate")}
+              isLight={isLight}
+            />
+          </div>
+          {products.size > 0 && (
+            <div
+              className="wink-result-text"
+              style={{ marginTop: 14, textAlign: "right", opacity: 0.85 }}
+            >
+              {ui.totalLabel}: <strong>{formatKRW(total)}</strong>
+            </div>
+          )}
+        </section>
+
+        {/* Name & engraving */}
+        <section className="wink-panel" style={{ marginBottom: 20 }}>
+          <div className="wink-section-title" style={{ marginBottom: 14 }}>
+            {ui.nameSectionTitle}
+          </div>
+
+          <div className="wink-form-grid" style={{ marginBottom: 0 }}>
+            <div className="wink-field">
+              <label>{ui.nameLabel}</label>
+              <input
+                className="wink-input"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder={ui.namePh}
+              />
+            </div>
+            <div className="wink-field">
+              <label>{ui.hanjaLabel}</label>
+              <input
+                className="wink-input"
+                value={hanja}
+                onChange={(e) => setHanja(e.target.value)}
+                placeholder={ui.hanjaPh}
+              />
+            </div>
+            <div className="wink-field wink-field-full">
+              <label>{ui.engravingLabel}</label>
+              <input
+                className="wink-input"
+                value={engraving}
+                onChange={(e) => setEngraving(e.target.value)}
+                placeholder={ui.engravingPh}
+              />
+            </div>
+          </div>
+
+          {/* Engraving preview */}
+          {name.trim() && (
+            <div
+              style={{
+                marginTop: 20,
+                padding: "20px 24px",
+                borderRadius: 12,
+                border: "1px solid rgba(201,168,76,0.28)",
+                background: isLight ? "rgba(201,168,76,0.07)" : "rgba(0,0,0,0.28)",
+                textAlign: "center",
+              }}
+            >
+              <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(201,168,76,0.85)", marginBottom: 16 }}>
+                {ui.previewTitle}
+              </div>
+
+              {/* 도장·문패 탭 */}
+              {(products.has("stamp") || products.has("doorplate")) && (
+                <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 20 }}>
+                  {products.has("stamp") && (
+                    <button type="button" onClick={() => setPreviewMode("stamp")}
+                      style={{ padding: "6px 18px", borderRadius: 999, fontSize: 13, fontWeight: 600, cursor: "pointer",
+                        border: previewMode === "stamp" ? "2px solid #C0392B" : "1px solid var(--line-strong)",
+                        background: previewMode === "stamp" ? "rgba(192,57,43,0.12)" : "transparent",
+                        color: previewMode === "stamp" ? "#C0392B" : "var(--text-soft)" }}>
+                      {ui.stampTitle}
+                    </button>
+                  )}
+                  {products.has("doorplate") && (
+                    <button type="button" onClick={() => setPreviewMode("doorplate")}
+                      style={{ padding: "6px 18px", borderRadius: 999, fontSize: 13, fontWeight: 600, cursor: "pointer",
+                        border: previewMode === "doorplate" ? "2px solid #C9A84C" : "1px solid var(--line-strong)",
+                        background: previewMode === "doorplate" ? "rgba(201,168,76,0.12)" : "transparent",
+                        color: previewMode === "doorplate" ? "#C9A84C" : "var(--text-soft)" }}>
+                      {ui.doorplateTitle}
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {/* 도장 SVG 미리보기 */}
+              {previewMode === "stamp" && (
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+                  <svg width="160" height="160" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+                    {/* 외곽 원 */}
+                    <circle cx="80" cy="80" r="76" fill="#C0392B" />
+                    <circle cx="80" cy="80" r="70" fill="none" stroke="rgba(255,255,255,0.45)" strokeWidth="1.5" />
+                    <circle cx="80" cy="80" r="64" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="0.8" />
+                    {/* 이름 세로 배열 */}
+                    {displayEngraving ? (
+                      displayEngraving.split("").map((ch, i) => {
+                        const total = displayEngraving.length;
+                        const spacing = total <= 2 ? 28 : total === 3 ? 24 : 20;
+                        const startY = 80 - ((total - 1) * spacing) / 2;
+                        return (
+                          <text key={i} x="80" y={startY + i * spacing + 6}
+                            textAnchor="middle" fill="white"
+                            fontSize={total <= 2 ? "28" : total === 3 ? "24" : "20"}
+                            fontWeight="bold" fontFamily="serif">
+                            {ch}
+                          </text>
+                        );
+                      })
+                    ) : (
+                      <text x="80" y="88" textAnchor="middle" fill="rgba(255,255,255,0.4)" fontSize="14">이름 입력</text>
+                    )}
+                  </svg>
+                  {hanja.trim() && (
+                    <div style={{ fontSize: 13, color: "rgba(201,168,76,0.78)", letterSpacing: "0.08em" }}>{hanja.trim()}</div>
+                  )}
+                </div>
+              )}
+
+              {/* 문패 SVG 미리보기 */}
+              {previewMode === "doorplate" && (
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+                  <svg width="240" height="100" viewBox="0 0 240 100" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                      <linearGradient id="woodGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#3D2B1F" />
+                        <stop offset="40%" stopColor="#5C3D27" />
+                        <stop offset="100%" stopColor="#2E1C10" />
+                      </linearGradient>
+                      <linearGradient id="goldFrame" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stopColor="#F0C84A" />
+                        <stop offset="100%" stopColor="#C9943A" />
+                      </linearGradient>
+                    </defs>
+                    {/* 나무 배경 */}
+                    <rect x="0" y="0" width="240" height="100" rx="8" fill="url(#woodGrad)" />
+                    {/* 골드 테두리 */}
+                    <rect x="4" y="4" width="232" height="92" rx="6" fill="none" stroke="url(#goldFrame)" strokeWidth="1.5" />
+                    <rect x="8" y="8" width="224" height="84" rx="4" fill="none" stroke="rgba(201,168,76,0.3)" strokeWidth="0.8" />
+                    {/* 이름 */}
+                    {displayEngraving ? (
+                      <text x="120" y="58" textAnchor="middle" fill="#F0C84A"
+                        fontSize={displayEngraving.length <= 3 ? "32" : "24"}
+                        fontWeight="bold" fontFamily="serif" letterSpacing="8">
+                        {displayEngraving}
+                      </text>
+                    ) : (
+                      <text x="120" y="58" textAnchor="middle" fill="rgba(201,168,76,0.35)" fontSize="14">이름 입력</text>
+                    )}
+                    {/* 한자 부제 */}
+                    {hanja.trim() && (
+                      <text x="120" y="78" textAnchor="middle" fill="rgba(201,168,76,0.55)" fontSize="11" letterSpacing="4">
+                        {hanja.trim()}
+                      </text>
+                    )}
+                  </svg>
+                </div>
+              )}
+
+              <div style={{ marginTop: 12, fontSize: 11, color: "var(--text-dim)" }}>
+                ※ 미리보기는 실제 제품과 차이가 있을 수 있습니다
+              </div>
+            </div>
+          )}
+        </section>
+
+        {/* Material options */}
+        {(products.has("stamp") || products.has("doorplate")) && (
+          <section className="wink-panel" style={{ marginBottom: 20 }}>
+            <div className="wink-form" style={{ gap: 20 }}>
+              {products.has("stamp") && (
+                <div>
+                  <div className="wink-section-title" style={{ marginBottom: 10, fontSize: 16 }}>
+                    {ui.stampMatLabel}
+                  </div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 10 }}>
+                    {STAMP_MATERIALS.map((m) => (
+                      <MaterialPill
+                        key={m}
+                        label={m}
+                        selected={stampMat === m}
+                        onClick={() => setStampMat(stampMat === m ? "" : m)}
+                        isLight={isLight}
+                      />
+                    ))}
+                  </div>
+                  <input
+                    className="wink-input"
+                    value={stampMat}
+                    onChange={(e) => setStampMat(e.target.value)}
+                    placeholder={ui.stampMatPh}
+                  />
+                </div>
+              )}
+              {products.has("doorplate") && (
+                <div>
+                  <div className="wink-section-title" style={{ marginBottom: 10, fontSize: 16 }}>
+                    {ui.doorplateMatLabel}
+                  </div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 10 }}>
+                    {DOORPLATE_MATERIALS.map((m) => (
+                      <MaterialPill
+                        key={m}
+                        label={m}
+                        selected={doorplateMat === m}
+                        onClick={() => setDoorplateMat(doorplateMat === m ? "" : m)}
+                        isLight={isLight}
+                      />
+                    ))}
+                  </div>
+                  <input
+                    className="wink-input"
+                    value={doorplateMat}
+                    onChange={(e) => setDoorplateMat(e.target.value)}
+                    placeholder={ui.doorplateMatPh}
+                  />
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* Memo */}
+        <section className="wink-panel" style={{ marginBottom: 20 }}>
+          <div className="wink-field">
+            <label>{ui.memoLabel}</label>
+            <textarea
+              className="wink-textarea"
+              rows={4}
+              value={memo}
+              onChange={(e) => setMemo(e.target.value)}
+              placeholder={ui.memoPh}
+            />
+          </div>
+        </section>
+
+        {error && <div className="wink-error-banner">{error}</div>}
+
+        <div className="wink-actions wink-actions-between">
+          <button
+            type="button"
+            className="wink-secondary-btn"
+            onClick={() => router.push(`/${lang}/category`)}
+          >
+            {ui.btnBack}
+          </button>
+          <button
+            type="button"
+            className="wink-primary-btn"
+            onClick={handleNextStep}
+          >
+            {ui.btnNext}
+          </button>
+        </div>
+      </div>
+    </main>
+  );
+}
