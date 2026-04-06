@@ -1,4 +1,12 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+
+function getAdminClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SECRET_KEY;
+  if (!url || !key) return null;
+  return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+}
 
 function stripTags(v: unknown): string {
   if (typeof v !== "string") return "";
@@ -7,6 +15,47 @@ function stripTags(v: unknown): string {
 
 export async function POST(req: Request) {
   try {
+    // ── 1. Auth check ────────────────────────────────────
+    const authHeader = req.headers.get("authorization") ?? "";
+    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+
+    if (!token) {
+      return NextResponse.json({ ok: false, error: "authentication required" }, { status: 401 });
+    }
+
+    const adminClient = getAdminClient();
+    if (adminClient) {
+      const { data: { user }, error: authErr } = await adminClient.auth.getUser(token);
+      if (authErr || !user) {
+        return NextResponse.json({ ok: false, error: "invalid token" }, { status: 401 });
+      }
+
+      // ── 2. Plan check (paid only) ──────────────────────
+      const { data: profile } = await adminClient
+        .from("users")
+        .select("plan")
+        .eq("id", user.id)
+        .single();
+
+      if (!profile || profile.plan === "free") {
+        return NextResponse.json(
+          { ok: false, error: "paid plan required" },
+          { status: 403 }
+        );
+      }
+    }
+
+    // ── 3. Email service check ───────────────────────────
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+      console.error("[send-card] RESEND_API_KEY not configured");
+      return NextResponse.json(
+        { ok: false, error: "email service not configured — set RESEND_API_KEY in environment variables" },
+        { status: 503 }
+      );
+    }
+
+    // ── 4. Parse body ────────────────────────────────────
     const body = await req.json();
     const email = stripTags(body?.email);
     const item = body?.item ?? {};
@@ -15,11 +64,6 @@ export async function POST(req: Request) {
 
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return NextResponse.json({ ok: false, error: "invalid email" }, { status: 400 });
-    }
-
-    const apiKey = process.env.RESEND_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json({ ok: false, error: "email service not configured" }, { status: 503 });
     }
 
     const name: string = stripTags(item.name) || "-";
@@ -36,7 +80,7 @@ export async function POST(req: Request) {
 
     const subject = lang === "ko"
       ? `윙크 네이밍 — "${name}" 이름 설계 카드`
-      : `윙크 네이밍 — Name Design Card: "${name}"`;
+      : `Wink Naming — Name Design Card: "${name}"`;
 
     const html = `<!DOCTYPE html>
 <html lang="${lang}">
@@ -102,6 +146,7 @@ export async function POST(req: Request) {
 </body>
 </html>`;
 
+    // ── 5. Send via Resend ───────────────────────────────
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -118,7 +163,7 @@ export async function POST(req: Request) {
 
     if (!res.ok) {
       const err = await res.text();
-      console.error("[send-card]", err);
+      console.error("[send-card] Resend error:", err);
       return NextResponse.json({ ok: false, error: "send failed" }, { status: 500 });
     }
 

@@ -1862,7 +1862,7 @@ export default function ResultPage() {
     } catch { /* ignore */ }
   };
 
-  // ─── 이름카드 이메일 전송 ─────────────────────────────────
+  // ─── 이름카드 이메일 전송 (유료 사용자 전용) ──────────────
   const handleSendCard = async () => {
     if (!sendCardEmail.trim() || sendCardLoading || results.length === 0) return;
     setSendCardLoading(true);
@@ -1871,9 +1871,20 @@ export default function ResultPage() {
       const idx = selectedNameIndex ?? 0;
       const allResults = [...results, ...extraResults];
       const item = allResults[idx];
+
+      // Bearer 토큰 첨부 (유료 사용자 인증용)
+      let token = "";
+      if (supabaseRef.current) {
+        const { data: { session } } = await supabaseRef.current.auth.getSession();
+        token = session?.access_token ?? "";
+      }
+
       const res = await fetch("/api/send-card", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({ email: sendCardEmail.trim(), item, lang, brief }),
       });
       if (res.ok) {
@@ -2022,6 +2033,7 @@ export default function ResultPage() {
         userId={userId}
         email={userEmail}
         usedCount={freeUsage?.usedCount ?? 0}
+        category={category}
         onClose={() => {
           setShowUpgradeModal(false);
           router.push(`/${lang}/category`);
@@ -2920,8 +2932,8 @@ export default function ResultPage() {
           </section>
         )}
 
-        {/* ── 이름카드 이메일 전송 ── */}
-        {results.length > 0 && (
+        {/* ── 이름카드 이메일 전송 (유료 사용자 전용) ── */}
+        {!isFreeUser && results.length > 0 && (
           <section className="wink-panel" style={{ marginTop: 24 }}>
             <div className="wink-section-title" style={{ marginBottom: 4 }}>{ui.sendCard}</div>
             <div className="wink-result-text" style={{ marginBottom: 12, opacity: 0.7 }}>{ui.sendCardDesc}</div>
@@ -3084,7 +3096,9 @@ export default function ResultPage() {
         <section className="wink-panel" style={{ marginTop: 32 }}>
           <div className="wink-section-title" style={{ marginBottom: 10 }}>{ui.trustTitle}</div>
           <div className="wink-result-text" style={{ marginBottom: 8 }}>{ui.trustBody1}</div>
-          <div className="wink-result-text" style={{ marginBottom: 8 }}>{ui.trustBody2}</div>
+          {brief?.category === "brand" && (
+            <div className="wink-result-text" style={{ marginBottom: 8 }}>{ui.trustBody2}</div>
+          )}
           <div className="wink-result-text">{ui.trustBody3}</div>
           <div className="wink-actions" style={{ marginTop: 16 }}>
             <TrustPill text={ui.trustPill1} />

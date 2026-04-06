@@ -1,12 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/browser";
 
-// ─── 타입 ──────────────────────────────────────────────────────
-type DayCount    = { date: string; count: number };
-type CatCount    = { category: string; count: number };
-type NameCount   = { name: string; count: number };
-type OrderRow    = {
+// ─── 타입 ──────────────────────────────────────────────────
+type DayCount     = { date: string; count: number };
+type CatCount     = { category: string; count: number };
+type NameCount    = { name: string; count: number };
+type MonthRevenue = { month: string; revenue: number };
+type OrderRow     = {
   id: string;
   customer_name: string;
   customer_email: string;
@@ -20,103 +23,139 @@ type DashStats = {
   todayGenerations: number;
   weekAvg: number;
   paidUsers: number;
+  totalUsers: number;
+  totalOrders: number;
+  totalRevenue: number;
+  conversionRate: number;
   weeklyGenerations: DayCount[];
   popularCategories: CatCount[];
   popularFamilyNames: NameCount[];
   recentOrders: OrderRow[];
+  monthlyRevenue: MonthRevenue[];
 };
 
 const CATEGORY_LABEL: Record<string, string> = {
-  child:   "아이 이름",
-  brand:   "브랜드명",
-  pet:     "반려동물",
-  stage:   "활동명·예명",
-  self:    "본인 개명",
-  me:      "본인 개명",
-  baby:    "아이 이름",
-  activity:"활동명·예명",
-  global:  "글로벌",
-  korean_to_foreign: "한→외",
-  foreign_to_korean: "외→한",
+  child: "아이 이름", brand: "브랜드명", pet: "반려동물",
+  stage: "활동명·예명", self: "본인 개명", me: "본인 개명",
+  baby: "아이 이름", activity: "활동명·예명", global: "글로벌",
+  korean_to_foreign: "한→외", foreign_to_korean: "외→한",
 };
 
 const STATUS_KO: Record<string, string> = {
-  pending:   "접수",
-  reviewing: "검토중",
-  designing: "설계중",
-  packaging: "패키지 준비",
-  completed: "완료",
-  cancelled: "취소",
+  pending: "접수", reviewing: "검토중", designing: "설계중",
+  packaging: "패키지 준비", completed: "완료", cancelled: "취소",
 };
-
 const STATUS_OPTIONS = Object.entries(STATUS_KO).map(([v, l]) => ({ value: v, label: l }));
 
-const STORAGE_KEY = "wink.admin.pw";
+const STATUS_COLOR: Record<string, string> = {
+  pending:   "rgba(201,168,76,0.85)",
+  reviewing: "rgba(100,160,255,0.85)",
+  designing: "rgba(100,200,160,0.85)",
+  packaging: "rgba(180,120,255,0.85)",
+  completed: "rgba(100,210,120,0.85)",
+  cancelled: "rgba(255,100,100,0.75)",
+};
 
-// ─── 메인 ──────────────────────────────────────────────────────
+function fmt(n: number) { return n.toLocaleString("ko-KR"); }
+function fmtKRW(n: number) {
+  if (n >= 100_000_000) return `${(n / 100_000_000).toFixed(1)}억`;
+  if (n >= 10_000) return `${Math.floor(n / 10_000)}만`;
+  return fmt(n);
+}
+function fmtDate(s: string) {
+  return new Date(s).toLocaleDateString("ko-KR", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+}
+function shortMonth(m: string) {
+  // "2025-04" → "4월"
+  const [, mo] = m.split("-");
+  return `${parseInt(mo, 10)}월`;
+}
+
+// ─── 공통 섹션 컨테이너 ────────────────────────────────────
+function Card({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
+  return (
+    <div style={{
+      borderRadius: 20,
+      padding: "22px 20px",
+      background: "rgba(255,255,255,0.025)",
+      border: "1px solid rgba(255,255,255,0.07)",
+      ...style,
+    }}>
+      {children}
+    </div>
+  );
+}
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={{
+      fontSize: 11, fontWeight: 700, letterSpacing: "0.12em",
+      color: "rgba(201,168,76,0.75)", textTransform: "uppercase",
+      marginBottom: 16,
+    }}>
+      {children}
+    </div>
+  );
+}
+
+// ─── 메인 ──────────────────────────────────────────────────
 export default function AdminPage() {
-  const [pw,        setPw]       = useState("");
-  const [authed,    setAuthed]   = useState(false);
-  const [authErr,   setAuthErr]  = useState("");
-  const [authLoading, setAuthLoading] = useState(false);
+  const router = useRouter();
+  const accessTokenRef = useRef("");
+
+  const [authState, setAuthState] = useState<"loading" | "ok" | "denied">("loading");
   const [stats,     setStats]    = useState<DashStats | null>(null);
   const [statsErr,  setStatsErr] = useState("");
   const [loading,   setLoading]  = useState(false);
-  const savedPw = useRef("");
 
-  // 세션스토리지에서 복원
+  // ── Supabase auth → admin role check ──────────────────
   useEffect(() => {
-    try {
-      const stored = sessionStorage.getItem(STORAGE_KEY);
-      if (stored) { savedPw.current = stored; setAuthed(true); }
-    } catch { /* ignore */ }
+    const check = async () => {
+      try {
+        const supabase = createClient();
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) { router.replace("/"); return; }
+
+        accessTokenRef.current = session.access_token;
+
+        const res  = await fetch("/api/admin/check-role", {
+          headers: { "Authorization": `Bearer ${session.access_token}` },
+        });
+        const json = await res.json();
+        if (!json.isAdmin) { router.replace("/"); return; }
+
+        setAuthState("ok");
+      } catch {
+        router.replace("/");
+      }
+    };
+    check();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // 인증 완료되면 stats 로드
+  // ── 인증 완료 후 stats 로드 ────────────────────────────
   useEffect(() => {
-    if (authed) loadStats();
+    if (authState === "ok") loadStats();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authed]);
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setAuthLoading(true);
-    setAuthErr("");
-    try {
-      const res  = await fetch("/api/admin/auth", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password: pw }),
-      });
-      const json = await res.json();
-      if (!res.ok || !json.ok) { setAuthErr(json.error ?? "인증 실패"); return; }
-      savedPw.current = pw;
-      sessionStorage.setItem(STORAGE_KEY, pw);
-      setAuthed(true);
-    } catch { setAuthErr("서버 연결 실패"); }
-    finally { setAuthLoading(false); }
-  };
+  }, [authState]);
 
   const loadStats = async () => {
     setLoading(true);
     setStatsErr("");
     try {
       const res  = await fetch("/api/admin/stats", {
-        headers: { "x-admin-password": savedPw.current },
+        headers: { "Authorization": `Bearer ${accessTokenRef.current}` },
       });
       const json = await res.json();
       if (!res.ok || !json.ok) { setStatsErr(json.error ?? "통계 조회 실패"); return; }
       setStats(json.stats);
     } catch { setStatsErr("서버 연결 실패"); }
-    finally { setLoading(false); }
+    finally  { setLoading(false); }
   };
 
-  const handleSignOut = () => {
-    sessionStorage.removeItem(STORAGE_KEY);
-    setAuthed(false);
-    setStats(null);
-    setPw("");
-    savedPw.current = "";
+  const handleSignOut = async () => {
+    try { const s = createClient(); await s.auth.signOut(); } catch { /* ignore */ }
+    router.replace("/");
   };
 
   const updateOrderStatus = async (orderId: string, status: string) => {
@@ -138,198 +177,354 @@ export default function AdminPage() {
     }
   };
 
-  // ─── 비밀번호 게이트 ──────────────────────────────────────
-  if (!authed) {
+  // ── 로딩 중 ────────────────────────────────────────────
+  if (authState === "loading") {
     return (
-      <main style={{ minHeight: "100vh", background: "#070f24", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
-        <form
-          onSubmit={handleLogin}
-          style={{
-            width: "100%", maxWidth: 380,
-            background: "linear-gradient(180deg, #101d3a 0%, #0b1428 100%)",
-            border: "1px solid rgba(201,168,76,0.25)",
-            borderRadius: 24, padding: "40px 32px",
-            boxShadow: "0 24px 64px rgba(0,0,0,0.5)",
-          }}
-        >
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.14em", color: "rgba(201,168,76,0.85)", textTransform: "uppercase", marginBottom: 18 }}>
-            WINK ADMIN
-          </div>
-          <h1 style={{ fontSize: 22, fontWeight: 800, color: "#f8fbff", marginBottom: 6, lineHeight: 1.2 }}>관리자 대시보드</h1>
-          <p style={{ fontSize: 13, color: "rgba(200,218,248,0.55)", marginBottom: 28 }}>
-            비밀번호를 입력하세요
-          </p>
-
-          <input
-            type="password"
-            value={pw}
-            onChange={(e) => setPw(e.target.value)}
-            placeholder="비밀번호"
-            autoFocus
-            style={{
-              width: "100%", boxSizing: "border-box",
-              padding: "12px 16px", borderRadius: 12,
-              border: `1px solid ${authErr ? "rgba(255,100,100,0.5)" : "rgba(200,218,248,0.18)"}`,
-              background: "rgba(255,255,255,0.04)",
-              color: "#f8fbff", fontSize: 15, outline: "none",
-              marginBottom: 10,
-            }}
-          />
-          {authErr && <p style={{ fontSize: 12, color: "rgba(255,120,120,0.9)", marginBottom: 12 }}>{authErr}</p>}
-
-          <button
-            type="submit"
-            disabled={authLoading || pw.length === 0}
-            style={{
-              width: "100%", padding: "14px",
-              borderRadius: 12, border: "none",
-              background: "linear-gradient(135deg, rgba(201,168,76,0.9), rgba(180,140,50,0.85))",
-              color: "#0a1020", fontWeight: 800, fontSize: 15, cursor: "pointer",
-              opacity: (authLoading || pw.length === 0) ? 0.5 : 1,
-              transition: "opacity 0.2s",
-            }}
-          >
-            {authLoading ? "확인 중..." : "로그인"}
-          </button>
-        </form>
+      <main style={{ minHeight: "100vh", background: "#060d22", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ color: "rgba(201,168,76,0.7)", fontSize: 14, letterSpacing: "0.08em" }}>
+          인증 확인 중...
+        </div>
       </main>
     );
   }
 
-  // ─── 대시보드 ─────────────────────────────────────────────
-  const weekMax = Math.max(...(stats?.weeklyGenerations.map((d) => d.count) ?? [1]), 1);
+  // ── 월별 매출 차트 ─────────────────────────────────────
+  const monthMax = Math.max(...(stats?.monthlyRevenue.map((m) => m.revenue) ?? [1]), 1);
+  const weekMax  = Math.max(...(stats?.weeklyGenerations.map((d) => d.count) ?? [1]), 1);
+  const today    = new Date().toISOString().slice(0, 10);
+  const thisMonth = new Date().toISOString().slice(0, 7);
 
   return (
-    <main style={{ minHeight: "100vh", background: "#060d22", padding: "0 0 60px" }}>
-      {/* 헤더 */}
-      <header style={{ background: "rgba(10,18,36,0.97)", borderBottom: "1px solid rgba(201,168,76,0.18)", padding: "16px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 50 }}>
+    <main style={{ minHeight: "100vh", background: "#060d22", paddingBottom: 60 }}>
+
+      {/* ── Sticky 헤더 ──────────────────────────────────── */}
+      <header style={{
+        background: "rgba(8,14,32,0.97)",
+        borderBottom: "1px solid rgba(201,168,76,0.15)",
+        padding: "14px 24px",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        position: "sticky", top: 0, zIndex: 50,
+        backdropFilter: "blur(12px)",
+      }}>
         <div>
-          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.14em", color: "rgba(201,168,76,0.85)", textTransform: "uppercase" }}>WINK ADMIN</span>
-          <div style={{ fontSize: 16, fontWeight: 800, color: "#f8fbff", marginTop: 2 }}>관리자 대시보드</div>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.18em", color: "rgba(201,168,76,0.75)", textTransform: "uppercase" }}>
+            WINK NAMING · ADMIN
+          </div>
+          <div style={{ fontSize: 17, fontWeight: 800, color: "#f0f5ff", marginTop: 1 }}>
+            관리자 대시보드
+          </div>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
           <button type="button" onClick={loadStats} disabled={loading}
-            style={{ padding: "7px 16px", borderRadius: 8, border: "1px solid rgba(200,218,248,0.18)", background: "transparent", color: "rgba(200,218,248,0.7)", fontSize: 12, cursor: "pointer", fontWeight: 600 }}>
+            style={{ padding: "7px 16px", borderRadius: 8, border: "1px solid rgba(200,218,248,0.15)", background: "transparent", color: "rgba(200,218,248,0.65)", fontSize: 12, cursor: "pointer", fontWeight: 600 }}>
             {loading ? "새로고침 중..." : "↻ 새로고침"}
           </button>
           <button type="button" onClick={handleSignOut}
-            style={{ padding: "7px 16px", borderRadius: 8, border: "1px solid rgba(255,100,100,0.3)", background: "transparent", color: "rgba(255,120,120,0.8)", fontSize: 12, cursor: "pointer", fontWeight: 600 }}>
+            style={{ padding: "7px 16px", borderRadius: 8, border: "1px solid rgba(255,100,100,0.25)", background: "transparent", color: "rgba(255,120,120,0.75)", fontSize: 12, cursor: "pointer", fontWeight: 600 }}>
             로그아웃
           </button>
         </div>
       </header>
 
-      <div style={{ maxWidth: 960, margin: "0 auto", padding: "28px 16px" }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "28px 16px" }}>
+
         {statsErr && (
-          <div style={{ padding: "14px 18px", borderRadius: 12, background: "rgba(255,80,80,0.08)", border: "1px solid rgba(255,80,80,0.25)", color: "rgba(255,130,130,0.9)", marginBottom: 20, fontSize: 14 }}>
+          <div style={{ padding: "14px 18px", borderRadius: 12, background: "rgba(255,80,80,0.07)", border: "1px solid rgba(255,80,80,0.22)", color: "rgba(255,130,130,0.9)", marginBottom: 20, fontSize: 14 }}>
             {statsErr}
           </div>
         )}
-
         {loading && !stats && (
-          <div style={{ color: "rgba(200,218,248,0.55)", fontSize: 14, textAlign: "center", padding: 40 }}>통계를 불러오는 중...</div>
+          <div style={{ color: "rgba(200,218,248,0.45)", fontSize: 14, textAlign: "center", padding: 48 }}>
+            통계를 불러오는 중...
+          </div>
         )}
 
         {stats && (
           <>
-            {/* ── 핵심 지표 ──────────────────────────────── */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 12, marginBottom: 24 }}>
+            {/* ── 1. 요약 카드 4개 ────────────────────────── */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 12, marginBottom: 24 }}>
               {[
-                { label: "총 이름 생성 수", value: stats.totalGenerations.toLocaleString(), icon: "✦", accent: "rgba(201,168,76,0.9)" },
-                { label: "오늘 생성 수", value: stats.todayGenerations.toLocaleString(), icon: "📅", accent: "rgba(100,180,255,0.85)" },
-                { label: "주간 일평균", value: stats.weekAvg.toLocaleString(), icon: "📊", accent: "rgba(130,200,140,0.85)" },
-                { label: "유료 사용자", value: stats.paidUsers.toLocaleString(), icon: "💎", accent: "rgba(180,120,255,0.85)" },
+                {
+                  label: "총 유저 수",
+                  value: fmt(stats.totalUsers),
+                  sub: `유료 ${fmt(stats.paidUsers)}명`,
+                  icon: "👤",
+                  accent: "rgba(100,160,255,0.9)",
+                },
+                {
+                  label: "총 주문 수",
+                  value: fmt(stats.totalOrders),
+                  sub: `전환율 ${stats.conversionRate}%`,
+                  icon: "📦",
+                  accent: "rgba(180,120,255,0.9)",
+                },
+                {
+                  label: "총 매출",
+                  value: `₩${fmtKRW(stats.totalRevenue)}`,
+                  sub: `${fmt(stats.totalRevenue)} 원`,
+                  icon: "💰",
+                  accent: "rgba(201,168,76,0.95)",
+                },
+                {
+                  label: "이름 생성 수",
+                  value: fmt(stats.totalGenerations),
+                  sub: `오늘 ${fmt(stats.todayGenerations)}건`,
+                  icon: "✦",
+                  accent: "rgba(100,210,160,0.9)",
+                },
               ].map((card) => (
-                <div key={card.label} style={{ borderRadius: 18, padding: "20px 18px", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                  <div style={{ fontSize: 18, marginBottom: 8 }}>{card.icon}</div>
-                  <div style={{ fontSize: "clamp(22px,4vw,32px)", fontWeight: 800, color: card.accent, fontVariantNumeric: "tabular-nums", lineHeight: 1 }}>{card.value}</div>
-                  <div style={{ fontSize: 12, color: "rgba(200,218,248,0.55)", marginTop: 5, fontWeight: 500 }}>{card.label}</div>
+                <div
+                  key={card.label}
+                  style={{
+                    borderRadius: 18, padding: "20px 18px",
+                    background: "linear-gradient(160deg, rgba(255,255,255,0.035), rgba(255,255,255,0.015))",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                  }}
+                >
+                  <div style={{ fontSize: 20, marginBottom: 10 }}>{card.icon}</div>
+                  <div style={{
+                    fontSize: "clamp(24px,4vw,34px)", fontWeight: 900,
+                    color: card.accent, lineHeight: 1,
+                    fontVariantNumeric: "tabular-nums",
+                  }}>
+                    {card.value}
+                  </div>
+                  <div style={{ fontSize: 12, color: "rgba(200,218,248,0.5)", marginTop: 6, fontWeight: 500 }}>
+                    {card.label}
+                  </div>
+                  <div style={{ fontSize: 11, color: "rgba(200,218,248,0.35)", marginTop: 3 }}>
+                    {card.sub}
+                  </div>
                 </div>
               ))}
             </div>
 
-            {/* ── 주간 트렌드 ────────────────────────────── */}
-            <section style={{ borderRadius: 20, padding: "22px 20px", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", marginBottom: 20 }}>
-              <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", color: "rgba(201,168,76,0.8)", textTransform: "uppercase", marginBottom: 18 }}>
-                최근 7일 생성 추이
-              </div>
-              <div style={{ display: "flex", alignItems: "flex-end", gap: 8, height: 100 }}>
-                {stats.weeklyGenerations.map((d) => {
-                  const heightPct = weekMax > 0 ? (d.count / weekMax) * 100 : 0;
-                  const isToday   = d.date === new Date().toISOString().slice(0, 10);
+            {/* ── 2. 월별 매출 차트 (12개월) ─────────────────── */}
+            <Card style={{ marginBottom: 20 }}>
+              <SectionLabel>월별 매출 (최근 12개월)</SectionLabel>
+              <div style={{ display: "flex", alignItems: "flex-end", gap: 6, height: 120 }}>
+                {stats.monthlyRevenue.map((m) => {
+                  const pct = monthMax > 0 ? (m.revenue / monthMax) * 100 : 0;
+                  const isCurrent = m.month === thisMonth;
                   return (
-                    <div key={d.date} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 5 }}>
-                      <div style={{ fontSize: 10, color: "rgba(200,218,248,0.5)", fontWeight: 600, minHeight: 14 }}>
-                        {d.count > 0 ? d.count : ""}
+                    <div key={m.month} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                      <div style={{ fontSize: 9, color: "rgba(200,218,248,0.45)", minHeight: 12, fontVariantNumeric: "tabular-nums" }}>
+                        {m.revenue > 0 ? fmtKRW(m.revenue) : ""}
                       </div>
-                      <div style={{ width: "100%", position: "relative" }}>
-                        <div
-                          style={{
-                            height: Math.max(heightPct, 4),
-                            width: "100%",
-                            borderRadius: "4px 4px 0 0",
-                            background: isToday
-                              ? "linear-gradient(180deg, rgba(201,168,76,0.9), rgba(201,168,76,0.5))"
-                              : "linear-gradient(180deg, rgba(100,160,255,0.7), rgba(100,160,255,0.3))",
-                            transition: "height 0.4s ease",
-                          }}
-                        />
-                      </div>
-                      <div style={{ fontSize: 10, color: isToday ? "rgba(201,168,76,0.9)" : "rgba(200,218,248,0.4)", fontWeight: isToday ? 700 : 500 }}>
-                        {d.date.slice(5)} {/* MM-DD */}
+                      <div style={{
+                        width: "100%",
+                        height: Math.max(pct * 0.9, m.revenue > 0 ? 4 : 2),
+                        borderRadius: "3px 3px 0 0",
+                        background: isCurrent
+                          ? "linear-gradient(180deg, rgba(201,168,76,0.95), rgba(201,168,76,0.5))"
+                          : "linear-gradient(180deg, rgba(100,160,255,0.65), rgba(100,160,255,0.25))",
+                        transition: "height 0.4s ease",
+                      }} />
+                      <div style={{ fontSize: 9, color: isCurrent ? "rgba(201,168,76,0.85)" : "rgba(200,218,248,0.35)", fontWeight: isCurrent ? 700 : 400 }}>
+                        {shortMonth(m.month)}
                       </div>
                     </div>
                   );
                 })}
               </div>
-            </section>
+            </Card>
 
-            {/* ── 카테고리 + 성씨 ────────────────────────── */}
+            {/* ── 3. 7일 추이 + 전환율 ────────────────────── */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 20 }}>
 
-              {/* 인기 카테고리 */}
-              <section style={{ borderRadius: 20, padding: "20px 18px", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", color: "rgba(201,168,76,0.8)", textTransform: "uppercase", marginBottom: 14 }}>
-                  인기 카테고리
+              {/* 7일 생성 추이 */}
+              <Card>
+                <SectionLabel>최근 7일 생성 추이</SectionLabel>
+                <div style={{ display: "flex", alignItems: "flex-end", gap: 8, height: 90 }}>
+                  {stats.weeklyGenerations.map((d) => {
+                    const pct = weekMax > 0 ? (d.count / weekMax) * 100 : 0;
+                    const isToday = d.date === today;
+                    return (
+                      <div key={d.date} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                        <div style={{ fontSize: 10, color: "rgba(200,218,248,0.5)", minHeight: 13 }}>
+                          {d.count > 0 ? d.count : ""}
+                        </div>
+                        <div style={{
+                          width: "100%",
+                          height: Math.max(pct, d.count > 0 ? 4 : 2),
+                          borderRadius: "3px 3px 0 0",
+                          background: isToday
+                            ? "linear-gradient(180deg, rgba(201,168,76,0.9), rgba(201,168,76,0.4))"
+                            : "linear-gradient(180deg, rgba(100,160,255,0.65), rgba(100,160,255,0.25))",
+                        }} />
+                        <div style={{ fontSize: 9, color: isToday ? "rgba(201,168,76,0.85)" : "rgba(200,218,248,0.35)", fontWeight: isToday ? 700 : 400 }}>
+                          {d.date.slice(5)}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
+              </Card>
+
+              {/* 전환율 + 주요 지표 */}
+              <Card>
+                <SectionLabel>유입 & 전환</SectionLabel>
+                <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+
+                  {/* 전환율 */}
+                  <div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
+                      <span style={{ fontSize: 12, color: "rgba(200,218,248,0.65)" }}>구매 전환율</span>
+                      <span style={{ fontSize: 22, fontWeight: 900, color: "rgba(201,168,76,0.95)", fontVariantNumeric: "tabular-nums" }}>
+                        {stats.conversionRate}%
+                      </span>
+                    </div>
+                    <div style={{ height: 5, borderRadius: 99, background: "rgba(255,255,255,0.06)" }}>
+                      <div style={{
+                        height: "100%", width: `${Math.min(stats.conversionRate, 100)}%`,
+                        borderRadius: 99,
+                        background: "linear-gradient(90deg, rgba(201,168,76,0.9), rgba(201,168,76,0.5))",
+                        transition: "width 0.6s ease",
+                      }} />
+                    </div>
+                    <div style={{ fontSize: 10, color: "rgba(200,218,248,0.35)", marginTop: 4 }}>
+                      이름 생성 {fmt(stats.totalGenerations)}건 → 구매 {fmt(stats.totalOrders)}건
+                    </div>
+                  </div>
+
+                  {/* 세부 지표 */}
+                  {[
+                    { label: "오늘 생성", value: fmt(stats.todayGenerations) + "건" },
+                    { label: "주간 일평균", value: fmt(stats.weekAvg) + "건" },
+                    { label: "유료 전환 사용자", value: fmt(stats.paidUsers) + "명" },
+                  ].map((row) => (
+                    <div key={row.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ fontSize: 12, color: "rgba(200,218,248,0.55)" }}>{row.label}</span>
+                      <span style={{ fontSize: 14, fontWeight: 700, color: "rgba(200,218,248,0.85)", fontVariantNumeric: "tabular-nums" }}>{row.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </div>
+
+            {/* ── 4. 주문/결제 내역 테이블 ─────────────────── */}
+            <Card style={{ marginBottom: 20 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                <SectionLabel>주문 / 결제 내역</SectionLabel>
+                <span style={{ fontSize: 11, color: "rgba(200,218,248,0.4)" }}>
+                  최근 {stats.recentOrders.length}건
+                </span>
+              </div>
+
+              {stats.recentOrders.length === 0 ? (
+                <div style={{ textAlign: "center", padding: "24px 0", fontSize: 13, color: "rgba(200,218,248,0.35)" }}>
+                  주문 없음
+                </div>
+              ) : (
+                <>
+                  {/* 테이블 헤더 */}
+                  <div style={{
+                    display: "grid",
+                    gridTemplateColumns: "130px 1fr 1fr 90px 70px 100px",
+                    gap: 8,
+                    padding: "8px 10px",
+                    borderBottom: "1px solid rgba(255,255,255,0.06)",
+                    marginBottom: 6,
+                  }}>
+                    {["날짜", "고객명", "이메일", "금액", "통화", "상태"].map((h) => (
+                      <div key={h} style={{ fontSize: 10, fontWeight: 700, color: "rgba(200,218,248,0.4)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+                        {h}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                    {stats.recentOrders.map((order) => (
+                      <div key={order.id}
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "130px 1fr 1fr 90px 70px 100px",
+                          gap: 8,
+                          alignItems: "center",
+                          padding: "10px 10px",
+                          borderRadius: 10,
+                          background: "rgba(255,255,255,0.02)",
+                          border: "1px solid rgba(255,255,255,0.04)",
+                        }}
+                      >
+                        <div style={{ fontSize: 11, color: "rgba(200,218,248,0.5)" }}>
+                          {fmtDate(order.created_at)}
+                        </div>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: "#f0f5ff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {order.customer_name}
+                        </div>
+                        <div style={{ fontSize: 11, color: "rgba(200,218,248,0.5)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {order.customer_email}
+                        </div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: "rgba(201,168,76,0.9)", fontVariantNumeric: "tabular-nums" }}>
+                          {fmt(order.total_amount)}
+                        </div>
+                        <div style={{ fontSize: 11, color: "rgba(200,218,248,0.45)" }}>
+                          {order.currency}
+                        </div>
+                        <select
+                          value={order.status}
+                          onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                          style={{
+                            padding: "4px 8px",
+                            borderRadius: 7,
+                            border: `1px solid ${STATUS_COLOR[order.status] ?? "rgba(200,218,248,0.18)"}44`,
+                            background: "rgba(255,255,255,0.04)",
+                            color: STATUS_COLOR[order.status] ?? "rgba(200,218,248,0.75)",
+                            fontSize: 11, fontWeight: 600, cursor: "pointer", outline: "none",
+                          }}
+                        >
+                          {STATUS_OPTIONS.map((o) => (
+                            <option key={o.value} value={o.value}>{o.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </Card>
+
+            {/* ── 5. 카테고리 + 성씨 ──────────────────────── */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+
+              <Card>
+                <SectionLabel>카테고리 분포</SectionLabel>
                 {stats.popularCategories.length === 0 && (
-                  <div style={{ fontSize: 13, color: "rgba(200,218,248,0.4)" }}>데이터 없음</div>
+                  <div style={{ fontSize: 13, color: "rgba(200,218,248,0.35)" }}>데이터 없음</div>
                 )}
                 {stats.popularCategories.map((item, idx) => {
                   const catMax = stats.popularCategories[0]?.count || 1;
                   return (
-                    <div key={item.category} style={{ marginBottom: 10 }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-                        <span style={{ fontSize: 12, color: "rgba(200,218,248,0.82)", fontWeight: 600 }}>
+                    <div key={item.category} style={{ marginBottom: 11 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                        <span style={{ fontSize: 12, color: "rgba(200,218,248,0.8)", fontWeight: 600 }}>
                           {CATEGORY_LABEL[item.category] ?? item.category}
                         </span>
-                        <span style={{ fontSize: 11, color: "rgba(200,218,248,0.5)", fontVariantNumeric: "tabular-nums" }}>
-                          {item.count}
+                        <span style={{ fontSize: 11, color: "rgba(200,218,248,0.45)", fontVariantNumeric: "tabular-nums" }}>
+                          {fmt(item.count)}
                         </span>
                       </div>
-                      <div style={{ height: 5, borderRadius: 99, background: "rgba(255,255,255,0.06)", overflow: "hidden" }}>
+                      <div style={{ height: 4, borderRadius: 99, background: "rgba(255,255,255,0.06)" }}>
                         <div style={{
                           height: "100%",
                           width: `${(item.count / catMax) * 100}%`,
                           borderRadius: 99,
                           background: idx === 0
-                            ? "linear-gradient(90deg, rgba(201,168,76,0.9), rgba(201,168,76,0.5))"
-                            : "linear-gradient(90deg, rgba(100,160,255,0.7), rgba(100,160,255,0.3))",
+                            ? "linear-gradient(90deg, rgba(201,168,76,0.9), rgba(201,168,76,0.45))"
+                            : "linear-gradient(90deg, rgba(100,160,255,0.65), rgba(100,160,255,0.25))",
                           transition: "width 0.5s ease",
                         }} />
                       </div>
                     </div>
                   );
                 })}
-              </section>
+              </Card>
 
-              {/* 인기 성씨 */}
-              <section style={{ borderRadius: 20, padding: "20px 18px", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", color: "rgba(201,168,76,0.8)", textTransform: "uppercase", marginBottom: 14 }}>
-                  인기 성씨 TOP 10
-                </div>
+              <Card>
+                <SectionLabel>인기 성씨 TOP 10</SectionLabel>
                 {stats.popularFamilyNames.length === 0 && (
-                  <div style={{ fontSize: 13, color: "rgba(200,218,248,0.4)" }}>데이터 없음</div>
+                  <div style={{ fontSize: 13, color: "rgba(200,218,248,0.35)" }}>데이터 없음</div>
                 )}
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
                   {stats.popularFamilyNames.map((item, idx) => (
@@ -337,75 +532,22 @@ export default function AdminPage() {
                       style={{
                         display: "flex", alignItems: "center", gap: 5,
                         padding: "5px 12px", borderRadius: 999,
-                        background: idx < 3 ? "rgba(201,168,76,0.12)" : "rgba(255,255,255,0.04)",
-                        border: `1px solid ${idx < 3 ? "rgba(201,168,76,0.3)" : "rgba(255,255,255,0.08)"}`,
+                        background: idx < 3 ? "rgba(201,168,76,0.10)" : "rgba(255,255,255,0.03)",
+                        border: `1px solid ${idx < 3 ? "rgba(201,168,76,0.28)" : "rgba(255,255,255,0.07)"}`,
                       }}
                     >
-                      <span style={{ fontSize: 15, fontWeight: 700, color: idx < 3 ? "rgba(201,168,76,0.95)" : "rgba(200,218,248,0.82)" }}>
+                      <span style={{ fontSize: 15, fontWeight: 700, color: idx < 3 ? "rgba(201,168,76,0.95)" : "rgba(200,218,248,0.8)" }}>
                         {item.name}
                       </span>
-                      <span style={{ fontSize: 10, color: "rgba(200,218,248,0.45)", fontVariantNumeric: "tabular-nums" }}>
+                      <span style={{ fontSize: 10, color: "rgba(200,218,248,0.4)", fontVariantNumeric: "tabular-nums" }}>
                         {item.count}
                       </span>
                     </div>
                   ))}
                 </div>
-              </section>
+              </Card>
             </div>
 
-            {/* ── 최근 주문 ──────────────────────────────── */}
-            <section style={{ borderRadius: 20, padding: "22px 18px", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
-                <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", color: "rgba(201,168,76,0.8)", textTransform: "uppercase" }}>
-                  최근 주문
-                </div>
-                <a href="/api/admin" style={{ fontSize: 11, color: "rgba(200,218,248,0.5)", textDecoration: "none" }}>
-                  전체 보기 →
-                </a>
-              </div>
-
-              {stats.recentOrders.length === 0 && (
-                <div style={{ fontSize: 13, color: "rgba(200,218,248,0.4)", textAlign: "center", padding: 20 }}>주문 없음</div>
-              )}
-
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                {stats.recentOrders.map((order) => (
-                  <div key={order.id}
-                    style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", borderRadius: 12, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", flexWrap: "wrap" }}
-                  >
-                    <div style={{ flex: "1 1 120px", minWidth: 0 }}>
-                      <div style={{ fontSize: 14, fontWeight: 700, color: "#f0f5ff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                        {order.customer_name}
-                      </div>
-                      <div style={{ fontSize: 11, color: "rgba(200,218,248,0.45)", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                        {order.customer_email}
-                      </div>
-                    </div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: "rgba(201,168,76,0.9)", whiteSpace: "nowrap" }}>
-                      {order.currency} {order.total_amount.toLocaleString()}
-                    </div>
-                    <div style={{ fontSize: 11, color: "rgba(200,218,248,0.45)", whiteSpace: "nowrap" }}>
-                      {new Date(order.created_at).toLocaleDateString("ko-KR")}
-                    </div>
-                    <select
-                      value={order.status}
-                      onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                      style={{
-                        padding: "5px 10px", borderRadius: 8,
-                        border: "1px solid rgba(200,218,248,0.15)",
-                        background: "rgba(255,255,255,0.05)",
-                        color: "rgba(200,218,248,0.82)",
-                        fontSize: 12, cursor: "pointer", outline: "none",
-                      }}
-                    >
-                      {STATUS_OPTIONS.map((o) => (
-                        <option key={o.value} value={o.value}>{o.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                ))}
-              </div>
-            </section>
           </>
         )}
       </div>

@@ -250,6 +250,23 @@ CREATE POLICY "users can read own plan"
 CREATE POLICY "service role can manage plans"
   ON public.user_plans FOR ALL USING (true);
 
+-- ─── 11. profiles (관리자 역할 관리) ────────────────────────
+-- role: 'user' (기본값) | 'admin'
+-- 어드민 계정 등록: INSERT INTO profiles (id, role) VALUES ('<user-uuid>', 'admin');
+CREATE TABLE IF NOT EXISTS public.profiles (
+  id         UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
+  role       TEXT NOT NULL DEFAULT 'user',
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "users can read own profile"
+  ON public.profiles FOR SELECT USING (auth.uid() = id);
+
+CREATE POLICY "service role can manage profiles"
+  ON public.profiles FOR ALL USING (true);
+
 -- ─── 인덱스 ──────────────────────────────────────────────────
 CREATE INDEX IF NOT EXISTS idx_naming_briefs_user_id       ON public.naming_briefs(user_id);
 CREATE INDEX IF NOT EXISTS idx_naming_results_brief_id     ON public.naming_results(brief_id);
