@@ -5,26 +5,26 @@ import { createAdminClient, createCookieClient } from "@/utils/supabase/server";
  * GET /api/auth/naver/callback
  * 네이버가 code + state 를 쿼리파라미터로 전달 → 토큰 교환 → 사용자 생성/로그인 → "/" 리다이렉트
  */
+const BASE_URL     = "https://yoonseul-naming.vercel.app";
+const CALLBACK_URL = `${BASE_URL}/api/auth/naver/callback`;
+
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
   const code  = searchParams.get("code");
   const state = searchParams.get("state");
-  const baseUrl =
-    process.env.NEXT_PUBLIC_BASE_URL ?? "https://yoonseul-naming.vercel.app";
 
   const redirect = (path: string) =>
-    NextResponse.redirect(new URL(path, baseUrl));
+    NextResponse.redirect(new URL(path, BASE_URL));
 
-  // ── 1. state 검증 (CSRF 방어) ─────────────────────────────────
-  const savedState = req.cookies.get("naver_oauth_state")?.value;
-  if (!code || !state || state !== savedState) {
-    console.error("[naver/callback] state mismatch", { state, savedState, hasCode: !!code });
-    return redirect("/login?error=invalid_state");
+  // ── 1. code 존재 확인 ─────────────────────────────────────────
+  if (!code) {
+    console.error("[naver/callback] missing code", { hasState: !!state });
+    return redirect("/login?error=missing_code");
   }
 
   const clientId     = process.env.NAVER_CLIENT_ID;
   const clientSecret = process.env.NAVER_CLIENT_SECRET;
-  const callbackUrl  = `${baseUrl}/api/auth/naver/callback`;
+  const callbackUrl  = CALLBACK_URL;
 
   if (!clientId || !clientSecret) {
     console.error("[naver/callback] NAVER_CLIENT_ID or NAVER_CLIENT_SECRET missing");
@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
         client_secret: clientSecret,
         redirect_uri:  callbackUrl,
         code,
-        state,
+        state:         state ?? "",
       }),
     });
     const tokenData = await tokenRes.json() as { access_token?: string; error?: string };
@@ -110,7 +110,7 @@ export async function GET(req: NextRequest) {
   }
 
   // ── 5. 세션 발급 → 응답 쿠키에 저장 ─────────────────────────
-  const response = NextResponse.redirect(new URL("/", baseUrl));
+  const response = NextResponse.redirect(new URL("/", BASE_URL));
   const supabase = createCookieClient(response);
 
   const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
@@ -118,9 +118,6 @@ export async function GET(req: NextRequest) {
     console.error("[naver/callback] signInWithPassword failed", signInError.message);
     return redirect("/login?error=signin_failed");
   }
-
-  // state 쿠키 제거
-  response.cookies.set("naver_oauth_state", "", { maxAge: 0, path: "/" });
 
   console.log("[naver/callback] success", { email });
   return response;
