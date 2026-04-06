@@ -19,9 +19,10 @@ export function createCookieClient(response: NextResponse) {
   return createSSRClient(url, anonKey, {
     cookies: {
       getAll: () => [],
-      setAll: (cookiesToSet: Array<{ name: string; value: string; options?: Record<string, unknown> }>) => {
+      setAll: (cookiesToSet: Array<{ name: string; value: string; options?: object }>) => {
         cookiesToSet.forEach(({ name, value, options }) => {
-          response.cookies.set(name, value, options);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          response.cookies.set(name, value, options as any);
         });
       },
     },
