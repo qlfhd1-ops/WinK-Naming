@@ -473,12 +473,11 @@ export default function LoginPage() {
                 설정: Supabase Dashboard → Auth → Providers → Kakao
                 참고: https://supabase.com/docs/guides/auth/social-login/auth-kakao */}
             <SocialBtn
-              label={socialLoading === "kakao" ? ui.socialLoading : ui.kakaoBtn}
+              label={ui.kakaoBtn}
               bg="#FEE500"
               color="#000000"
-              disabled={socialLoading !== null}
-              loading={socialLoading === "kakao"}
-              onClick={() => handleSocialLogin("kakao")}
+              disabled={true}
+              comingSoon="준비 중"
               icon={
                 <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden fill="#000000">
                   <path d="M9 1C4.582 1 1 3.865 1 7.385c0 2.24 1.483 4.205 3.718 5.348L3.87 15.5a.25.25 0 0 0 .366.27L8.01 13.5c.325.024.654.036.99.036 4.418 0 8-2.865 8-6.15C17 3.865 13.418 1 9 1z"/>
