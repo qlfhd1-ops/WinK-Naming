@@ -358,6 +358,7 @@ export default function LoginPage() {
         provider,
         options: {
           redirectTo: "https://yoonseul-naming.vercel.app/auth/callback",
+          ...(provider === "kakao" && { scopes: "profile_nickname profile_image" }),
         },
       });
       if (oauthError) throw oauthError;
