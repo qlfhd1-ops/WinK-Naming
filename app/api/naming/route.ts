@@ -2,6 +2,7 @@ import OpenAI from "openai";
 import { createClient } from "@supabase/supabase-js";
 import { getFreeLimiter } from "@/lib/upstash";
 import { rateLimit } from "@/lib/rate-limiter";
+import { calcSaju, sajuToPromptText } from "@/lib/saju";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -120,6 +121,14 @@ export async function POST(req: Request) {
     // ─── 카테고리별 프롬프트 분기 ────────────────────────────
     const isKTF = category === "korean_to_foreign";
 
+    // ─── 사주 오행 계산 (child 카테고리, birthDate 있을 때) ───
+    const sajuText = (category === "child" && birthDate)
+      ? (() => {
+          const saju = calcSaju(birthDate, birthTime || undefined);
+          return saju ? sajuToPromptText(saju) : "";
+        })()
+      : "";
+
     const systemPrompt = isKTF
       ? `당신은 한국 이름의 의미와 철학을 세계 언어로 아름답게 재탄생시키는 전문가입니다.
 
@@ -142,10 +151,21 @@ export async function POST(req: Request) {
 
 [핵심 설계 원칙]
 1. 성씨+이름 음운 조화 — 성씨의 종성·두음·운율을 분석하여 전체 이름이 자연스럽고 리듬감 있게 흐르도록 설계
-2. 한자 오행 획수 분석 — 각 한자의 오행(木火土金水)과 획수를 검토, 이름 전체의 오행 균형과 획수 조화를 반영
-3. 놀림감·발음 어색함 필터링 — 동물명·욕설·부정적 연상·발음 꼬임·이중 의미를 완전 차단
-4. 흔한 이름 배제 — 도윤·서준·하준·지우·하윤·지호·시우 등 출생 빈출 이름 사용 금지
-5. 3방향 트랙 분리 — rank_order 1=안정형(safe), 2=세련형(refined), 3=창의형(creative)으로 각기 다른 방향성 설계
+2. 한자 오행 획수 분석 (필수) — 각 한자의 정확한 획수와 오행(木火土金水)을 반드시 명시하고, 이름 전체 오행의 상생/상극 관계를 분석할 것
+   - 오행 상생: 木→火→土→金→水→木 (이름에 반영 권장)
+   - 오행 상극: 木→土, 火→金, 土→水, 金→木, 水→火 (가능하면 회피)
+   - 획수 음양: 홀수=陽, 짝수=陰 — 이름 전체 획수의 음양 균형 검토
+3. 발음오행 (자음 기준): ㄱㅋ=木, ㄴㄷㅌㄹ=火, ㅇㅎ=土, ㅅㅈㅊ=金, ㅁㅂㅍ=水
+   — 한자 오행과 발음 오행이 일치하거나 상생 관계이면 더욱 좋은 이름
+4. 놀림감·발음 어색함 필터링 — 동물명·욕설·부정적 연상·발음 꼬임·이중 의미를 완전 차단
+5. 흔한 이름 배제 — 도윤·서준·하준·지우·하윤·지호·시우 등 출생 빈출 이름 사용 금지
+6. 3방향 트랙 분리 — rank_order 1=안정형(safe), 2=세련형(refined), 3=창의형(creative)으로 각기 다른 방향성 설계
+
+[한자 획수 작성 규칙]
+- hanja_strokes 필드 예시: "旻(8획,火,陰)+俊(9획,木,陽)=17획(陽)"
+- five_elements 필드 예시: "火木 상생 조화 — 화생목(火生木) / 발음오행: ㅁ(水)·ㅈ(金) 상생"
+- yinyang 필드 예시: "陽 (총획 17획, 홀수)" 또는 "陰 (총획 14획, 짝수)"
+- 획수가 불확실한 한자는 절대 임의로 기재하지 말고, 가장 많이 쓰이는 이름용 한자를 선택할 것
 
 [성별 작명 원칙]
 - 남성(남자/male): 강하고 듬직한 느낌의 이름
@@ -228,6 +248,7 @@ ${excludeNames.length > 0 ? `- 제외할 이름 (이미 제안한 이름, 반드
 - 태어난 시간: ${birthTime || "미입력"}
 - UI 언어: ${lang}
 ${excludeNames.length > 0 ? `- 제외할 이름 (이미 제안한 이름, 반드시 다른 이름 설계): ${excludeNames.join(", ")}` : ""}
+${sajuText ? `\n${sajuText}` : ""}
 
 [출력 형식 — JSON 배열만, 순수 텍스트로]
 [
@@ -236,18 +257,19 @@ ${excludeNames.length > 0 ? `- 제외할 이름 (이미 제안한 이름, 반드
     "track": "safe",
     "name": "한글이름",
     "hanja": "漢字 (해당 없으면 빈 문자열)",
-    "hanja_meaning": "한자 각 글자의 뜻",
-    "hanja_strokes": "획수 조합 예: 木8+水7=15획",
-    "five_elements": "오행 균형 분석 예: 木水 상생 조화",
+    "hanja_meaning": "한자 각 글자의 뜻 (예: 旻=가을하늘 민, 俊=준걸 준)",
+    "hanja_strokes": "획수 상세 (예: 旻(8획,火,陰)+俊(9획,木,陽)=17획(陽))",
+    "five_elements": "오행 분석 (예: 火木 상생 — 화생목(火生木) / 발음오행: ㅁ(水)·ㅈ(金) 상생)",
+    "yinyang": "음양 판단 (예: 陽 — 총획 17획 홀수 / 또는 陰 — 총획 14획 짝수)",
     "english": "로마자 표기",
     "chinese": "중문 표기",
     "chinese_pinyin": "병음",
     "japanese_kana": "가나 표기",
     "japanese_reading": "로마자 읽기",
     "meaning": "이름 전체 의미 (2-3문장)",
-    "story": "설계 배경: 성씨 음운 조화·오행·획수·방향성 포함 (3-4문장)",
+    "story": "설계 배경: 성씨 음운 조화·한자 오행·획수 음양·사주 보완·방향성 포함 (3-4문장)",
     "fit_reason": "이 트랙(안정형)으로 선정한 이유 (2문장)",
-    "phonetic_harmony": "성씨+이름 음운 조화 분석 (1-2문장)",
+    "phonetic_harmony": "성씨+이름 음운 조화 분석 + 발음오행 (1-2문장)",
     "teasing_risk": "low",
     "similarity_risk": "low",
     "pronunciation_risk": "low",
