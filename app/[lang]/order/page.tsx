@@ -9,6 +9,8 @@ import { PRICING } from "@/lib/pricing";
 // ─── Types ───────────────────────────────────────────────
 type ProductType = "stamp" | "doorplate";
 type Step = "form" | "confirm" | "done";
+type StampScript = "block" | "curved" | "hand";
+type StampLang  = "ko" | "hanja" | "en";
 
 // ─── Product config ───────────────────────────────────────
 const PRODUCT_PRICE: Record<ProductType, number> = {
@@ -79,6 +81,7 @@ const COPY = {
     trust1: "결과 확인 후 마음에 드실 때만 주문해 주세요.",
     trust2: "주문 후 제작이 시작되면 취소가 어렵습니다.",
     trust3: "한글·한자 각인이 모두 가능합니다.",
+    previewQualityNote: "모든 디자인은 실제 도장으로 찍은 듯한 사실적인 질감으로 표현되었으며, 곧바로 인쇄물이나 디지털 문서에 적용할 수 있는 형태로 시각화되어 미리보기와 흡사합니다.",
     deliverySectionTitle: "배송지 정보",
     deliveryRecipientLabel: "받는 분 이름",
     deliveryRecipientPh: "받으실 분의 이름을 입력해 주세요",
@@ -149,6 +152,7 @@ const COPY = {
     trust1: "Only order if you are satisfied with the design.",
     trust2: "Cancellation is difficult once production begins.",
     trust3: "Both Korean and Hanja engraving are available.",
+    previewQualityNote: "All designs are rendered with a realistic ink-stamp texture, ready for print or digital documents. The actual stamp will closely resemble this preview.",
     deliverySectionTitle: "Delivery Address",
     deliveryRecipientLabel: "Recipient Name",
     deliveryRecipientPh: "Enter the recipient's name",
@@ -219,6 +223,7 @@ const COPY = {
     trust1: "满意后再下单。",
     trust2: "开始制作后较难取消订单。",
     trust3: "支持韩文和汉字刻印。",
+    previewQualityNote: "所有设计均以仿真印章质感呈现，可直接用于印刷或数字文档，实际效果与预览高度相似。",
     deliverySectionTitle: "收货地址",
     deliveryRecipientLabel: "收件人姓名",
     deliveryRecipientPh: "请输入收件人姓名",
@@ -289,6 +294,7 @@ const COPY = {
     trust1: "ご満足いただけた場合のみご注文ください。",
     trust2: "制作開始後はキャンセルが難しくなります。",
     trust3: "韓国語・漢字どちらの彫刻も対応しています。",
+    previewQualityNote: "すべてのデザインはリアルな印鑑の質感で表現されており、印刷物やデジタル文書にそのまま使用できる形で視覚化されています。実際の仕上がりはプレビューに近いものになります。",
     deliverySectionTitle: "配送先情報",
     deliveryRecipientLabel: "受取人名",
     deliveryRecipientPh: "受取人のお名前をご入力ください",
@@ -359,6 +365,7 @@ const COPY = {
     trust1: "Pida solo si está satisfecho con el diseño.",
     trust2: "La cancelación es difícil una vez iniciada la producción.",
     trust3: "El grabado en coreano y Hanja está disponible.",
+    previewQualityNote: "Todos los diseños se muestran con una textura realista de sello entintado, listos para impresión o documentos digitales. El sello real se parecerá a esta vista previa.",
     deliverySectionTitle: "Dirección de entrega",
     deliveryRecipientLabel: "Nombre del destinatario",
     deliveryRecipientPh: "Ingrese el nombre del destinatario",
@@ -429,6 +436,7 @@ const COPY = {
     trust1: "Заказывайте только если удовлетворены дизайном.",
     trust2: "Отмена затруднена после начала производства.",
     trust3: "Доступна гравировка на корейском и Ханджа.",
+    previewQualityNote: "Все дизайны отображаются с реалистичной текстурой печати, готовой для использования в печатных или цифровых документах. Реальная печать будет близка к предварительному просмотру.",
     deliverySectionTitle: "Адрес доставки",
     deliveryRecipientLabel: "Имя получателя",
     deliveryRecipientPh: "Введите имя получателя",
@@ -499,6 +507,7 @@ const COPY = {
     trust1: "Commandez seulement si vous êtes satisfait du design.",
     trust2: "L'annulation est difficile une fois la production commencée.",
     trust3: "La gravure en coréen et Hanja est disponible.",
+    previewQualityNote: "Tous les designs sont rendus avec une texture réaliste de tampon encré, prêts pour l'impression ou les documents numériques. Le tampon réel ressemblera étroitement à cet aperçu.",
     deliverySectionTitle: "Adresse de livraison",
     deliveryRecipientLabel: "Nom du destinataire",
     deliveryRecipientPh: "Saisir le nom du destinataire",
@@ -569,6 +578,7 @@ const COPY = {
     trust1: "اطلب فقط إذا كنت راضياً عن التصميم.",
     trust2: "يصعب الإلغاء بعد بدء الإنتاج.",
     trust3: "النقش بالكورية وهانجا متاح.",
+    previewQualityNote: "جميع التصميمات مُقدَّمة بملمس واقعي لختم الحبر، جاهزة للطباعة أو المستندات الرقمية. سيكون الختم الفعلي قريباً جداً من المعاينة.",
     deliverySectionTitle: "عنوان التسليم",
     deliveryRecipientLabel: "اسم المستلم",
     deliveryRecipientPh: "أدخل اسم المستلم",
@@ -639,6 +649,7 @@ const COPY = {
     trust1: "केवल तभी ऑर्डर करें जब डिज़ाइन पसंद आए।",
     trust2: "उत्पादन शुरू होने के बाद रद्द करना मुश्किल है।",
     trust3: "कोरियाई और हांजा दोनों नक्काशी उपलब्ध है।",
+    previewQualityNote: "सभी डिज़ाइन वास्तविक स्टाम्प की स्याही जैसी बनावट के साथ प्रस्तुत किए गए हैं, जो मुद्रण या डिजिटल दस्तावेज़ों के लिए तैयार हैं। वास्तविक स्टाम्प इस पूर्वावलोकन के समान होगा।",
     deliverySectionTitle: "डिलीवरी पता",
     deliveryRecipientLabel: "प्राप्तकर्ता का नाम",
     deliveryRecipientPh: "प्राप्तकर्ता का नाम दर्ज करें",
@@ -853,6 +864,111 @@ function ProductCard({
   );
 }
 
+// ─── StampPreview ─────────────────────────────────────────
+function StampPreview({
+  displayText,
+  showIn,
+  script,
+}: {
+  displayText: string;
+  showIn: boolean;
+  script: StampScript;
+}) {
+  const letters = displayText ? [...displayText] : [];
+  const allChars = [...letters, ...(showIn && displayText ? ["印"] : [])];
+  const n = allChars.length;
+
+  const fontProps = (() => {
+    switch (script) {
+      case "block":  return { fontFamily: "serif",      fontWeight: "900", fontStyle: "normal" };
+      case "curved": return { fontFamily: "serif",      fontWeight: "700", fontStyle: "italic"  };
+      case "hand":   return { fontFamily: "sans-serif", fontWeight: "400", fontStyle: "normal"  };
+    }
+  })();
+
+  // 글자수별 위치 계산
+  const positions: Array<{ x: number; y: number; size: number }> = (() => {
+    if (n === 0) return [];
+    if (n === 1) return [{ x: 88, y: 98, size: 46 }];
+    if (n === 2) return [
+      { x: 88, y: 71, size: 36 },
+      { x: 88, y: 110, size: 36 },
+    ];
+    if (n === 3) return [
+      // T자형: 상단 1글자, 하단 2글자
+      { x: 88, y: 65, size: 30 },
+      { x: 62, y: 106, size: 30 },
+      { x: 114, y: 106, size: 30 },
+    ];
+    if (n === 4) return [
+      // 2×2 그리드
+      { x: 62, y: 71, size: 26 },
+      { x: 114, y: 71, size: 26 },
+      { x: 62, y: 108, size: 26 },
+      { x: 114, y: 108, size: 26 },
+    ];
+    // 5자+: 세로 나열
+    const sp = 20, sy = 88 - ((n - 1) * sp) / 2 + 8;
+    return allChars.map((_, i) => ({ x: 88, y: sy + i * sp, size: 18 }));
+  })();
+
+  return (
+    <svg width="176" height="176" viewBox="0 0 176 176" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        {/* 외곽 잉크 번짐 필터 */}
+        <filter id="edgeInk" x="-8%" y="-8%" width="116%" height="116%">
+          <feTurbulence type="turbulence" baseFrequency="0.032" numOctaves="2" seed="9" result="en" />
+          <feDisplacementMap in="SourceGraphic" in2="en" scale="4.5"
+            xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+        {/* 글자 잉크 질감 필터 */}
+        <filter id="textInk" x="-10%" y="-10%" width="120%" height="120%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.88" numOctaves="4" seed="3" result="tn" />
+          <feDisplacementMap in="SourceGraphic" in2="tn" scale="1.6"
+            xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+      </defs>
+
+      {/* 인주 배경 — 잉크 번짐 */}
+      <g filter="url(#edgeInk)">
+        <circle cx="88" cy="88" r="82" fill="#B5291F" />
+        <circle cx="88" cy="88" r="76" fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth="2" />
+        <circle cx="88" cy="88" r="69" fill="none" stroke="rgba(255,255,255,0.30)" strokeWidth="0.8" />
+      </g>
+
+      {/* 글자 — 잉크 질감 */}
+      {n > 0 ? (
+        <g filter="url(#textInk)">
+          {allChars.map((ch, i) => {
+            const pos = positions[i];
+            if (!pos) return null;
+            return (
+              <text
+                key={i}
+                x={pos.x}
+                y={pos.y}
+                textAnchor="middle"
+                fill={ch === "印" ? "rgba(240,208,72,0.96)" : "rgba(255,255,255,0.97)"}
+                fontSize={pos.size}
+                fontFamily={fontProps.fontFamily}
+                fontWeight={fontProps.fontWeight}
+                fontStyle={fontProps.fontStyle}
+              >
+                {ch}
+              </text>
+            );
+          })}
+        </g>
+      ) : (
+        <text x="88" y="96" textAnchor="middle"
+          fill="rgba(255,255,255,0.32)" fontSize="14" fontFamily="sans-serif">
+          이름 입력
+        </text>
+      )}
+    </svg>
+  );
+}
+
 // ─── Main Page ────────────────────────────────────────────
 export default function OrderPage() {
   const router = useRouter();
@@ -884,6 +1000,10 @@ export default function OrderPage() {
   const [memo, setMemo] = useState("");
   const [custName, setCustName] = useState("");
   const [custEmail, setCustEmail] = useState("");
+  // ── Stamp preview options
+  const [previewStampLang, setPreviewStampLang]     = useState<StampLang>("ko");
+  const [previewStampScript, setPreviewStampScript] = useState<StampScript>("block");
+  const [previewShowIn, setPreviewShowIn]           = useState(false);
   // ── Delivery state
   const [deliveryRecipient, setDeliveryRecipient] = useState("");
   const [deliveryPhone, setDeliveryPhone] = useState("");
@@ -1083,6 +1203,17 @@ export default function OrderPage() {
                   <strong>{ui.memoLabel}</strong>: {memo.trim()}
                 </div>
               )}
+              {(deliveryRecipient.trim() || deliveryAddr.trim()) && (
+                <div>
+                  <strong>{ui.deliverySectionTitle}</strong>{" "}
+                  {deliveryRecipient.trim()}
+                  {deliveryPhone.trim() ? ` (${deliveryPhone.trim()})` : ""}
+                  {deliveryAddr.trim()
+                    ? ` — ${deliveryZip.trim() ? `[${deliveryZip}] ` : ""}${deliveryAddr.trim()}${deliveryAddrDetail.trim() ? ` ${deliveryAddrDetail.trim()}` : ""}`
+                    : ""}
+                  {deliveryMemo.trim() ? ` / ${deliveryMemo.trim()}` : ""}
+                </div>
+              )}
             </div>
 
             <div
@@ -1120,6 +1251,67 @@ export default function OrderPage() {
                     placeholder={ui.custEmailPh}
                     autoComplete="email"
                   />
+                </div>
+              </div>
+            </section>
+
+            {/* Delivery — confirm page */}
+            <section className="wink-panel" style={{ marginBottom: 20 }}>
+              <div className="wink-section-title" style={{ marginBottom: 14 }}>
+                {ui.deliverySectionTitle}
+              </div>
+              <div className="wink-form-grid">
+                <div className="wink-field">
+                  <label>{ui.deliveryRecipientLabel}</label>
+                  <input className="wink-input" value={deliveryRecipient}
+                    onChange={(e) => setDeliveryRecipient(e.target.value)}
+                    placeholder={ui.deliveryRecipientPh} autoComplete="name" />
+                </div>
+                <div className="wink-field">
+                  <label>{ui.deliveryPhoneLabel}</label>
+                  <input className="wink-input" type="tel" value={deliveryPhone}
+                    onChange={(e) => setDeliveryPhone(e.target.value)}
+                    placeholder={ui.deliveryPhonePh} autoComplete="tel" />
+                </div>
+                <div className="wink-field wink-field-full">
+                  <label>{ui.deliveryZipLabel}</label>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <input className="wink-input" value={deliveryZip}
+                      onChange={(e) => setDeliveryZip(e.target.value)}
+                      placeholder="00000" style={{ maxWidth: 140 }} readOnly />
+                    <button type="button"
+                      onClick={() => openDaumPostcode((zip, addr) => {
+                        setDeliveryZip(zip); setDeliveryAddr(addr); setDeliveryAddrDetail("");
+                      })}
+                      style={{
+                        padding: "0 20px", borderRadius: 10, fontSize: 13, fontWeight: 700,
+                        cursor: "pointer", whiteSpace: "nowrap", transition: "all 0.15s",
+                        border: "1px solid rgba(201,168,76,0.6)",
+                        background: isLight ? "rgba(201,168,76,0.12)" : "rgba(201,168,76,0.10)",
+                        color: isLight ? "rgba(120,90,20,0.95)" : "rgba(201,168,76,0.95)",
+                      }}>
+                      {ui.deliveryZipSearchBtn}
+                    </button>
+                  </div>
+                </div>
+                <div className="wink-field wink-field-full">
+                  <label>{ui.deliveryAddrLabel}</label>
+                  <input className="wink-input" value={deliveryAddr}
+                    onChange={(e) => setDeliveryAddr(e.target.value)}
+                    placeholder={ui.deliveryAddrLabel}
+                    autoComplete="street-address" readOnly={!!deliveryZip} />
+                </div>
+                <div className="wink-field wink-field-full">
+                  <label>{ui.deliveryAddrDetailLabel}</label>
+                  <input className="wink-input" value={deliveryAddrDetail}
+                    onChange={(e) => setDeliveryAddrDetail(e.target.value)}
+                    placeholder={ui.deliveryAddrDetailPh} autoComplete="address-line2" />
+                </div>
+                <div className="wink-field wink-field-full">
+                  <label>{ui.deliveryMemoLabel}</label>
+                  <input className="wink-input" value={deliveryMemo}
+                    onChange={(e) => setDeliveryMemo(e.target.value)}
+                    placeholder={ui.deliveryMemoPh} />
                 </div>
               </div>
             </section>
@@ -1277,36 +1469,79 @@ export default function OrderPage() {
                 </div>
               )}
 
-              {/* 도장 SVG 미리보기 */}
+              {/* 도장 미리보기 — 옵션 컨트롤 */}
               {previewMode === "stamp" && (
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
-                  <svg width="160" height="160" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
-                    {/* 외곽 원 */}
-                    <circle cx="80" cy="80" r="76" fill="#C0392B" />
-                    <circle cx="80" cy="80" r="70" fill="none" stroke="rgba(255,255,255,0.45)" strokeWidth="1.5" />
-                    <circle cx="80" cy="80" r="64" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="0.8" />
-                    {/* 이름 세로 배열 */}
-                    {displayEngraving ? (
-                      displayEngraving.split("").map((ch, i) => {
-                        const total = displayEngraving.length;
-                        const spacing = total <= 2 ? 28 : total === 3 ? 24 : 20;
-                        const startY = 80 - ((total - 1) * spacing) / 2;
-                        return (
-                          <text key={i} x="80" y={startY + i * spacing + 6}
-                            textAnchor="middle" fill="white"
-                            fontSize={total <= 2 ? "28" : total === 3 ? "24" : "20"}
-                            fontWeight="bold" fontFamily="serif">
-                            {ch}
-                          </text>
-                        );
-                      })
-                    ) : (
-                      <text x="80" y="88" textAnchor="middle" fill="rgba(255,255,255,0.4)" fontSize="14">이름 입력</text>
-                    )}
-                  </svg>
-                  {hanja.trim() && (
-                    <div style={{ fontSize: 13, color: "rgba(201,168,76,0.78)", letterSpacing: "0.08em" }}>{hanja.trim()}</div>
-                  )}
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
+
+                  {/* 컨트롤 행 */}
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center" }}>
+                    {/* 표기 */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                      <span style={{ fontSize: 11, color: "rgba(201,168,76,0.75)", letterSpacing: "0.06em" }}>표기</span>
+                      {(["ko", "hanja", "en"] as StampLang[]).map((l) => (
+                        <button key={l} type="button" onClick={() => setPreviewStampLang(l)}
+                          style={{
+                            padding: "3px 9px", borderRadius: 999, fontSize: 12, fontWeight: 600, cursor: "pointer",
+                            border: previewStampLang === l ? "1px solid rgba(201,168,76,0.8)" : "1px solid var(--line-soft)",
+                            background: previewStampLang === l ? "rgba(201,168,76,0.15)" : "transparent",
+                            color: previewStampLang === l ? "rgba(201,168,76,0.95)" : "var(--text-soft)",
+                          }}>
+                          {l === "ko" ? "한글" : l === "hanja" ? "한자" : "영어"}
+                        </button>
+                      ))}
+                    </div>
+                    {/* 서체 */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                      <span style={{ fontSize: 11, color: "rgba(201,168,76,0.75)", letterSpacing: "0.06em" }}>서체</span>
+                      {(["block", "curved", "hand"] as StampScript[]).map((s) => (
+                        <button key={s} type="button" onClick={() => setPreviewStampScript(s)}
+                          style={{
+                            padding: "3px 9px", borderRadius: 999, fontSize: 12, fontWeight: 600, cursor: "pointer",
+                            border: previewStampScript === s ? "1px solid rgba(201,168,76,0.8)" : "1px solid var(--line-soft)",
+                            background: previewStampScript === s ? "rgba(201,168,76,0.15)" : "transparent",
+                            color: previewStampScript === s ? "rgba(201,168,76,0.95)" : "var(--text-soft)",
+                          }}>
+                          {s === "block" ? "T자형" : s === "curved" ? "굽이형" : "필기체"}
+                        </button>
+                      ))}
+                    </div>
+                    {/* 인(印) 토글 */}
+                    <button type="button" onClick={() => setPreviewShowIn((v) => !v)}
+                      style={{
+                        padding: "3px 11px", borderRadius: 999, fontSize: 12, fontWeight: 600, cursor: "pointer",
+                        border: previewShowIn ? "1px solid rgba(201,168,76,0.8)" : "1px solid var(--line-soft)",
+                        background: previewShowIn ? "rgba(201,168,76,0.15)" : "transparent",
+                        color: previewShowIn ? "rgba(201,168,76,0.95)" : "var(--text-soft)",
+                      }}>
+                      인(印) 포함
+                    </button>
+                  </div>
+
+                  {/* 도장 SVG */}
+                  <StampPreview
+                    displayText={
+                      previewStampLang === "ko"    ? displayEngraving :
+                      previewStampLang === "hanja" ? (hanja.trim() || displayEngraving) :
+                      (engraving.trim() || name.trim())
+                    }
+                    showIn={previewShowIn}
+                    script={previewStampScript}
+                  />
+
+                  {/* 신뢰 문구 */}
+                  <div style={{
+                    maxWidth: 300,
+                    padding: "12px 16px",
+                    borderRadius: 10,
+                    border: "1px solid rgba(201,168,76,0.22)",
+                    background: isLight ? "rgba(201,168,76,0.06)" : "rgba(201,168,76,0.05)",
+                    fontSize: 11,
+                    lineHeight: 1.7,
+                    color: isLight ? "rgba(60,50,20,0.72)" : "rgba(201,185,120,0.72)",
+                    textAlign: "center",
+                  }}>
+                    {ui.previewQualityNote}
+                  </div>
                 </div>
               )}
 
