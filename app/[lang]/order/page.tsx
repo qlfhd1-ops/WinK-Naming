@@ -1,7 +1,7 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { FormEvent, useEffect, useRef, useState } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { AppLang, isSupportedLang } from "@/lib/lang-config";
 import { createClient } from "@/lib/supabase/browser";
 import { PRICING } from "@/lib/pricing";
@@ -94,6 +94,16 @@ const COPY = {
     deliveryAddrDetailPh: "동·호수 등 상세 주소를 입력해 주세요",
     deliveryMemoLabel: "배송 메모 (선택)",
     deliveryMemoPh: "부재 시 문앞 보관, 경비실 맡김 등",
+    stampNameLabel: "도장 이름",
+    doorplateNameLabel: "문패 이름",
+    nameModeKo: "한글",
+    nameModeHanja: "한자",
+    nameModeDuo: "2인",
+    doorplateDuoPh: "예: 이인홍 & 배은주",
+    designerNotice: "주문 완료 후 24시간 내 전문 디자이너가 시안을 이메일로 발송합니다.",
+    savedNamesTitle: "저장된 작명 결과",
+    savedNamesHint: "선택하면 도장 이름에 자동 입력됩니다",
+    savedNamesEmpty: "저장된 이름 결과가 없습니다",
   },
   en: {
     chip: "Wink Direct Order",
@@ -165,6 +175,16 @@ const COPY = {
     deliveryAddrDetailPh: "Apt, suite, unit, etc.",
     deliveryMemoLabel: "Delivery Note (optional)",
     deliveryMemoPh: "Leave at door, front desk, etc.",
+    stampNameLabel: "Stamp Name",
+    doorplateNameLabel: "Door Plate Name",
+    nameModeKo: "Korean",
+    nameModeHanja: "Hanja",
+    nameModeDuo: "Two Names",
+    doorplateDuoPh: "e.g. Lee In-hong & Bae Eun-ju",
+    designerNotice: "A professional designer will send your design draft by email within 24 hours of order completion.",
+    savedNamesTitle: "Saved Naming Results",
+    savedNamesHint: "Select to auto-fill stamp name",
+    savedNamesEmpty: "No saved naming results found",
   },
   zh: {
     chip: "Wink Direct Order",
@@ -236,6 +256,16 @@ const COPY = {
     deliveryAddrDetailPh: "楼层、房间号等",
     deliveryMemoLabel: "配送备注（选填）",
     deliveryMemoPh: "无人时放门口、前台代收等",
+    stampNameLabel: "印章名字",
+    doorplateNameLabel: "门牌名字",
+    nameModeKo: "韩文",
+    nameModeHanja: "汉字",
+    nameModeDuo: "两人",
+    doorplateDuoPh: "例：이인홍 & 배은주",
+    designerNotice: "订单完成后24小时内，专业设计师将通过邮件发送设计稿。",
+    savedNamesTitle: "已保存的命名结果",
+    savedNamesHint: "选择后自动填入印章名字",
+    savedNamesEmpty: "暂无已保存的命名结果",
   },
   ja: {
     chip: "Wink Direct Order",
@@ -307,6 +337,16 @@ const COPY = {
     deliveryAddrDetailPh: "建物名・部屋番号など",
     deliveryMemoLabel: "配送メモ（任意）",
     deliveryMemoPh: "不在時は玄関前に置くなど",
+    stampNameLabel: "印鑑名前",
+    doorplateNameLabel: "表札名前",
+    nameModeKo: "韓国語",
+    nameModeHanja: "漢字",
+    nameModeDuo: "2名",
+    doorplateDuoPh: "例：이인홍 & 배은주",
+    designerNotice: "ご注文完了後24時間以内に、プロデザイナーがデザイン案をメールでお送りします。",
+    savedNamesTitle: "保存された命名結果",
+    savedNamesHint: "選択すると印鑑名前に自動入力されます",
+    savedNamesEmpty: "保存された命名結果がありません",
   },
   es: {
     chip: "Wink Direct Order",
@@ -378,6 +418,16 @@ const COPY = {
     deliveryAddrDetailPh: "Piso, apartamento, etc.",
     deliveryMemoLabel: "Nota de entrega (opcional)",
     deliveryMemoPh: "Dejar en la puerta, conserjería, etc.",
+    stampNameLabel: "Nombre del sello",
+    doorplateNameLabel: "Nombre de la placa",
+    nameModeKo: "Coreano",
+    nameModeHanja: "Hanja",
+    nameModeDuo: "Dos nombres",
+    doorplateDuoPh: "ej. 이인홍 & 배은주",
+    designerNotice: "Un diseñador profesional enviará su borrador por correo dentro de las 24 horas posteriores al pedido.",
+    savedNamesTitle: "Resultados de nombre guardados",
+    savedNamesHint: "Seleccione para autocompletar el nombre del sello",
+    savedNamesEmpty: "No se encontraron resultados guardados",
   },
   ru: {
     chip: "Wink Direct Order",
@@ -449,6 +499,16 @@ const COPY = {
     deliveryAddrDetailPh: "Квартира, этаж и т.д.",
     deliveryMemoLabel: "Примечание к доставке (необязательно)",
     deliveryMemoPh: "Оставить у двери, на ресепшн и т.д.",
+    stampNameLabel: "Имя для печати",
+    doorplateNameLabel: "Имя для таблички",
+    nameModeKo: "Корейский",
+    nameModeHanja: "Ханджа",
+    nameModeDuo: "Два имени",
+    doorplateDuoPh: "напр. 이인홍 & 배은주",
+    designerNotice: "Профессиональный дизайнер пришлёт вам макет по email в течение 24 часов после оформления заказа.",
+    savedNamesTitle: "Сохранённые результаты нейминга",
+    savedNamesHint: "Выберите для автозаполнения имени на печати",
+    savedNamesEmpty: "Сохранённых результатов нет",
   },
   fr: {
     chip: "Wink Direct Order",
@@ -520,6 +580,16 @@ const COPY = {
     deliveryAddrDetailPh: "Appartement, étage, etc.",
     deliveryMemoLabel: "Note de livraison (optionnel)",
     deliveryMemoPh: "Laisser à la porte, à la réception, etc.",
+    stampNameLabel: "Nom du sceau",
+    doorplateNameLabel: "Nom de la plaque",
+    nameModeKo: "Coréen",
+    nameModeHanja: "Hanja",
+    nameModeDuo: "Deux noms",
+    doorplateDuoPh: "ex. 이인홍 & 배은주",
+    designerNotice: "Un designer professionnel vous enverra votre maquette par email dans les 24 heures suivant la commande.",
+    savedNamesTitle: "Résultats de naming sauvegardés",
+    savedNamesHint: "Sélectionnez pour remplir automatiquement le nom du sceau",
+    savedNamesEmpty: "Aucun résultat de naming sauvegardé",
   },
   ar: {
     chip: "Wink Direct Order",
@@ -591,6 +661,16 @@ const COPY = {
     deliveryAddrDetailPh: "الشقة، الطابق، إلخ",
     deliveryMemoLabel: "ملاحظة التسليم (اختياري)",
     deliveryMemoPh: "اترك عند الباب، في الاستقبال، إلخ",
+    stampNameLabel: "اسم الختم",
+    doorplateNameLabel: "اسم اللوحة",
+    nameModeKo: "كوري",
+    nameModeHanja: "هانجا",
+    nameModeDuo: "اسمان",
+    doorplateDuoPh: "مثال: 이인홍 & 배은주",
+    designerNotice: "سيرسل مصمم محترف مسودة التصميم عبر البريد الإلكتروني خلال 24 ساعة من إتمام الطلب.",
+    savedNamesTitle: "نتائج التسمية المحفوظة",
+    savedNamesHint: "اختر لملء اسم الختم تلقائياً",
+    savedNamesEmpty: "لا توجد نتائج محفوظة",
   },
   hi: {
     chip: "Wink Direct Order",
@@ -662,6 +742,16 @@ const COPY = {
     deliveryAddrDetailPh: "फ्लैट नंबर, मंज़िल आदि",
     deliveryMemoLabel: "डिलीवरी नोट (वैकल्पिक)",
     deliveryMemoPh: "दरवाज़े पर छोड़ें, रिसेप्शन पर दें आदि",
+    stampNameLabel: "मुहर का नाम",
+    doorplateNameLabel: "पट्टिका का नाम",
+    nameModeKo: "कोरियाई",
+    nameModeHanja: "हांजा",
+    nameModeDuo: "दो नाम",
+    doorplateDuoPh: "जैसे 이인홍 & 배은주",
+    designerNotice: "ऑर्डर पूरा होने के 24 घंटे के भीतर एक पेशेवर डिज़ाइनर ईमेल पर डिज़ाइन ड्राफ्ट भेजेगा।",
+    savedNamesTitle: "सहेजे गए नामकरण परिणाम",
+    savedNamesHint: "चुनें तो मुहर नाम स्वचालित भरा जाएगा",
+    savedNamesEmpty: "कोई सहेजा गया परिणाम नहीं मिला",
   },
 } as const;
 
@@ -690,7 +780,7 @@ function openDaumPostcode(onComplete: (zip: string, addr: string) => void) {
     run();
   } else {
     const script = document.createElement("script");
-    script.src = "//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+    script.src = "https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
     script.onload = run;
     document.head.appendChild(script);
   }
@@ -1076,6 +1166,14 @@ export default function OrderPage() {
     }
   }, []);
 
+  // ── URL params (결과 페이지 연동)
+  const searchParams = useSearchParams();
+
+  // ── Saved names (Supabase 작명 결과)
+  type SavedName = { id: string; name: string; hanja: string | null };
+  const [savedNames, setSavedNames] = useState<SavedName[]>([]);
+  const [savedLoading, setSavedLoading] = useState(false);
+
   // ── Form state
   const [step, setStep] = useState<Step>("form");
   const [products, setProducts] = useState<Set<ProductType>>(new Set());
@@ -1086,6 +1184,12 @@ export default function OrderPage() {
   const [stampMat, setStampMat] = useState("");
   const [doorplateMat, setDoorplateMat] = useState("");
   const [memo, setMemo] = useState("");
+  // ── Name mode
+  const [stampNameLang, setStampNameLang]     = useState<StampLang>("ko");
+  const [doorplateNameMode, setDoorplateNameMode] = useState<"ko" | "hanja" | "duo">("ko");
+  const [doorplateName, setDoorplateName]     = useState("");
+  const [doorplateHanja, setDoorplateHanja]   = useState("");
+  const [doorplateDuo, setDoorplateDuo]       = useState("");
   const [custName, setCustName] = useState("");
   const [custEmail, setCustEmail] = useState("");
   // ── Stamp preview options
@@ -1102,6 +1206,42 @@ export default function OrderPage() {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [orderId, setOrderId] = useState("");
+
+  // ── URL params → 이름 자동 입력 (결과 페이지 연동)
+  useEffect(() => {
+    const pName  = searchParams.get("name");
+    const pHanja = searchParams.get("hanja");
+    if (pName)  { setName(pName);  }
+    if (pHanja) { setHanja(pHanja); }
+  }, [searchParams]);
+
+  // ── Supabase 저장된 작명 결과 불러오기
+  useEffect(() => {
+    const load = async () => {
+      setSavedLoading(true);
+      try {
+        const sb = createClient();
+        const { data: { user } } = await sb.auth.getUser();
+        if (!user) return;
+        const { data } = await sb
+          .from("naming_results")
+          .select("id, name, chinese")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(20);
+        if (data) {
+          setSavedNames(data.map((r: { id: string; name: string; chinese: string | null }) => ({
+            id: r.id,
+            name: r.name,
+            hanja: r.chinese ?? null,
+          })));
+        }
+      } catch { /* ignore */ } finally {
+        setSavedLoading(false);
+      }
+    };
+    load();
+  }, []);
 
   const toggleProduct = (p: ProductType) => {
     setProducts((prev) => {
@@ -1149,6 +1289,11 @@ export default function OrderPage() {
           name: name.trim(),
           hanja: hanja.trim(),
           engraving: engraving.trim(),
+          stampNameLang,
+          doorplateName: doorplateName.trim(),
+          doorplateHanja: doorplateHanja.trim(),
+          doorplateNameMode,
+          doorplateDuo: doorplateDuo.trim(),
           products: [...products],
           stampMaterial: stampMat.trim(),
           doorplateMaterial: doorplateMat.trim(),
@@ -1268,9 +1413,23 @@ export default function OrderPage() {
                   .join(" + ")}
               </div>
               <div>
-                <strong>{ui.engravingInfo}</strong>:{" "}
-                {name.trim()}{hanja.trim() ? ` (${hanja.trim()})` : ""} — {displayEngraving}
+                <strong>{ui.stampNameLabel}</strong>:{" "}
+                {name.trim()}{hanja.trim() ? ` (${hanja.trim()})` : ""}
+                {stampNameLang === "hanja" && hanja.trim() ? ` [${ui.nameModeHanja}]` : ""}
               </div>
+              {(products.has("doorplate") && doorplateName.trim()) && (
+                <div>
+                  <strong>{ui.doorplateNameLabel}</strong>:{" "}
+                  {doorplateName.trim()}
+                  {doorplateNameMode === "hanja" && doorplateHanja.trim() ? ` (${doorplateHanja.trim()})` : ""}
+                  {doorplateNameMode === "duo" ? ` [${ui.nameModeDuo}]` : ""}
+                </div>
+              )}
+              {engraving.trim() && (
+                <div>
+                  <strong>{ui.engravingLabel}</strong>: {engraving.trim()}
+                </div>
+              )}
               {(stampMat.trim() || doorplateMat.trim()) && (
                 <div>
                   <strong>{ui.materialInfo}</strong>:{" "}
@@ -1481,207 +1640,163 @@ export default function OrderPage() {
           )}
         </section>
 
-        {/* Name & engraving */}
+        {/* Name & engraving — 도장/문패 분리 입력 */}
         <section className="wink-panel" style={{ marginBottom: 20 }}>
           <div className="wink-section-title" style={{ marginBottom: 14 }}>
             {ui.nameSectionTitle}
           </div>
 
-          <div className="wink-form-grid" style={{ marginBottom: 0 }}>
-            <div className="wink-field">
-              <label>{ui.nameLabel}</label>
+          {/* 저장된 작명 결과 장바구니 */}
+          {savedNames.length > 0 && (
+            <div style={{
+              marginBottom: 20,
+              padding: "14px 16px",
+              borderRadius: 10,
+              border: "1px solid rgba(201,168,76,0.28)",
+              background: isLight ? "rgba(201,168,76,0.06)" : "rgba(201,168,76,0.05)",
+            }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "rgba(201,168,76,0.9)", marginBottom: 6, letterSpacing: "0.06em" }}>
+                {ui.savedNamesTitle}
+              </div>
+              <div style={{ fontSize: 11, color: "var(--text-soft)", marginBottom: 10 }}>{ui.savedNamesHint}</div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                {savedNames.map((sn) => (
+                  <button
+                    key={sn.id}
+                    type="button"
+                    onClick={() => {
+                      setName(sn.name);
+                      if (sn.hanja) setHanja(sn.hanja);
+                      setStampNameLang(sn.hanja ? "hanja" : "ko");
+                    }}
+                    style={{
+                      padding: "5px 14px", borderRadius: 999, fontSize: 13, fontWeight: 600,
+                      cursor: "pointer", transition: "all 0.15s",
+                      border: "1px solid rgba(201,168,76,0.45)",
+                      background: name === sn.name ? "rgba(201,168,76,0.18)" : "transparent",
+                      color: name === sn.name ? "rgba(201,168,76,0.97)" : "var(--text-main)",
+                    }}
+                  >
+                    {sn.name}{sn.hanja ? ` (${sn.hanja})` : ""}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 두 컬럼: 왼쪽 도장 / 오른쪽 문패 */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+
+            {/* 왼쪽: 도장 이름 */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "rgba(201,168,76,0.9)", letterSpacing: "0.06em" }}>
+                ⬛ {ui.stampNameLabel}
+              </div>
+              {/* 한글 / 한자 토글 */}
+              <div style={{ display: "flex", gap: 6 }}>
+                {(["ko", "hanja"] as StampLang[]).map((m) => (
+                  <button key={m} type="button" onClick={() => setStampNameLang(m)}
+                    style={{
+                      padding: "4px 12px", borderRadius: 999, fontSize: 12, fontWeight: 600, cursor: "pointer", transition: "all 0.15s",
+                      border: stampNameLang === m ? "1.5px solid rgba(201,168,76,0.85)" : "1px solid var(--line-soft)",
+                      background: stampNameLang === m ? "rgba(201,168,76,0.15)" : "transparent",
+                      color: stampNameLang === m ? "rgba(201,168,76,0.97)" : "var(--text-soft)",
+                    }}>
+                    {m === "ko" ? ui.nameModeKo : ui.nameModeHanja}
+                  </button>
+                ))}
+              </div>
               <input
                 className="wink-input"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder={ui.namePh}
               />
+              {stampNameLang === "hanja" && (
+                <input
+                  className="wink-input"
+                  value={hanja}
+                  onChange={(e) => setHanja(e.target.value)}
+                  placeholder={ui.hanjaPh}
+                />
+              )}
             </div>
-            <div className="wink-field">
-              <label>{ui.hanjaLabel}</label>
+
+            {/* 오른쪽: 문패 이름 */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "rgba(201,168,76,0.9)", letterSpacing: "0.06em" }}>
+                🏷️ {ui.doorplateNameLabel}
+              </div>
+              {/* 한글 / 한자 / 2인 토글 */}
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                {(["ko", "hanja", "duo"] as const).map((m) => (
+                  <button key={m} type="button" onClick={() => setDoorplateNameMode(m)}
+                    style={{
+                      padding: "4px 12px", borderRadius: 999, fontSize: 12, fontWeight: 600, cursor: "pointer", transition: "all 0.15s",
+                      border: doorplateNameMode === m ? "1.5px solid rgba(201,168,76,0.85)" : "1px solid var(--line-soft)",
+                      background: doorplateNameMode === m ? "rgba(201,168,76,0.15)" : "transparent",
+                      color: doorplateNameMode === m ? "rgba(201,168,76,0.97)" : "var(--text-soft)",
+                    }}>
+                    {m === "ko" ? ui.nameModeKo : m === "hanja" ? ui.nameModeHanja : ui.nameModeDuo}
+                  </button>
+                ))}
+              </div>
               <input
                 className="wink-input"
-                value={hanja}
-                onChange={(e) => setHanja(e.target.value)}
-                placeholder={ui.hanjaPh}
+                value={doorplateName}
+                onChange={(e) => setDoorplateName(e.target.value)}
+                placeholder={doorplateNameMode === "duo" ? ui.doorplateDuoPh : ui.namePh}
               />
-            </div>
-            <div className="wink-field wink-field-full">
-              <label>{ui.engravingLabel}</label>
-              <input
-                className="wink-input"
-                value={engraving}
-                onChange={(e) => setEngraving(e.target.value)}
-                placeholder={ui.engravingPh}
-              />
+              {doorplateNameMode === "hanja" && (
+                <input
+                  className="wink-input"
+                  value={doorplateHanja}
+                  onChange={(e) => setDoorplateHanja(e.target.value)}
+                  placeholder={ui.hanjaPh}
+                />
+              )}
+              {doorplateNameMode === "duo" && (
+                <div style={{ fontSize: 11, color: "var(--text-soft)", paddingLeft: 4 }}>
+                  ※ {ui.doorplateDuoPh}
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Engraving preview */}
-          {name.trim() && (
-            <div
-              style={{
-                marginTop: 20,
-                padding: "20px 24px",
-                borderRadius: 12,
-                border: "1px solid rgba(201,168,76,0.28)",
-                background: isLight ? "rgba(201,168,76,0.07)" : "rgba(0,0,0,0.28)",
-                textAlign: "center",
-              }}
-            >
-              <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(201,168,76,0.85)", marginBottom: 16 }}>
-                {ui.previewTitle}
+          {/* 각인 문구 공통 (선택) */}
+          <div className="wink-field wink-field-full" style={{ marginTop: 16 }}>
+            <label>{ui.engravingLabel}</label>
+            <input
+              className="wink-input"
+              value={engraving}
+              onChange={(e) => setEngraving(e.target.value)}
+              placeholder={ui.engravingPh}
+            />
+          </div>
+
+          {/* 디자이너 안내 — 미리보기 대체 */}
+          <div style={{
+            marginTop: 20,
+            padding: "16px 20px",
+            borderRadius: 12,
+            border: "1px solid rgba(201,168,76,0.32)",
+            background: isLight
+              ? "linear-gradient(135deg, rgba(201,168,76,0.08), rgba(252,248,238,0.96))"
+              : "linear-gradient(135deg, rgba(201,168,76,0.08), rgba(11,22,52,0.7))",
+            display: "flex",
+            alignItems: "flex-start",
+            gap: 14,
+          }}>
+            <span style={{ fontSize: 28, lineHeight: 1 }}>✏️</span>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "rgba(201,168,76,0.95)", marginBottom: 4 }}>
+                디자이너 시안 안내
               </div>
-
-              {/* 도장·문패 탭 */}
-              {(products.has("stamp") || products.has("doorplate")) && (
-                <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 20 }}>
-                  {products.has("stamp") && (
-                    <button type="button" onClick={() => setPreviewMode("stamp")}
-                      style={{ padding: "6px 18px", borderRadius: 999, fontSize: 13, fontWeight: 600, cursor: "pointer",
-                        border: previewMode === "stamp" ? "2px solid #C0392B" : "1px solid var(--line-strong)",
-                        background: previewMode === "stamp" ? "rgba(192,57,43,0.12)" : "transparent",
-                        color: previewMode === "stamp" ? "#C0392B" : "var(--text-soft)" }}>
-                      {ui.stampTitle}
-                    </button>
-                  )}
-                  {products.has("doorplate") && (
-                    <button type="button" onClick={() => setPreviewMode("doorplate")}
-                      style={{ padding: "6px 18px", borderRadius: 999, fontSize: 13, fontWeight: 600, cursor: "pointer",
-                        border: previewMode === "doorplate" ? "2px solid #C9A84C" : "1px solid var(--line-strong)",
-                        background: previewMode === "doorplate" ? "rgba(201,168,76,0.12)" : "transparent",
-                        color: previewMode === "doorplate" ? "#C9A84C" : "var(--text-soft)" }}>
-                      {ui.doorplateTitle}
-                    </button>
-                  )}
-                </div>
-              )}
-
-              {/* 도장 미리보기 — 옵션 컨트롤 */}
-              {previewMode === "stamp" && (
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
-
-                  {/* 컨트롤 행 */}
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "center" }}>
-                    {/* 표기: 한글 / 한자 */}
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <span style={{ fontSize: 11, color: "rgba(201,168,76,0.75)", letterSpacing: "0.06em" }}>표기</span>
-                      {(["ko", "hanja"] as StampLang[]).map((l) => (
-                        <button key={l} type="button" onClick={() => setPreviewStampLang(l)}
-                          style={{
-                            padding: "4px 12px", borderRadius: 999, fontSize: 12, fontWeight: 600, cursor: "pointer",
-                            border: previewStampLang === l ? "1.5px solid rgba(201,168,76,0.85)" : "1px solid var(--line-soft)",
-                            background: previewStampLang === l ? "rgba(201,168,76,0.15)" : "transparent",
-                            color: previewStampLang === l ? "rgba(201,168,76,0.97)" : "var(--text-soft)",
-                            transition: "all 0.15s",
-                          }}>
-                          {l === "ko" ? "한글" : "한자"}
-                        </button>
-                      ))}
-                    </div>
-                    {/* 서체: 굵은체 / 명조체 / 고딕체 / 필기체 */}
-                    <div style={{ display: "flex", alignItems: "center", gap: 5, flexWrap: "wrap" }}>
-                      <span style={{ fontSize: 11, color: "rgba(201,168,76,0.75)", letterSpacing: "0.06em" }}>서체</span>
-                      {(["block", "curved", "gothic", "hand"] as StampScript[]).map((s) => (
-                        <button key={s} type="button" onClick={() => setPreviewStampScript(s)}
-                          style={{
-                            padding: "4px 10px", borderRadius: 999, fontSize: 12, fontWeight: 600, cursor: "pointer",
-                            border: previewStampScript === s ? "1.5px solid rgba(201,168,76,0.85)" : "1px solid var(--line-soft)",
-                            background: previewStampScript === s ? "rgba(201,168,76,0.15)" : "transparent",
-                            color: previewStampScript === s ? "rgba(201,168,76,0.97)" : "var(--text-soft)",
-                            transition: "all 0.15s",
-                          }}>
-                          {s === "block" ? "굵은체" : s === "curved" ? "명조체" : s === "gothic" ? "고딕체" : "필기체"}
-                        </button>
-                      ))}
-                    </div>
-                    {/* 인(印) 토글 */}
-                    <button type="button" onClick={() => setPreviewShowIn((v) => !v)}
-                      style={{
-                        padding: "4px 14px", borderRadius: 999, fontSize: 12, fontWeight: 600, cursor: "pointer",
-                        border: previewShowIn ? "1.5px solid rgba(201,168,76,0.85)" : "1px solid var(--line-soft)",
-                        background: previewShowIn ? "rgba(201,168,76,0.15)" : "transparent",
-                        color: previewShowIn ? "rgba(201,168,76,0.97)" : "var(--text-soft)",
-                        transition: "all 0.15s",
-                      }}>
-                      인(印) 포함
-                    </button>
-                  </div>
-
-                  {/* 도장 SVG */}
-                  <StampPreview
-                    displayText={
-                      previewStampLang === "ko"
-                        ? displayEngraving
-                        : (hanja.trim() || displayEngraving)
-                    }
-                    showIn={previewShowIn}
-                    script={previewStampScript}
-                    stampLang={previewStampLang}
-                  />
-
-                  {/* 신뢰 문구 */}
-                  <div style={{
-                    maxWidth: 300,
-                    padding: "12px 16px",
-                    borderRadius: 10,
-                    border: "1px solid rgba(201,168,76,0.22)",
-                    background: isLight ? "rgba(201,168,76,0.06)" : "rgba(201,168,76,0.05)",
-                    fontSize: 11,
-                    lineHeight: 1.7,
-                    color: isLight ? "rgba(60,50,20,0.72)" : "rgba(201,185,120,0.72)",
-                    textAlign: "center",
-                  }}>
-                    {ui.previewQualityNote}
-                  </div>
-                </div>
-              )}
-
-              {/* 문패 SVG 미리보기 */}
-              {previewMode === "doorplate" && (
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
-                  <svg width="240" height="100" viewBox="0 0 240 100" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                      <linearGradient id="woodGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#3D2B1F" />
-                        <stop offset="40%" stopColor="#5C3D27" />
-                        <stop offset="100%" stopColor="#2E1C10" />
-                      </linearGradient>
-                      <linearGradient id="goldFrame" x1="0" y1="0" x2="1" y2="1">
-                        <stop offset="0%" stopColor="#F0C84A" />
-                        <stop offset="100%" stopColor="#C9943A" />
-                      </linearGradient>
-                    </defs>
-                    {/* 나무 배경 */}
-                    <rect x="0" y="0" width="240" height="100" rx="8" fill="url(#woodGrad)" />
-                    {/* 골드 테두리 */}
-                    <rect x="4" y="4" width="232" height="92" rx="6" fill="none" stroke="url(#goldFrame)" strokeWidth="1.5" />
-                    <rect x="8" y="8" width="224" height="84" rx="4" fill="none" stroke="rgba(201,168,76,0.3)" strokeWidth="0.8" />
-                    {/* 이름 */}
-                    {displayEngraving ? (
-                      <text x="120" y="58" textAnchor="middle" fill="#F0C84A"
-                        fontSize={displayEngraving.length <= 3 ? "32" : "24"}
-                        fontWeight="bold" fontFamily="serif" letterSpacing="8">
-                        {displayEngraving}
-                      </text>
-                    ) : (
-                      <text x="120" y="58" textAnchor="middle" fill="rgba(201,168,76,0.35)" fontSize="14">이름 입력</text>
-                    )}
-                    {/* 한자 부제 */}
-                    {hanja.trim() && (
-                      <text x="120" y="78" textAnchor="middle" fill="rgba(201,168,76,0.55)" fontSize="11" letterSpacing="4">
-                        {hanja.trim()}
-                      </text>
-                    )}
-                  </svg>
-                </div>
-              )}
-
-              <div style={{ marginTop: 12, fontSize: 11, color: "var(--text-dim)" }}>
-                ※ 미리보기는 실제 제품과 차이가 있을 수 있습니다
+              <div style={{ fontSize: 13, lineHeight: 1.7, color: isLight ? "rgba(40,35,20,0.82)" : "rgba(210,198,160,0.88)" }}>
+                {ui.designerNotice}
               </div>
             </div>
-          )}
+          </div>
         </section>
 
         {/* Material options */}
