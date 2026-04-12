@@ -10,7 +10,7 @@ import { PRICING } from "@/lib/pricing";
 type ProductType = "stamp" | "doorplate";
 type Step = "form" | "confirm" | "done";
 type StampScript = "block" | "curved" | "hand";
-type StampLang  = "ko" | "hanja" | "en";
+type StampLang  = "ko" | "hanja";
 
 // ─── Product config ───────────────────────────────────────
 const PRODUCT_PRICE: Record<ProductType, number> = {
@@ -864,81 +864,138 @@ function ProductCard({
   );
 }
 
-// ─── StampPreview ─────────────────────────────────────────
+// ─── StampPreview v2 ──────────────────────────────────────
+// 실제 도장 찍은 질감: 종이 배경 + 진한 빨간 잉크(#8B0000) + 불규칙 테두리
 function StampPreview({
   displayText,
   showIn,
   script,
+  stampLang,
 }: {
   displayText: string;
   showIn: boolean;
   script: StampScript;
+  stampLang: StampLang;
 }) {
-  const letters = displayText ? [...displayText] : [];
+  const letters  = displayText ? [...displayText] : [];
   const allChars = [...letters, ...(showIn && displayText ? ["印"] : [])];
-  const n = allChars.length;
+  const n        = allChars.length;
+  const isHanja  = stampLang === "hanja";
 
-  const fontProps = (() => {
-    switch (script) {
-      case "block":  return { fontFamily: "serif",      fontWeight: "900", fontStyle: "normal" };
-      case "curved": return { fontFamily: "serif",      fontWeight: "700", fontStyle: "italic"  };
-      case "hand":   return { fontFamily: "sans-serif", fontWeight: "400", fontStyle: "normal"  };
-    }
-  })();
+  // 서체 → 폰트 매핑 (Google Fonts 로드됨)
+  const fontMap: Record<StampScript, { family: string; weight: string; style: string }> = {
+    block:  { family: "'Noto Serif KR', serif",   weight: "900", style: "normal" },
+    curved: { family: "'Noto Serif KR', serif",   weight: "700", style: "italic"  },
+    hand:   { family: "'Dancing Script', cursive", weight: "700", style: "normal" },
+  };
+  const f = fontMap[script];
 
-  // 글자수별 위치 계산
-  const positions: Array<{ x: number; y: number; size: number }> = (() => {
+  // 글자 위치 계산 — viewBox 220×220, 도장 중심 (110,110)
+  type Pos = { x: number; y: number; size: number };
+  const positions: Pos[] = (() => {
     if (n === 0) return [];
-    if (n === 1) return [{ x: 88, y: 98, size: 46 }];
-    if (n === 2) return [
-      { x: 88, y: 71, size: 36 },
-      { x: 88, y: 110, size: 36 },
-    ];
-    if (n === 3) return [
-      // T자형: 상단 1글자, 하단 2글자
-      { x: 88, y: 65, size: 30 },
-      { x: 62, y: 106, size: 30 },
-      { x: 114, y: 106, size: 30 },
-    ];
-    if (n === 4) return [
-      // 2×2 그리드
-      { x: 62, y: 71, size: 26 },
-      { x: 114, y: 71, size: 26 },
-      { x: 62, y: 108, size: 26 },
-      { x: 114, y: 108, size: 26 },
-    ];
-    // 5자+: 세로 나열
-    const sp = 20, sy = 88 - ((n - 1) * sp) / 2 + 8;
-    return allChars.map((_, i) => ({ x: 88, y: sy + i * sp, size: 18 }));
+    if (n === 1) return [{ x: 110, y: 126, size: 58 }];
+
+    if (!isHanja) {
+      // ── 한글 레이아웃 ──────────────────────────────
+      if (n === 2) return [
+        { x: 110, y: 86,  size: 46 },
+        { x: 110, y: 138, size: 46 },
+      ];
+      // 3글자 T자형: 상단 1 / 하단 2
+      if (n === 3) return [
+        { x: 110, y: 80,  size: 40 },
+        { x: 74,  y: 138, size: 40 },
+        { x: 146, y: 138, size: 40 },
+      ];
+      // 4글자 2×2
+      if (n === 4) return [
+        { x: 74,  y: 88,  size: 34 },
+        { x: 146, y: 88,  size: 34 },
+        { x: 74,  y: 142, size: 34 },
+        { x: 146, y: 142, size: 34 },
+      ];
+    } else {
+      // ── 한자 레이아웃 ──────────────────────────────
+      if (n === 2) return [
+        { x: 110, y: 86,  size: 46 },
+        { x: 110, y: 138, size: 46 },
+      ];
+      // 3글자 굽이형: 우상단 / 좌상단 / 하단중앙
+      if (n === 3) return [
+        { x: 146, y: 82,  size: 38 },
+        { x: 74,  y: 82,  size: 38 },
+        { x: 110, y: 148, size: 38 },
+      ];
+      // 4글자 2×2 그리드
+      if (n === 4) return [
+        { x: 74,  y: 88,  size: 33 },
+        { x: 146, y: 88,  size: 33 },
+        { x: 74,  y: 142, size: 33 },
+        { x: 146, y: 142, size: 33 },
+      ];
+    }
+
+    // fallback: 세로 나열
+    const sp = 24, sy = 110 - ((n - 1) * sp) / 2 + 10;
+    return allChars.map((_, i) => ({ x: 110, y: sy + i * sp, size: 20 }));
   })();
 
   return (
-    <svg width="176" height="176" viewBox="0 0 176 176" xmlns="http://www.w3.org/2000/svg">
+    <svg
+      width="220" height="220" viewBox="0 0 220 220"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-label="도장 미리보기"
+      style={{ display: "block" }}
+    >
       <defs>
-        {/* 외곽 잉크 번짐 필터 */}
-        <filter id="edgeInk" x="-8%" y="-8%" width="116%" height="116%">
-          <feTurbulence type="turbulence" baseFrequency="0.032" numOctaves="2" seed="9" result="en" />
-          <feDisplacementMap in="SourceGraphic" in2="en" scale="4.5"
-            xChannelSelector="R" yChannelSelector="G" />
+        {/* ① 종이 질감 — fractalNoise × multiply */}
+        <filter id="sp-paper" x="0%" y="0%" width="100%" height="100%"
+          colorInterpolationFilters="sRGB">
+          <feTurbulence type="fractalNoise" baseFrequency="0.68" numOctaves="4" seed="2" result="n"/>
+          <feColorMatrix type="saturate" values="0" in="n" result="g"/>
+          <feBlend in="SourceGraphic" in2="g" mode="multiply" result="blended"/>
+          <feComponentTransfer in="blended">
+            <feFuncR type="linear" slope="0.06" intercept="0.92"/>
+            <feFuncG type="linear" slope="0.05" intercept="0.90"/>
+            <feFuncB type="linear" slope="0.04" intercept="0.84"/>
+          </feComponentTransfer>
         </filter>
-        {/* 글자 잉크 질감 필터 */}
-        <filter id="textInk" x="-10%" y="-10%" width="120%" height="120%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.88" numOctaves="4" seed="3" result="tn" />
-          <feDisplacementMap in="SourceGraphic" in2="tn" scale="1.6"
-            xChannelSelector="R" yChannelSelector="G" />
+
+        {/* ② 불규칙 테두리 — 저주파 turbulence displacement */}
+        <filter id="sp-rough" x="-10%" y="-10%" width="120%" height="120%">
+          <feTurbulence type="turbulence" baseFrequency="0.038 0.022"
+            numOctaves="3" seed="11" result="r"/>
+          <feDisplacementMap in="SourceGraphic" in2="r" scale="5.5"
+            xChannelSelector="R" yChannelSelector="G"/>
+        </filter>
+
+        {/* ③ 글자 잉크 번짐 — 고주파 fractalNoise displacement */}
+        <filter id="sp-ink" x="-18%" y="-18%" width="136%" height="136%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.82" numOctaves="4"
+            seed="6" result="t"/>
+          <feDisplacementMap in="SourceGraphic" in2="t" scale="2.2"
+            xChannelSelector="R" yChannelSelector="G"/>
         </filter>
       </defs>
 
-      {/* 인주 배경 — 잉크 번짐 */}
-      <g filter="url(#edgeInk)">
-        <circle cx="88" cy="88" r="82" fill="#B5291F" />
-        <circle cx="88" cy="88" r="76" fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth="2" />
-        <circle cx="88" cy="88" r="69" fill="none" stroke="rgba(255,255,255,0.30)" strokeWidth="0.8" />
+      {/* 종이 배경 — 크림색 + 질감 */}
+      <rect width="220" height="220" fill="#F5EFE3" filter="url(#sp-paper)"/>
+
+      {/* 도장 본체 — 두껍고 불규칙한 테두리 + 잉크 채움 */}
+      <g filter="url(#sp-rough)">
+        {/* 외곽 두꺼운 링 */}
+        <circle cx="110" cy="110" r="95" fill="none" stroke="#8B0000" strokeWidth="7"/>
+        {/* 잉크 채움 원 */}
+        <circle cx="110" cy="110" r="90" fill="#8B0000"/>
+        {/* 내부 얇은 장식 링 */}
+        <circle cx="110" cy="110" r="82" fill="none"
+          stroke="rgba(255,230,210,0.30)" strokeWidth="1.2"/>
       </g>
 
-      {/* 글자 — 잉크 질감 */}
+      {/* 글자 — 잉크 번짐 + 크림색 */}
       {n > 0 ? (
-        <g filter="url(#textInk)">
+        <g filter="url(#sp-ink)">
           {allChars.map((ch, i) => {
             const pos = positions[i];
             if (!pos) return null;
@@ -948,11 +1005,11 @@ function StampPreview({
                 x={pos.x}
                 y={pos.y}
                 textAnchor="middle"
-                fill={ch === "印" ? "rgba(240,208,72,0.96)" : "rgba(255,255,255,0.97)"}
+                fill={ch === "印" ? "#F0C848" : "#FFF0DF"}
                 fontSize={pos.size}
-                fontFamily={fontProps.fontFamily}
-                fontWeight={fontProps.fontWeight}
-                fontStyle={fontProps.fontStyle}
+                fontFamily={f.family}
+                fontWeight={f.weight}
+                fontStyle={f.style}
               >
                 {ch}
               </text>
@@ -960,8 +1017,8 @@ function StampPreview({
           })}
         </g>
       ) : (
-        <text x="88" y="96" textAnchor="middle"
-          fill="rgba(255,255,255,0.32)" fontSize="14" fontFamily="sans-serif">
+        <text x="110" y="118" textAnchor="middle"
+          fill="rgba(255,240,220,0.28)" fontSize="14" fontFamily="sans-serif">
           이름 입력
         </text>
       )}
@@ -986,6 +1043,18 @@ export default function OrderPage() {
     const obs = new MutationObserver(check);
     obs.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
     return () => obs.disconnect();
+  }, []);
+
+  // ── Google Fonts (도장 미리보기용: Noto Serif KR + Dancing Script)
+  useEffect(() => {
+    const id = "stamp-gfonts";
+    if (!document.getElementById(id)) {
+      const link = document.createElement("link");
+      link.id   = id;
+      link.rel  = "stylesheet";
+      link.href = "https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@700;900&family=Dancing+Script:wght@700&display=swap";
+      document.head.appendChild(link);
+    }
   }, []);
 
   // ── Form state
@@ -1474,44 +1543,47 @@ export default function OrderPage() {
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
 
                   {/* 컨트롤 행 */}
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center" }}>
-                    {/* 표기 */}
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "center" }}>
+                    {/* 표기: 한글 / 한자 */}
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <span style={{ fontSize: 11, color: "rgba(201,168,76,0.75)", letterSpacing: "0.06em" }}>표기</span>
-                      {(["ko", "hanja", "en"] as StampLang[]).map((l) => (
+                      {(["ko", "hanja"] as StampLang[]).map((l) => (
                         <button key={l} type="button" onClick={() => setPreviewStampLang(l)}
                           style={{
-                            padding: "3px 9px", borderRadius: 999, fontSize: 12, fontWeight: 600, cursor: "pointer",
-                            border: previewStampLang === l ? "1px solid rgba(201,168,76,0.8)" : "1px solid var(--line-soft)",
+                            padding: "4px 12px", borderRadius: 999, fontSize: 12, fontWeight: 600, cursor: "pointer",
+                            border: previewStampLang === l ? "1.5px solid rgba(201,168,76,0.85)" : "1px solid var(--line-soft)",
                             background: previewStampLang === l ? "rgba(201,168,76,0.15)" : "transparent",
-                            color: previewStampLang === l ? "rgba(201,168,76,0.95)" : "var(--text-soft)",
+                            color: previewStampLang === l ? "rgba(201,168,76,0.97)" : "var(--text-soft)",
+                            transition: "all 0.15s",
                           }}>
-                          {l === "ko" ? "한글" : l === "hanja" ? "한자" : "영어"}
+                          {l === "ko" ? "한글" : "한자"}
                         </button>
                       ))}
                     </div>
-                    {/* 서체 */}
+                    {/* 서체: 굵은체 / 궁서체 / 필기체 */}
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <span style={{ fontSize: 11, color: "rgba(201,168,76,0.75)", letterSpacing: "0.06em" }}>서체</span>
                       {(["block", "curved", "hand"] as StampScript[]).map((s) => (
                         <button key={s} type="button" onClick={() => setPreviewStampScript(s)}
                           style={{
-                            padding: "3px 9px", borderRadius: 999, fontSize: 12, fontWeight: 600, cursor: "pointer",
-                            border: previewStampScript === s ? "1px solid rgba(201,168,76,0.8)" : "1px solid var(--line-soft)",
+                            padding: "4px 12px", borderRadius: 999, fontSize: 12, fontWeight: 600, cursor: "pointer",
+                            border: previewStampScript === s ? "1.5px solid rgba(201,168,76,0.85)" : "1px solid var(--line-soft)",
                             background: previewStampScript === s ? "rgba(201,168,76,0.15)" : "transparent",
-                            color: previewStampScript === s ? "rgba(201,168,76,0.95)" : "var(--text-soft)",
+                            color: previewStampScript === s ? "rgba(201,168,76,0.97)" : "var(--text-soft)",
+                            transition: "all 0.15s",
                           }}>
-                          {s === "block" ? "T자형" : s === "curved" ? "굽이형" : "필기체"}
+                          {s === "block" ? "굵은체" : s === "curved" ? "궁서체" : "필기체"}
                         </button>
                       ))}
                     </div>
                     {/* 인(印) 토글 */}
                     <button type="button" onClick={() => setPreviewShowIn((v) => !v)}
                       style={{
-                        padding: "3px 11px", borderRadius: 999, fontSize: 12, fontWeight: 600, cursor: "pointer",
-                        border: previewShowIn ? "1px solid rgba(201,168,76,0.8)" : "1px solid var(--line-soft)",
+                        padding: "4px 14px", borderRadius: 999, fontSize: 12, fontWeight: 600, cursor: "pointer",
+                        border: previewShowIn ? "1.5px solid rgba(201,168,76,0.85)" : "1px solid var(--line-soft)",
                         background: previewShowIn ? "rgba(201,168,76,0.15)" : "transparent",
-                        color: previewShowIn ? "rgba(201,168,76,0.95)" : "var(--text-soft)",
+                        color: previewShowIn ? "rgba(201,168,76,0.97)" : "var(--text-soft)",
+                        transition: "all 0.15s",
                       }}>
                       인(印) 포함
                     </button>
@@ -1520,12 +1592,13 @@ export default function OrderPage() {
                   {/* 도장 SVG */}
                   <StampPreview
                     displayText={
-                      previewStampLang === "ko"    ? displayEngraving :
-                      previewStampLang === "hanja" ? (hanja.trim() || displayEngraving) :
-                      (engraving.trim() || name.trim())
+                      previewStampLang === "ko"
+                        ? displayEngraving
+                        : (hanja.trim() || displayEngraving)
                     }
                     showIn={previewShowIn}
                     script={previewStampScript}
+                    stampLang={previewStampLang}
                   />
 
                   {/* 신뢰 문구 */}
