@@ -79,6 +79,18 @@ const COPY = {
     trust1: "결과 확인 후 마음에 드실 때만 주문해 주세요.",
     trust2: "주문 후 제작이 시작되면 취소가 어렵습니다.",
     trust3: "한글·한자 각인이 모두 가능합니다.",
+    deliverySectionTitle: "배송지 정보",
+    deliveryRecipientLabel: "받는 분 이름",
+    deliveryRecipientPh: "받으실 분의 이름을 입력해 주세요",
+    deliveryPhoneLabel: "연락처",
+    deliveryPhonePh: "010-0000-0000",
+    deliveryZipLabel: "우편번호",
+    deliveryZipSearchBtn: "주소 검색",
+    deliveryAddrLabel: "기본 주소",
+    deliveryAddrDetailLabel: "상세 주소",
+    deliveryAddrDetailPh: "동·호수 등 상세 주소를 입력해 주세요",
+    deliveryMemoLabel: "배송 메모 (선택)",
+    deliveryMemoPh: "부재 시 문앞 보관, 경비실 맡김 등",
   },
   en: {
     chip: "Wink Direct Order",
@@ -137,6 +149,18 @@ const COPY = {
     trust1: "Only order if you are satisfied with the design.",
     trust2: "Cancellation is difficult once production begins.",
     trust3: "Both Korean and Hanja engraving are available.",
+    deliverySectionTitle: "Delivery Address",
+    deliveryRecipientLabel: "Recipient Name",
+    deliveryRecipientPh: "Enter the recipient's name",
+    deliveryPhoneLabel: "Phone Number",
+    deliveryPhonePh: "e.g. 010-0000-0000",
+    deliveryZipLabel: "Postal Code",
+    deliveryZipSearchBtn: "Search Address",
+    deliveryAddrLabel: "Address",
+    deliveryAddrDetailLabel: "Detailed Address",
+    deliveryAddrDetailPh: "Apt, suite, unit, etc.",
+    deliveryMemoLabel: "Delivery Note (optional)",
+    deliveryMemoPh: "Leave at door, front desk, etc.",
   },
   zh: {
     chip: "Wink Direct Order",
@@ -195,6 +219,18 @@ const COPY = {
     trust1: "满意后再下单。",
     trust2: "开始制作后较难取消订单。",
     trust3: "支持韩文和汉字刻印。",
+    deliverySectionTitle: "收货地址",
+    deliveryRecipientLabel: "收件人姓名",
+    deliveryRecipientPh: "请输入收件人姓名",
+    deliveryPhoneLabel: "联系电话",
+    deliveryPhonePh: "例：010-0000-0000",
+    deliveryZipLabel: "邮政编码",
+    deliveryZipSearchBtn: "搜索地址",
+    deliveryAddrLabel: "地址",
+    deliveryAddrDetailLabel: "详细地址",
+    deliveryAddrDetailPh: "楼层、房间号等",
+    deliveryMemoLabel: "配送备注（选填）",
+    deliveryMemoPh: "无人时放门口、前台代收等",
   },
   ja: {
     chip: "Wink Direct Order",
@@ -253,6 +289,18 @@ const COPY = {
     trust1: "ご満足いただけた場合のみご注文ください。",
     trust2: "制作開始後はキャンセルが難しくなります。",
     trust3: "韓国語・漢字どちらの彫刻も対応しています。",
+    deliverySectionTitle: "配送先情報",
+    deliveryRecipientLabel: "受取人名",
+    deliveryRecipientPh: "受取人のお名前をご入力ください",
+    deliveryPhoneLabel: "電話番号",
+    deliveryPhonePh: "例：010-0000-0000",
+    deliveryZipLabel: "郵便番号",
+    deliveryZipSearchBtn: "住所検索",
+    deliveryAddrLabel: "住所",
+    deliveryAddrDetailLabel: "詳細住所",
+    deliveryAddrDetailPh: "建物名・部屋番号など",
+    deliveryMemoLabel: "配送メモ（任意）",
+    deliveryMemoPh: "不在時は玄関前に置くなど",
   },
   es: {
     chip: "Wink Direct Order",
@@ -311,6 +359,18 @@ const COPY = {
     trust1: "Pida solo si está satisfecho con el diseño.",
     trust2: "La cancelación es difícil una vez iniciada la producción.",
     trust3: "El grabado en coreano y Hanja está disponible.",
+    deliverySectionTitle: "Dirección de entrega",
+    deliveryRecipientLabel: "Nombre del destinatario",
+    deliveryRecipientPh: "Ingrese el nombre del destinatario",
+    deliveryPhoneLabel: "Teléfono",
+    deliveryPhonePh: "ej. 010-0000-0000",
+    deliveryZipLabel: "Código postal",
+    deliveryZipSearchBtn: "Buscar dirección",
+    deliveryAddrLabel: "Dirección",
+    deliveryAddrDetailLabel: "Dirección detallada",
+    deliveryAddrDetailPh: "Piso, apartamento, etc.",
+    deliveryMemoLabel: "Nota de entrega (opcional)",
+    deliveryMemoPh: "Dejar en la puerta, conserjería, etc.",
   },
   ru: {
     chip: "Wink Direct Order",
@@ -369,6 +429,18 @@ const COPY = {
     trust1: "Заказывайте только если удовлетворены дизайном.",
     trust2: "Отмена затруднена после начала производства.",
     trust3: "Доступна гравировка на корейском и Ханджа.",
+    deliverySectionTitle: "Адрес доставки",
+    deliveryRecipientLabel: "Имя получателя",
+    deliveryRecipientPh: "Введите имя получателя",
+    deliveryPhoneLabel: "Телефон",
+    deliveryPhonePh: "напр. 010-0000-0000",
+    deliveryZipLabel: "Почтовый индекс",
+    deliveryZipSearchBtn: "Найти адрес",
+    deliveryAddrLabel: "Адрес",
+    deliveryAddrDetailLabel: "Уточнение адреса",
+    deliveryAddrDetailPh: "Квартира, этаж и т.д.",
+    deliveryMemoLabel: "Примечание к доставке (необязательно)",
+    deliveryMemoPh: "Оставить у двери, на ресепшн и т.д.",
   },
   fr: {
     chip: "Wink Direct Order",
@@ -427,6 +499,18 @@ const COPY = {
     trust1: "Commandez seulement si vous êtes satisfait du design.",
     trust2: "L'annulation est difficile une fois la production commencée.",
     trust3: "La gravure en coréen et Hanja est disponible.",
+    deliverySectionTitle: "Adresse de livraison",
+    deliveryRecipientLabel: "Nom du destinataire",
+    deliveryRecipientPh: "Saisir le nom du destinataire",
+    deliveryPhoneLabel: "Téléphone",
+    deliveryPhonePh: "ex. 010-0000-0000",
+    deliveryZipLabel: "Code postal",
+    deliveryZipSearchBtn: "Rechercher une adresse",
+    deliveryAddrLabel: "Adresse",
+    deliveryAddrDetailLabel: "Complément d'adresse",
+    deliveryAddrDetailPh: "Appartement, étage, etc.",
+    deliveryMemoLabel: "Note de livraison (optionnel)",
+    deliveryMemoPh: "Laisser à la porte, à la réception, etc.",
   },
   ar: {
     chip: "Wink Direct Order",
@@ -485,6 +569,18 @@ const COPY = {
     trust1: "اطلب فقط إذا كنت راضياً عن التصميم.",
     trust2: "يصعب الإلغاء بعد بدء الإنتاج.",
     trust3: "النقش بالكورية وهانجا متاح.",
+    deliverySectionTitle: "عنوان التسليم",
+    deliveryRecipientLabel: "اسم المستلم",
+    deliveryRecipientPh: "أدخل اسم المستلم",
+    deliveryPhoneLabel: "رقم الهاتف",
+    deliveryPhonePh: "مثال: 010-0000-0000",
+    deliveryZipLabel: "الرمز البريدي",
+    deliveryZipSearchBtn: "البحث عن العنوان",
+    deliveryAddrLabel: "العنوان",
+    deliveryAddrDetailLabel: "تفاصيل العنوان",
+    deliveryAddrDetailPh: "الشقة، الطابق، إلخ",
+    deliveryMemoLabel: "ملاحظة التسليم (اختياري)",
+    deliveryMemoPh: "اترك عند الباب، في الاستقبال، إلخ",
   },
   hi: {
     chip: "Wink Direct Order",
@@ -543,6 +639,18 @@ const COPY = {
     trust1: "केवल तभी ऑर्डर करें जब डिज़ाइन पसंद आए।",
     trust2: "उत्पादन शुरू होने के बाद रद्द करना मुश्किल है।",
     trust3: "कोरियाई और हांजा दोनों नक्काशी उपलब्ध है।",
+    deliverySectionTitle: "डिलीवरी पता",
+    deliveryRecipientLabel: "प्राप्तकर्ता का नाम",
+    deliveryRecipientPh: "प्राप्तकर्ता का नाम दर्ज करें",
+    deliveryPhoneLabel: "फ़ोन नंबर",
+    deliveryPhonePh: "जैसे 010-0000-0000",
+    deliveryZipLabel: "पिन कोड",
+    deliveryZipSearchBtn: "पता खोजें",
+    deliveryAddrLabel: "पता",
+    deliveryAddrDetailLabel: "विस्तृत पता",
+    deliveryAddrDetailPh: "फ्लैट नंबर, मंज़िल आदि",
+    deliveryMemoLabel: "डिलीवरी नोट (वैकल्पिक)",
+    deliveryMemoPh: "दरवाज़े पर छोड़ें, रिसेप्शन पर दें आदि",
   },
 } as const;
 
@@ -554,6 +662,27 @@ function toUiLang(l: string): UiLang {
 // ─── Helpers ─────────────────────────────────────────────
 function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+/** 카카오/Daum 우편번호 팝업 — 스크립트를 동적으로 로드 후 실행 */
+function openDaumPostcode(onComplete: (zip: string, addr: string) => void) {
+  const run = () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    new (window as any).daum.Postcode({
+      oncomplete: (data: { zonecode: string; roadAddress: string; jibunAddress: string }) => {
+        onComplete(data.zonecode, data.roadAddress || data.jibunAddress);
+      },
+    }).open();
+  };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if ((window as any).daum?.Postcode) {
+    run();
+  } else {
+    const script = document.createElement("script");
+    script.src = "//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+    script.onload = run;
+    document.head.appendChild(script);
+  }
 }
 
 function formatKRW(n: number) {
@@ -755,6 +884,13 @@ export default function OrderPage() {
   const [memo, setMemo] = useState("");
   const [custName, setCustName] = useState("");
   const [custEmail, setCustEmail] = useState("");
+  // ── Delivery state
+  const [deliveryRecipient, setDeliveryRecipient] = useState("");
+  const [deliveryPhone, setDeliveryPhone] = useState("");
+  const [deliveryZip, setDeliveryZip] = useState("");
+  const [deliveryAddr, setDeliveryAddr] = useState("");
+  const [deliveryAddrDetail, setDeliveryAddrDetail] = useState("");
+  const [deliveryMemo, setDeliveryMemo] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [orderId, setOrderId] = useState("");
@@ -810,6 +946,14 @@ export default function OrderPage() {
           doorplateMaterial: doorplateMat.trim(),
           memo: memo.trim(),
           customer: { name: custName.trim(), email: custEmail.trim() },
+          delivery: {
+            recipient: deliveryRecipient.trim(),
+            phone: deliveryPhone.trim(),
+            zip: deliveryZip.trim(),
+            address: deliveryAddr.trim(),
+            addressDetail: deliveryAddrDetail.trim(),
+            memo: deliveryMemo.trim(),
+          },
           userId,
           lang,
         }),
@@ -1280,6 +1424,111 @@ export default function OrderPage() {
               onChange={(e) => setMemo(e.target.value)}
               placeholder={ui.memoPh}
             />
+          </div>
+        </section>
+
+        {/* Delivery Address */}
+        <section className="wink-panel" style={{ marginBottom: 20 }}>
+          <div className="wink-section-title" style={{ marginBottom: 14 }}>
+            {ui.deliverySectionTitle}
+          </div>
+          <div className="wink-form-grid">
+            {/* 받는 분 이름 */}
+            <div className="wink-field">
+              <label>{ui.deliveryRecipientLabel}</label>
+              <input
+                className="wink-input"
+                value={deliveryRecipient}
+                onChange={(e) => setDeliveryRecipient(e.target.value)}
+                placeholder={ui.deliveryRecipientPh}
+                autoComplete="name"
+              />
+            </div>
+            {/* 연락처 */}
+            <div className="wink-field">
+              <label>{ui.deliveryPhoneLabel}</label>
+              <input
+                className="wink-input"
+                type="tel"
+                value={deliveryPhone}
+                onChange={(e) => setDeliveryPhone(e.target.value)}
+                placeholder={ui.deliveryPhonePh}
+                autoComplete="tel"
+              />
+            </div>
+            {/* 우편번호 + 검색 버튼 */}
+            <div className="wink-field wink-field-full">
+              <label>{ui.deliveryZipLabel}</label>
+              <div style={{ display: "flex", gap: 8 }}>
+                <input
+                  className="wink-input"
+                  value={deliveryZip}
+                  onChange={(e) => setDeliveryZip(e.target.value)}
+                  placeholder="00000"
+                  style={{ maxWidth: 140 }}
+                  readOnly
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    openDaumPostcode((zip, addr) => {
+                      setDeliveryZip(zip);
+                      setDeliveryAddr(addr);
+                      setDeliveryAddrDetail("");
+                    })
+                  }
+                  style={{
+                    padding: "0 20px",
+                    borderRadius: 10,
+                    border: "1px solid rgba(201,168,76,0.6)",
+                    background: isLight
+                      ? "rgba(201,168,76,0.12)"
+                      : "rgba(201,168,76,0.10)",
+                    color: isLight ? "rgba(120,90,20,0.95)" : "rgba(201,168,76,0.95)",
+                    fontSize: 13,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    whiteSpace: "nowrap",
+                    transition: "all 0.15s",
+                  }}
+                >
+                  {ui.deliveryZipSearchBtn}
+                </button>
+              </div>
+            </div>
+            {/* 기본 주소 */}
+            <div className="wink-field wink-field-full">
+              <label>{ui.deliveryAddrLabel}</label>
+              <input
+                className="wink-input"
+                value={deliveryAddr}
+                onChange={(e) => setDeliveryAddr(e.target.value)}
+                placeholder={ui.deliveryAddrLabel}
+                autoComplete="street-address"
+                readOnly={!!deliveryZip}
+              />
+            </div>
+            {/* 상세 주소 */}
+            <div className="wink-field wink-field-full">
+              <label>{ui.deliveryAddrDetailLabel}</label>
+              <input
+                className="wink-input"
+                value={deliveryAddrDetail}
+                onChange={(e) => setDeliveryAddrDetail(e.target.value)}
+                placeholder={ui.deliveryAddrDetailPh}
+                autoComplete="address-line2"
+              />
+            </div>
+            {/* 배송 메모 */}
+            <div className="wink-field wink-field-full">
+              <label>{ui.deliveryMemoLabel}</label>
+              <input
+                className="wink-input"
+                value={deliveryMemo}
+                onChange={(e) => setDeliveryMemo(e.target.value)}
+                placeholder={ui.deliveryMemoPh}
+              />
+            </div>
           </div>
         </section>
 
