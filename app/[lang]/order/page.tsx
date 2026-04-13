@@ -9,7 +9,6 @@ import { PRICING } from "@/lib/pricing";
 // ─── Types ───────────────────────────────────────────────
 type ProductType = "stamp" | "doorplate";
 type Step = "form" | "confirm" | "done";
-type StampScript = "block" | "curved" | "gothic" | "hand";
 type StampLang  = "ko" | "hanja";
 
 // ─── Product config ───────────────────────────────────────
@@ -104,6 +103,17 @@ const COPY = {
     savedNamesTitle: "저장된 작명 결과",
     savedNamesHint: "선택하면 도장 이름에 자동 입력됩니다",
     savedNamesEmpty: "저장된 이름 결과가 없습니다",
+    styleTitle: "각인 스타일 선택",
+    styleLabel1: "한글 초굵은 전서체",
+    styleDesc1: "4글자 · 정방형 배치",
+    styleLabel2: "한자 굵은 전서체",
+    styleDesc2: "4글자 · 한자 격식체",
+    styleLabel3: "한글 가는 필기체",
+    styleDesc3: "3글자 · T자형 레이아웃",
+    styleLabel4: "한자 우아한 굽이형",
+    styleDesc4: "3글자 · 곡선 레이아웃",
+    styleNotice: "선택하신 스타일 기반으로 전문 각인사가 제작합니다.\n주문 완료 후 24시간 내 최종 시안을 이메일로 발송합니다.",
+    styleSelected: "선택된 스타일",
   },
   en: {
     chip: "Wink Direct Order",
@@ -185,6 +195,17 @@ const COPY = {
     savedNamesTitle: "Saved Naming Results",
     savedNamesHint: "Select to auto-fill stamp name",
     savedNamesEmpty: "No saved naming results found",
+    styleTitle: "Select Engraving Style",
+    styleLabel1: "Korean Bold Seal Script",
+    styleDesc1: "4 chars · Square layout",
+    styleLabel2: "Hanja Bold Seal Script",
+    styleDesc2: "4 chars · Formal hanja style",
+    styleLabel3: "Korean Light Cursive",
+    styleDesc3: "3 chars · T-shape layout",
+    styleLabel4: "Hanja Elegant Curve",
+    styleDesc4: "3 chars · Curved layout",
+    styleNotice: "Our master engraver will craft your stamp based on the selected style.\nA final design draft will be sent by email within 24 hours of your order.",
+    styleSelected: "Selected Style",
   },
   zh: {
     chip: "Wink Direct Order",
@@ -266,6 +287,17 @@ const COPY = {
     savedNamesTitle: "已保存的命名结果",
     savedNamesHint: "选择后自动填入印章名字",
     savedNamesEmpty: "暂无已保存的命名结果",
+    styleTitle: "选择刻印风格",
+    styleLabel1: "韩文超粗篆书体",
+    styleDesc1: "4字 · 正方形排列",
+    styleLabel2: "汉字粗篆书体",
+    styleDesc2: "4字 · 汉字正式体",
+    styleLabel3: "韩文细腻手写体",
+    styleDesc3: "3字 · T形布局",
+    styleLabel4: "汉字优雅弯曲型",
+    styleDesc4: "3字 · 曲线布局",
+    styleNotice: "将根据您选择的风格由专业刻印师制作。\n订单完成后24小时内将通过邮件发送最终设计稿。",
+    styleSelected: "已选风格",
   },
   ja: {
     chip: "Wink Direct Order",
@@ -347,6 +379,17 @@ const COPY = {
     savedNamesTitle: "保存された命名結果",
     savedNamesHint: "選択すると印鑑名前に自動入力されます",
     savedNamesEmpty: "保存された命名結果がありません",
+    styleTitle: "彫刻スタイルを選択",
+    styleLabel1: "韓国語 超極太篆書体",
+    styleDesc1: "4文字 · 正方形配置",
+    styleLabel2: "漢字 太篆書体",
+    styleDesc2: "4文字 · 漢字正式体",
+    styleLabel3: "韓国語 細筆書き体",
+    styleDesc3: "3文字 · T字形レイアウト",
+    styleLabel4: "漢字 優雅な曲線型",
+    styleDesc4: "3文字 · 曲線レイアウト",
+    styleNotice: "選択されたスタイルをもとに専門の彫刻師が制作します。\nご注文完了後24時間以内に最終デザイン案をメールでお送りします。",
+    styleSelected: "選択スタイル",
   },
   es: {
     chip: "Wink Direct Order",
@@ -428,6 +471,17 @@ const COPY = {
     savedNamesTitle: "Resultados de nombre guardados",
     savedNamesHint: "Seleccione para autocompletar el nombre del sello",
     savedNamesEmpty: "No se encontraron resultados guardados",
+    styleTitle: "Seleccionar estilo de grabado",
+    styleLabel1: "Coreano, script sello ultranegrita",
+    styleDesc1: "4 chars · Diseño cuadrado",
+    styleLabel2: "Hanja, script sello negrita",
+    styleDesc2: "4 chars · Estilo hanja formal",
+    styleLabel3: "Coreano, cursiva delgada",
+    styleDesc3: "3 chars · Diseño en T",
+    styleLabel4: "Hanja, curva elegante",
+    styleDesc4: "3 chars · Diseño curvo",
+    styleNotice: "Nuestro maestro grabador elaborará su sello según el estilo seleccionado.\nEl borrador final se enviará por correo dentro de las 24 horas del pedido.",
+    styleSelected: "Estilo seleccionado",
   },
   ru: {
     chip: "Wink Direct Order",
@@ -509,6 +563,17 @@ const COPY = {
     savedNamesTitle: "Сохранённые результаты нейминга",
     savedNamesHint: "Выберите для автозаполнения имени на печати",
     savedNamesEmpty: "Сохранённых результатов нет",
+    styleTitle: "Выбрать стиль гравировки",
+    styleLabel1: "Корейский, жирный печатный",
+    styleDesc1: "4 знака · квадратная схема",
+    styleLabel2: "Ханджа, жирный печатный",
+    styleDesc2: "4 знака · официальный стиль",
+    styleLabel3: "Корейский, тонкий курсив",
+    styleDesc3: "3 знака · Т-образная схема",
+    styleLabel4: "Ханджа, изящная кривая",
+    styleDesc4: "3 знака · изогнутая схема",
+    styleNotice: "Мастер-гравировщик изготовит вашу печать на основе выбранного стиля.\nОкончательный макет будет отправлен по email в течение 24 часов после заказа.",
+    styleSelected: "Выбранный стиль",
   },
   fr: {
     chip: "Wink Direct Order",
@@ -590,6 +655,17 @@ const COPY = {
     savedNamesTitle: "Résultats de naming sauvegardés",
     savedNamesHint: "Sélectionnez pour remplir automatiquement le nom du sceau",
     savedNamesEmpty: "Aucun résultat de naming sauvegardé",
+    styleTitle: "Choisir le style de gravure",
+    styleLabel1: "Coréen, script sceau ultra-gras",
+    styleDesc1: "4 caractères · disposition carrée",
+    styleLabel2: "Hanja, script sceau gras",
+    styleDesc2: "4 caractères · style hanja formel",
+    styleLabel3: "Coréen, cursive fine",
+    styleDesc3: "3 caractères · disposition en T",
+    styleLabel4: "Hanja, courbe élégante",
+    styleDesc4: "3 caractères · disposition courbe",
+    styleNotice: "Notre maître graveur fabriquera votre sceau selon le style choisi.\nUn brouillon final vous sera envoyé par email dans les 24 heures suivant la commande.",
+    styleSelected: "Style sélectionné",
   },
   ar: {
     chip: "Wink Direct Order",
@@ -671,6 +747,17 @@ const COPY = {
     savedNamesTitle: "نتائج التسمية المحفوظة",
     savedNamesHint: "اختر لملء اسم الختم تلقائياً",
     savedNamesEmpty: "لا توجد نتائج محفوظة",
+    styleTitle: "اختر أسلوب النقش",
+    styleLabel1: "كوري، خط ختم عريض جداً",
+    styleDesc1: "4 أحرف · تخطيط مربع",
+    styleLabel2: "هانجا، خط ختم عريض",
+    styleDesc2: "4 أحرف · أسلوب هانجا رسمي",
+    styleLabel3: "كوري، مائل رفيع",
+    styleDesc3: "3 أحرف · تخطيط T",
+    styleLabel4: "هانجا، منحنى أنيق",
+    styleDesc4: "3 أحرف · تخطيط منحنى",
+    styleNotice: "سيقوم نقاشنا المحترف بصنع ختمك بناءً على الأسلوب المختار.\nسيتم إرسال المسودة النهائية بالبريد الإلكتروني خلال 24 ساعة من الطلب.",
+    styleSelected: "الأسلوب المختار",
   },
   hi: {
     chip: "Wink Direct Order",
@@ -752,6 +839,17 @@ const COPY = {
     savedNamesTitle: "सहेजे गए नामकरण परिणाम",
     savedNamesHint: "चुनें तो मुहर नाम स्वचालित भरा जाएगा",
     savedNamesEmpty: "कोई सहेजा गया परिणाम नहीं मिला",
+    styleTitle: "नक्काशी शैली चुनें",
+    styleLabel1: "कोरियाई, अति-मोटी सील लिपि",
+    styleDesc1: "4 अक्षर · वर्गाकार लेआउट",
+    styleLabel2: "हांजा, मोटी सील लिपि",
+    styleDesc2: "4 अक्षर · औपचारिक हांजा शैली",
+    styleLabel3: "कोरियाई, पतला कर्सिव",
+    styleDesc3: "3 अक्षर · T-आकार लेआउट",
+    styleLabel4: "हांजा, सुंदर वक्र",
+    styleDesc4: "3 अक्षर · वक्राकार लेआउट",
+    styleNotice: "चुनी गई शैली के आधार पर हमारे विशेषज्ञ नक्काशीकार आपकी मुहर बनाएंगे।\nऑर्डर के 24 घंटे के भीतर अंतिम डिज़ाइन ड्राफ्ट ईमेल पर भेजा जाएगा।",
+    styleSelected: "चुनी गई शैली",
   },
 } as const;
 
@@ -954,186 +1052,6 @@ function ProductCard({
   );
 }
 
-// ─── StampPreview v3 ──────────────────────────────────────
-// 실제 낙관/인장 스타일: 흰 종이 배경 + 빨간 이중 링 테두리 + 빨간 글자
-function StampPreview({
-  displayText,
-  showIn,
-  script,
-  stampLang,
-}: {
-  displayText: string;
-  showIn: boolean;
-  script: StampScript;
-  stampLang: StampLang;
-}) {
-  const letters  = displayText ? [...displayText] : [];
-  const allChars = [...letters, ...(showIn && displayText ? ["印"] : [])];
-  const n        = allChars.length;
-  const isHanja  = stampLang === "hanja";
-
-  // 서체 → 폰트 매핑 (Google Fonts: Black Han Sans / Noto Serif KR / Do Hyeon / Gaegu)
-  const fontMap: Record<StampScript, { family: string; weight: string; style: string }> = {
-    block:  { family: "'Black Han Sans', sans-serif",  weight: "400", style: "normal" },
-    curved: { family: "'Noto Serif KR', serif",        weight: "700", style: "normal" },
-    gothic: { family: "'Do Hyeon', sans-serif",        weight: "400", style: "normal" },
-    hand:   { family: "'Gaegu', cursive",              weight: "700", style: "normal" },
-  };
-  const f = fontMap[script];
-
-  // 글자 위치 계산 — viewBox 220×220, 도장 중심 (110,110)
-  // 2자(외자+印 or 단독 2글자)는 크게, 3자↑는 작게
-  type Pos = { x: number; y: number; size: number };
-  const positions: Pos[] = (() => {
-    if (n === 0) return [];
-
-    // 1글자 — 정중앙, 매우 크게
-    if (n === 1) return [{ x: 110, y: 110, size: 62 }];
-
-    if (!isHanja) {
-      // ── 한글 레이아웃 ──────────────────────────────
-      // 2글자 — 세로 2칸, 크게
-      if (n === 2) return [
-        { x: 110, y: 84,  size: 52 },
-        { x: 110, y: 140, size: 52 },
-      ];
-      // 3글자 T자형: 상단 1자 / 구분선 / 하단 2자 나란히
-      if (n === 3) return [
-        { x: 110, y: 78,  size: 42 },
-        { x: 72,  y: 144, size: 42 },
-        { x: 148, y: 144, size: 42 },
-      ];
-      // 4글자 2×2
-      if (n === 4) return [
-        { x: 72,  y: 84,  size: 36 },
-        { x: 148, y: 84,  size: 36 },
-        { x: 72,  y: 144, size: 36 },
-        { x: 148, y: 144, size: 36 },
-      ];
-    } else {
-      // ── 한자 레이아웃 ──────────────────────────────
-      if (n === 2) return [
-        { x: 110, y: 84,  size: 52 },
-        { x: 110, y: 140, size: 52 },
-      ];
-      // 3글자: 우→좌 상단 2자 / 하단 중앙 1자
-      if (n === 3) return [
-        { x: 148, y: 80,  size: 40 },
-        { x: 72,  y: 80,  size: 40 },
-        { x: 110, y: 150, size: 40 },
-      ];
-      // 4글자 2×2
-      if (n === 4) return [
-        { x: 72,  y: 84,  size: 35 },
-        { x: 148, y: 84,  size: 35 },
-        { x: 72,  y: 144, size: 35 },
-        { x: 148, y: 144, size: 35 },
-      ];
-    }
-
-    // fallback: 세로 나열
-    const sp = 22, sy = 110 - ((n - 1) * sp) / 2;
-    return allChars.map((_, i) => ({ x: 110, y: sy + i * sp, size: 18 }));
-  })();
-
-  // T자형 구분선 — 3자 레이아웃에서만 표시 (내부 원에 clip)
-  const showDivider = n === 3;
-
-  return (
-    <svg
-      width="220" height="220" viewBox="0 0 220 220"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-label="도장 미리보기"
-      style={{ display: "block" }}
-    >
-      <defs>
-        {/* ① 종이 질감 — 미세 fractalNoise */}
-        <filter id="sp-paper" x="0%" y="0%" width="100%" height="100%"
-          colorInterpolationFilters="sRGB">
-          <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="4" seed="3" result="n"/>
-          <feColorMatrix type="saturate" values="0" in="n" result="g"/>
-          <feBlend in="SourceGraphic" in2="g" mode="multiply" result="blended"/>
-          <feComponentTransfer in="blended">
-            <feFuncR type="linear" slope="0.04" intercept="0.94"/>
-            <feFuncG type="linear" slope="0.03" intercept="0.93"/>
-            <feFuncB type="linear" slope="0.03" intercept="0.90"/>
-          </feComponentTransfer>
-        </filter>
-
-        {/* ② 불규칙 링/선 — 저주파 displacement */}
-        <filter id="sp-rough" x="-12%" y="-12%" width="124%" height="124%">
-          <feTurbulence type="turbulence" baseFrequency="0.032 0.018"
-            numOctaves="3" seed="7" result="r"/>
-          <feDisplacementMap in="SourceGraphic" in2="r" scale="4.5"
-            xChannelSelector="R" yChannelSelector="G"/>
-        </filter>
-
-        {/* ③ 글자 잉크 번짐 */}
-        <filter id="sp-ink" x="-20%" y="-20%" width="140%" height="140%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.78" numOctaves="4"
-            seed="9" result="t"/>
-          <feDisplacementMap in="SourceGraphic" in2="t" scale="1.8"
-            xChannelSelector="R" yChannelSelector="G"/>
-        </filter>
-
-        {/* ④ 내부 원 clipPath — 구분선이 링 밖으로 나가지 않도록 */}
-        <clipPath id="sp-clip">
-          <circle cx="110" cy="110" r="91"/>
-        </clipPath>
-      </defs>
-
-      {/* 종이 배경 — 거의 흰색 + 미세 질감 */}
-      <rect width="220" height="220" fill="#FAFAF6" filter="url(#sp-paper)"/>
-
-      {/* 이중 링 테두리 */}
-      <g filter="url(#sp-rough)">
-        {/* 외곽 링 — 두꺼운 */}
-        <circle cx="110" cy="110" r="100" fill="none" stroke="#8B0000" strokeWidth="5"/>
-        {/* 내부 링 — 얇은 */}
-        <circle cx="110" cy="110" r="91"  fill="none" stroke="#8B0000" strokeWidth="1.4"/>
-      </g>
-
-      {/* T자형 수평 구분선 (3글자 레이아웃) — 내부 원 안에 clip */}
-      {showDivider && (
-        <g clipPath="url(#sp-clip)" filter="url(#sp-rough)">
-          <line x1="19" y1="110" x2="201" y2="110"
-            stroke="#8B0000" strokeWidth="1.2" opacity="0.85"/>
-        </g>
-      )}
-
-      {/* 글자 — 빨간 잉크 */}
-      {n > 0 ? (
-        <g filter="url(#sp-ink)">
-          {allChars.map((ch, i) => {
-            const pos = positions[i];
-            if (!pos) return null;
-            return (
-              <text
-                key={i}
-                x={pos.x}
-                y={pos.y}
-                textAnchor="middle"
-                dominantBaseline="central"
-                fill="#8B0000"
-                fontSize={pos.size}
-                fontFamily={f.family}
-                fontWeight={f.weight}
-                fontStyle={f.style}
-              >
-                {ch}
-              </text>
-            );
-          })}
-        </g>
-      ) : (
-        <text x="110" y="110" textAnchor="middle" dominantBaseline="central"
-          fill="rgba(139,0,0,0.22)" fontSize="14" fontFamily="sans-serif">
-          이름 입력
-        </text>
-      )}
-    </svg>
-  );
-}
 
 // ─── Main Page ────────────────────────────────────────────
 export default function OrderPage() {
@@ -1154,17 +1072,6 @@ export default function OrderPage() {
     return () => obs.disconnect();
   }, []);
 
-  // ── Google Fonts (도장 미리보기용: Noto Serif KR + Dancing Script)
-  useEffect(() => {
-    const id = "stamp-gfonts";
-    if (!document.getElementById(id)) {
-      const link = document.createElement("link");
-      link.id   = id;
-      link.rel  = "stylesheet";
-      link.href = "https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Serif+KR:wght@700;900&family=Do+Hyeon&family=Gaegu:wght@700&display=swap";
-      document.head.appendChild(link);
-    }
-  }, []);
 
   // ── URL params (결과 페이지 연동)
   const searchParams = useSearchParams();
@@ -1177,7 +1084,6 @@ export default function OrderPage() {
   // ── Form state
   const [step, setStep] = useState<Step>("form");
   const [products, setProducts] = useState<Set<ProductType>>(new Set());
-  const [previewMode, setPreviewMode] = useState<"stamp" | "doorplate">("stamp");
   const [name, setName] = useState("");
   const [hanja, setHanja] = useState("");
   const [engraving, setEngraving] = useState("");
@@ -1192,10 +1098,8 @@ export default function OrderPage() {
   const [doorplateDuo, setDoorplateDuo]       = useState("");
   const [custName, setCustName] = useState("");
   const [custEmail, setCustEmail] = useState("");
-  // ── Stamp preview options
-  const [previewStampLang, setPreviewStampLang]     = useState<StampLang>("ko");
-  const [previewStampScript, setPreviewStampScript] = useState<StampScript>("block");
-  const [previewShowIn, setPreviewShowIn]           = useState(false);
+  // ── 스타일 선택 (레퍼런스 카드)
+  const [stampStyle, setStampStyle] = useState<1 | 2 | 3 | 4 | null>(null);
   // ── Delivery state
   const [deliveryRecipient, setDeliveryRecipient] = useState("");
   const [deliveryPhone, setDeliveryPhone] = useState("");
@@ -1247,8 +1151,6 @@ export default function OrderPage() {
     setProducts((prev) => {
       const next = new Set(prev);
       next.has(p) ? next.delete(p) : next.add(p);
-      if (next.has("stamp")) setPreviewMode("stamp");
-      else if (next.has("doorplate")) setPreviewMode("doorplate");
       return next;
     });
   };
@@ -1289,6 +1191,7 @@ export default function OrderPage() {
           name: name.trim(),
           hanja: hanja.trim(),
           engraving: engraving.trim(),
+          stampStyle: stampStyle ?? null,
           stampNameLang,
           doorplateName: doorplateName.trim(),
           doorplateHanja: doorplateHanja.trim(),
@@ -1417,6 +1320,15 @@ export default function OrderPage() {
                 {name.trim()}{hanja.trim() ? ` (${hanja.trim()})` : ""}
                 {stampNameLang === "hanja" && hanja.trim() ? ` [${ui.nameModeHanja}]` : ""}
               </div>
+              {stampStyle && (
+                <div>
+                  <strong>{ui.styleSelected}</strong>:{" "}
+                  {stampStyle === 1 ? ui.styleLabel1
+                    : stampStyle === 2 ? ui.styleLabel2
+                    : stampStyle === 3 ? ui.styleLabel3
+                    : ui.styleLabel4}
+                </div>
+              )}
               {(products.has("doorplate") && doorplateName.trim()) && (
                 <div>
                   <strong>{ui.doorplateNameLabel}</strong>:{" "}
@@ -1774,29 +1686,117 @@ export default function OrderPage() {
             />
           </div>
 
-          {/* 디자이너 안내 — 미리보기 대체 */}
-          <div style={{
-            marginTop: 20,
-            padding: "16px 20px",
-            borderRadius: 12,
-            border: "1px solid rgba(201,168,76,0.32)",
-            background: isLight
-              ? "linear-gradient(135deg, rgba(201,168,76,0.08), rgba(252,248,238,0.96))"
-              : "linear-gradient(135deg, rgba(201,168,76,0.08), rgba(11,22,52,0.7))",
-            display: "flex",
-            alignItems: "flex-start",
-            gap: 14,
-          }}>
-            <span style={{ fontSize: 28, lineHeight: 1 }}>✏️</span>
-            <div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: "rgba(201,168,76,0.95)", marginBottom: 4 }}>
-                디자이너 시안 안내
+          {/* 각인 스타일 선택 — 4종 레퍼런스 카드 */}
+          {products.has("stamp") && (
+            <div style={{ marginTop: 24 }}>
+              <div style={{
+                fontSize: 13, fontWeight: 700, letterSpacing: "0.06em",
+                color: "rgba(201,168,76,0.9)", marginBottom: 14,
+              }}>
+                ⬛ {ui.styleTitle}
               </div>
-              <div style={{ fontSize: 13, lineHeight: 1.7, color: isLight ? "rgba(40,35,20,0.82)" : "rgba(210,198,160,0.88)" }}>
-                {ui.designerNotice}
+
+              {/* 카드 그리드 2×2 */}
+              <div style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(2, 1fr)",
+                gap: 12,
+              }}>
+                {([
+                  { n: 1 as const, img: "/images/stamp-ref-1.svg", label: ui.styleLabel1, desc: ui.styleDesc1 },
+                  { n: 2 as const, img: "/images/stamp-ref-2.svg", label: ui.styleLabel2, desc: ui.styleDesc2 },
+                  { n: 3 as const, img: "/images/stamp-ref-3.svg", label: ui.styleLabel3, desc: ui.styleDesc3 },
+                  { n: 4 as const, img: "/images/stamp-ref-4.svg", label: ui.styleLabel4, desc: ui.styleDesc4 },
+                ] as { n: 1|2|3|4; img: string; label: string; desc: string }[]).map((card) => (
+                  <button
+                    key={card.n}
+                    type="button"
+                    onClick={() => setStampStyle(stampStyle === card.n ? null : card.n)}
+                    style={{
+                      textAlign: "left",
+                      padding: "0",
+                      borderRadius: 14,
+                      cursor: "pointer",
+                      overflow: "hidden",
+                      border: stampStyle === card.n
+                        ? "2.5px solid rgba(201,168,76,0.9)"
+                        : isLight
+                        ? "1px solid rgba(0,0,0,0.12)"
+                        : "1px solid rgba(120,160,255,0.18)",
+                      background: isLight ? "#fff" : "rgba(11,22,52,0.7)",
+                      boxShadow: stampStyle === card.n
+                        ? "0 0 0 4px rgba(201,168,76,0.12), 0 8px 24px rgba(201,168,76,0.15)"
+                        : "0 4px 12px rgba(0,0,0,0.1)",
+                      transition: "all 0.18s",
+                      position: "relative",
+                    }}
+                  >
+                    {/* 선택 체크 배지 */}
+                    {stampStyle === card.n && (
+                      <span style={{
+                        position: "absolute", top: 10, right: 10, zIndex: 2,
+                        width: 24, height: 24, borderRadius: "50%",
+                        background: "rgba(201,168,76,0.92)",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        fontSize: 13, color: "#070e28", fontWeight: 800,
+                      }}>✓</span>
+                    )}
+                    {/* 레퍼런스 이미지 */}
+                    <div style={{
+                      width: "100%",
+                      aspectRatio: "1 / 1",
+                      background: "#FAFAF6",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      overflow: "hidden",
+                    }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={card.img}
+                        alt={card.label}
+                        style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                      />
+                    </div>
+                    {/* 레이블 */}
+                    <div style={{ padding: "10px 12px 12px" }}>
+                      <div style={{
+                        fontSize: 13, fontWeight: 700, marginBottom: 3,
+                        color: stampStyle === card.n
+                          ? "rgba(201,168,76,0.97)"
+                          : isLight ? "rgba(30,40,60,0.9)" : "rgba(220,225,240,0.92)",
+                      }}>
+                        {card.label}
+                      </div>
+                      <div style={{
+                        fontSize: 11,
+                        color: isLight ? "rgba(60,70,90,0.6)" : "rgba(180,190,210,0.6)",
+                      }}>
+                        {card.desc}
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              {/* 안내 문구 */}
+              <div style={{
+                marginTop: 16,
+                padding: "14px 18px",
+                borderRadius: 10,
+                border: "1px solid rgba(201,168,76,0.28)",
+                background: isLight
+                  ? "rgba(201,168,76,0.06)"
+                  : "rgba(201,168,76,0.05)",
+                fontSize: 13,
+                lineHeight: 1.75,
+                color: isLight ? "rgba(40,35,20,0.78)" : "rgba(210,198,160,0.82)",
+                whiteSpace: "pre-line",
+              }}>
+                {ui.styleNotice}
               </div>
             </div>
-          </div>
+          )}
         </section>
 
         {/* Material options */}
