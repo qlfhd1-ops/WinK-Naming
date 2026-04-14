@@ -154,7 +154,7 @@ export async function POST(req: Request) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "윙크 네이밍 <noreply@wink-naming.com>",
+        from: "윙크 네이밍 <onboarding@resend.dev>",  // TODO: 도메인 인증 후 noreply@wink-naming.com 으로 변경
         to: [email],
         subject,
         html,
