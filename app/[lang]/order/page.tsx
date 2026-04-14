@@ -12,14 +12,18 @@ type Step = "form" | "confirm" | "done";
 type StampLang  = "ko" | "hanja";
 
 // ─── Product config ───────────────────────────────────────
-const PRODUCT_PRICE: Record<ProductType, number> = {
-  stamp: PRICING.stamp,
-  doorplate: PRICING.doorplate,
-};
+// 도장 재질 옵션 (가격 포함)
+const STAMP_MAT_OPTIONS = [
+  { id: "목인",   label: "목인(木印)",    sub: "기본 원목",  price: 29000 },
+  { id: "흑단",   label: "흑단목(黑檀)", sub: "고급 원목",  price: 45000 },
+  { id: "수우각", label: "수우각(水牛角)", sub: "전통 소뿔", price: 59000 },
+  { id: "자수정", label: "자수정(紫水晶)", sub: "천연 보석", price: 89000 },
+] as const;
+type StampMatId = (typeof STAMP_MAT_OPTIONS)[number]["id"];
 
-// Material presets
-const STAMP_MATERIALS = ["목인(木印)", "수정(水晶)", "흑단(黑檀)", "상아대용"];
 const DOORPLATE_MATERIALS = ["스테인리스", "원목", "아크릴", "황동"];
+
+const DOORPLATE_PRICE = PRICING.doorplate;
 
 // ─── COPY ─────────────────────────────────────────────────
 const COPY = {
@@ -112,8 +116,10 @@ const COPY = {
     styleDesc3: "3글자 · T자형 레이아웃",
     styleLabel4: "한자 우아한 굽이형",
     styleDesc4: "3글자 · 곡선 레이아웃",
-    styleNotice: "선택하신 스타일 기반으로 전문 각인사가 제작합니다.\n주문 완료 후 24시간 내 최종 시안을 이메일로 발송합니다.",
+    styleNotice: "선택하신 스타일 그대로 제작됩니다.\n주문 즉시 제작이 시작됩니다.",
     styleSelected: "선택된 스타일",
+    showInLabel: "인(印) 포함",
+    matSectionTitle: "재질 선택",
   },
   en: {
     chip: "Wink Direct Order",
@@ -204,8 +210,10 @@ const COPY = {
     styleDesc3: "3 chars · T-shape layout",
     styleLabel4: "Hanja Elegant Curve",
     styleDesc4: "3 chars · Curved layout",
-    styleNotice: "Our master engraver will craft your stamp based on the selected style.\nA final design draft will be sent by email within 24 hours of your order.",
+    styleNotice: "Your stamp will be crafted exactly as the selected style.\nProduction begins immediately upon order.",
     styleSelected: "Selected Style",
+    showInLabel: "Include 印 (In)",
+    matSectionTitle: "Select Material",
   },
   zh: {
     chip: "Wink Direct Order",
@@ -296,8 +304,10 @@ const COPY = {
     styleDesc3: "3字 · T形布局",
     styleLabel4: "汉字优雅弯曲型",
     styleDesc4: "3字 · 曲线布局",
-    styleNotice: "将根据您选择的风格由专业刻印师制作。\n订单完成后24小时内将通过邮件发送最终设计稿。",
+    styleNotice: "将严格按照您选择的风格进行制作。\n下单后立即开始生产。",
     styleSelected: "已选风格",
+    showInLabel: "含 印",
+    matSectionTitle: "选择材质",
   },
   ja: {
     chip: "Wink Direct Order",
@@ -388,8 +398,10 @@ const COPY = {
     styleDesc3: "3文字 · T字形レイアウト",
     styleLabel4: "漢字 優雅な曲線型",
     styleDesc4: "3文字 · 曲線レイアウト",
-    styleNotice: "選択されたスタイルをもとに専門の彫刻師が制作します。\nご注文完了後24時間以内に最終デザイン案をメールでお送りします。",
+    styleNotice: "選択されたスタイルそのままに制作いたします。\nご注文後、すぐに制作が開始されます。",
     styleSelected: "選択スタイル",
+    showInLabel: "印 を含める",
+    matSectionTitle: "素材を選択",
   },
   es: {
     chip: "Wink Direct Order",
@@ -480,8 +492,10 @@ const COPY = {
     styleDesc3: "3 chars · Diseño en T",
     styleLabel4: "Hanja, curva elegante",
     styleDesc4: "3 chars · Diseño curvo",
-    styleNotice: "Nuestro maestro grabador elaborará su sello según el estilo seleccionado.\nEl borrador final se enviará por correo dentro de las 24 horas del pedido.",
+    styleNotice: "Su sello se fabricará exactamente según el estilo seleccionado.\nLa producción comienza de inmediato tras el pedido.",
     styleSelected: "Estilo seleccionado",
+    showInLabel: "Incluir 印",
+    matSectionTitle: "Seleccionar material",
   },
   ru: {
     chip: "Wink Direct Order",
@@ -572,8 +586,10 @@ const COPY = {
     styleDesc3: "3 знака · Т-образная схема",
     styleLabel4: "Ханджа, изящная кривая",
     styleDesc4: "3 знака · изогнутая схема",
-    styleNotice: "Мастер-гравировщик изготовит вашу печать на основе выбранного стиля.\nОкончательный макет будет отправлен по email в течение 24 часов после заказа.",
+    styleNotice: "Ваша печать будет изготовлена точно по выбранному стилю.\nПроизводство начинается сразу после заказа.",
     styleSelected: "Выбранный стиль",
+    showInLabel: "Включить 印",
+    matSectionTitle: "Выбор материала",
   },
   fr: {
     chip: "Wink Direct Order",
@@ -664,8 +680,10 @@ const COPY = {
     styleDesc3: "3 caractères · disposition en T",
     styleLabel4: "Hanja, courbe élégante",
     styleDesc4: "3 caractères · disposition courbe",
-    styleNotice: "Notre maître graveur fabriquera votre sceau selon le style choisi.\nUn brouillon final vous sera envoyé par email dans les 24 heures suivant la commande.",
+    styleNotice: "Votre sceau sera fabriqué exactement selon le style sélectionné.\nLa production commence immédiatement après la commande.",
     styleSelected: "Style sélectionné",
+    showInLabel: "Inclure 印",
+    matSectionTitle: "Choisir le matériau",
   },
   ar: {
     chip: "Wink Direct Order",
@@ -756,8 +774,10 @@ const COPY = {
     styleDesc3: "3 أحرف · تخطيط T",
     styleLabel4: "هانجا، منحنى أنيق",
     styleDesc4: "3 أحرف · تخطيط منحنى",
-    styleNotice: "سيقوم نقاشنا المحترف بصنع ختمك بناءً على الأسلوب المختار.\nسيتم إرسال المسودة النهائية بالبريد الإلكتروني خلال 24 ساعة من الطلب.",
+    styleNotice: "سيتم صنع ختمك بالضبط وفق الأسلوب المختار.\nيبدأ الإنتاج فور تقديم الطلب.",
     styleSelected: "الأسلوب المختار",
+    showInLabel: "تضمين 印",
+    matSectionTitle: "اختر المادة",
   },
   hi: {
     chip: "Wink Direct Order",
@@ -848,8 +868,10 @@ const COPY = {
     styleDesc3: "3 अक्षर · T-आकार लेआउट",
     styleLabel4: "हांजा, सुंदर वक्र",
     styleDesc4: "3 अक्षर · वक्राकार लेआउट",
-    styleNotice: "चुनी गई शैली के आधार पर हमारे विशेषज्ञ नक्काशीकार आपकी मुहर बनाएंगे।\nऑर्डर के 24 घंटे के भीतर अंतिम डिज़ाइन ड्राफ्ट ईमेल पर भेजा जाएगा।",
+    styleNotice: "चुनी गई शैली के अनुसार आपकी मुहर बनाई जाएगी।\nऑर्डर के तुरंत बाद उत्पादन शुरू होता है।",
     styleSelected: "चुनी गई शैली",
+    showInLabel: "印 शामिल करें",
+    matSectionTitle: "सामग्री चुनें",
   },
 } as const;
 
@@ -889,50 +911,6 @@ function formatKRW(n: number) {
 }
 
 // ─── Sub-components ───────────────────────────────────────
-function MaterialPill({
-  label,
-  selected,
-  onClick,
-  isLight,
-}: {
-  label: string;
-  selected: boolean;
-  onClick: () => void;
-  isLight: boolean;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      style={{
-        padding: "6px 14px",
-        borderRadius: 999,
-        fontSize: 13,
-        fontWeight: 600,
-        cursor: "pointer",
-        border: selected
-          ? "1px solid rgba(201,168,76,0.8)"
-          : isLight
-          ? "1px solid rgba(0,0,0,0.15)"
-          : "1px solid rgba(120,160,255,0.22)",
-        background: selected
-          ? "rgba(201,168,76,0.14)"
-          : isLight
-          ? "rgba(0,0,0,0.04)"
-          : "rgba(255,255,255,0.04)",
-        color: selected
-          ? "rgba(201,140,30,0.98)"
-          : isLight
-          ? "rgba(30,40,60,0.82)"
-          : "rgba(200,215,240,0.8)",
-        transition: "all 0.15s",
-      }}
-    >
-      {label}
-    </button>
-  );
-}
-
 function ProductCard({
   id,
   title,
@@ -1046,7 +1024,7 @@ function ProductCard({
         ))}
       </ul>
       <div className="wink-score-pill" style={{ display: "inline-block" }}>
-        {formatKRW(price)}
+        {id === "stamp" ? "₩29,000~" : formatKRW(price)}
       </div>
     </button>
   );
@@ -1087,8 +1065,9 @@ export default function OrderPage() {
   const [name, setName] = useState("");
   const [hanja, setHanja] = useState("");
   const [engraving, setEngraving] = useState("");
-  const [stampMat, setStampMat] = useState("");
+  const [stampMatId, setStampMatId] = useState<StampMatId | null>(null);
   const [doorplateMat, setDoorplateMat] = useState("");
+  const [showIn, setShowIn] = useState(false);
   const [memo, setMemo] = useState("");
   // ── Name mode
   const [stampNameLang, setStampNameLang]     = useState<StampLang>("ko");
@@ -1156,7 +1135,9 @@ export default function OrderPage() {
   };
 
   const displayEngraving = engraving.trim() || name.trim() || "이름";
-  const total = [...products].reduce((s, p) => s + PRODUCT_PRICE[p], 0);
+  const stampPrice = STAMP_MAT_OPTIONS.find(m => m.id === stampMatId)?.price ?? 29000;
+  const total = (products.has("stamp") ? stampPrice : 0)
+              + (products.has("doorplate") ? DOORPLATE_PRICE : 0);
 
   // ── Step 1 → 2
   const handleNextStep = () => {
@@ -1192,13 +1173,15 @@ export default function OrderPage() {
           hanja: hanja.trim(),
           engraving: engraving.trim(),
           stampStyle: stampStyle ?? null,
+          showIn,
           stampNameLang,
           doorplateName: doorplateName.trim(),
           doorplateHanja: doorplateHanja.trim(),
           doorplateNameMode,
           doorplateDuo: doorplateDuo.trim(),
           products: [...products],
-          stampMaterial: stampMat.trim(),
+          stampMaterial: stampMatId ?? "",
+          stampPrice,
           doorplateMaterial: doorplateMat.trim(),
           memo: memo.trim(),
           customer: { name: custName.trim(), email: custEmail.trim() },
@@ -1329,6 +1312,16 @@ export default function OrderPage() {
                     : ui.styleLabel4}
                 </div>
               )}
+              {stampMatId && products.has("stamp") && (
+                <div>
+                  <strong>{ui.matSectionTitle}</strong>:{" "}
+                  {STAMP_MAT_OPTIONS.find(m => m.id === stampMatId)?.label ?? stampMatId}
+                  {" "}— {formatKRW(stampPrice)}
+                </div>
+              )}
+              {showIn && products.has("stamp") && (
+                <div><strong>{ui.showInLabel}</strong>: ✓</div>
+              )}
               {(products.has("doorplate") && doorplateName.trim()) && (
                 <div>
                   <strong>{ui.doorplateNameLabel}</strong>:{" "}
@@ -1342,19 +1335,10 @@ export default function OrderPage() {
                   <strong>{ui.engravingLabel}</strong>: {engraving.trim()}
                 </div>
               )}
-              {(stampMat.trim() || doorplateMat.trim()) && (
+              {(products.has("doorplate") && doorplateMat.trim()) && (
                 <div>
                   <strong>{ui.materialInfo}</strong>:{" "}
-                  {[
-                    products.has("stamp") && stampMat.trim()
-                      ? `${ui.stampTitle}: ${stampMat.trim()}`
-                      : null,
-                    products.has("doorplate") && doorplateMat.trim()
-                      ? `${ui.doorplateTitle}: ${doorplateMat.trim()}`
-                      : null,
-                  ]
-                    .filter(Boolean)
-                    .join(" / ")}
+                  {`${ui.doorplateTitle}: ${doorplateMat.trim()}`}
                 </div>
               )}
               {memo.trim() && (
@@ -1526,7 +1510,7 @@ export default function OrderPage() {
               title={ui.stampTitle}
               desc={ui.stampDesc}
               points={ui.stampPoints}
-              price={PRODUCT_PRICE.stamp}
+              price={29000}
               selected={products.has("stamp")}
               onToggle={() => toggleProduct("stamp")}
               isLight={isLight}
@@ -1536,7 +1520,7 @@ export default function OrderPage() {
               title={ui.doorplateTitle}
               desc={ui.doorplateDesc}
               points={ui.doorplatePoints}
-              price={PRODUCT_PRICE.doorplate}
+              price={DOORPLATE_PRICE}
               selected={products.has("doorplate")}
               onToggle={() => toggleProduct("doorplate")}
               isLight={isLight}
@@ -1632,6 +1616,21 @@ export default function OrderPage() {
                   placeholder={ui.hanjaPh}
                 />
               )}
+              {/* 인(印) 포함 토글 */}
+              <button
+                type="button"
+                onClick={() => setShowIn((v) => !v)}
+                style={{
+                  alignSelf: "flex-start",
+                  padding: "5px 14px", borderRadius: 999, fontSize: 12, fontWeight: 600,
+                  cursor: "pointer", transition: "all 0.15s",
+                  border: showIn ? "1.5px solid rgba(201,168,76,0.85)" : "1px solid var(--line-soft)",
+                  background: showIn ? "rgba(201,168,76,0.15)" : "transparent",
+                  color: showIn ? "rgba(201,168,76,0.97)" : "var(--text-soft)",
+                }}
+              >
+                {ui.showInLabel}
+              </button>
             </div>
 
             {/* 오른쪽: 문패 이름 */}
@@ -1779,79 +1778,124 @@ export default function OrderPage() {
                 ))}
               </div>
 
-              {/* 안내 문구 */}
+              {/* 즉시 제작 안내 */}
               <div style={{
                 marginTop: 16,
                 padding: "14px 18px",
                 borderRadius: 10,
                 border: "1px solid rgba(201,168,76,0.28)",
-                background: isLight
-                  ? "rgba(201,168,76,0.06)"
-                  : "rgba(201,168,76,0.05)",
-                fontSize: 13,
-                lineHeight: 1.75,
-                color: isLight ? "rgba(40,35,20,0.78)" : "rgba(210,198,160,0.82)",
-                whiteSpace: "pre-line",
+                background: isLight ? "rgba(201,168,76,0.06)" : "rgba(201,168,76,0.05)",
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 12,
               }}>
-                {ui.styleNotice}
+                <span style={{ fontSize: 20, lineHeight: 1, flexShrink: 0 }}>⚡</span>
+                <div style={{
+                  fontSize: 13, lineHeight: 1.75, whiteSpace: "pre-line",
+                  color: isLight ? "rgba(40,35,20,0.78)" : "rgba(210,198,160,0.82)",
+                }}>
+                  {ui.styleNotice}
+                </div>
               </div>
             </div>
           )}
         </section>
 
-        {/* Material options */}
+        {/* 재질 선택 — 도장 라디오 카드 + 문패 필 */}
         {(products.has("stamp") || products.has("doorplate")) && (
           <section className="wink-panel" style={{ marginBottom: 20 }}>
-            <div className="wink-form" style={{ gap: 20 }}>
-              {products.has("stamp") && (
-                <div>
-                  <div className="wink-section-title" style={{ marginBottom: 10, fontSize: 16 }}>
-                    {ui.stampMatLabel}
-                  </div>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 10 }}>
-                    {STAMP_MATERIALS.map((m) => (
-                      <MaterialPill
-                        key={m}
-                        label={m}
-                        selected={stampMat === m}
-                        onClick={() => setStampMat(stampMat === m ? "" : m)}
-                        isLight={isLight}
-                      />
-                    ))}
-                  </div>
-                  <input
-                    className="wink-input"
-                    value={stampMat}
-                    onChange={(e) => setStampMat(e.target.value)}
-                    placeholder={ui.stampMatPh}
-                  />
+            {products.has("stamp") && (
+              <div style={{ marginBottom: products.has("doorplate") ? 24 : 0 }}>
+                <div className="wink-section-title" style={{ marginBottom: 14 }}>
+                  {ui.matSectionTitle}
                 </div>
-              )}
-              {products.has("doorplate") && (
-                <div>
-                  <div className="wink-section-title" style={{ marginBottom: 10, fontSize: 16 }}>
-                    {ui.doorplateMatLabel}
-                  </div>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 10 }}>
-                    {DOORPLATE_MATERIALS.map((m) => (
-                      <MaterialPill
-                        key={m}
-                        label={m}
-                        selected={doorplateMat === m}
-                        onClick={() => setDoorplateMat(doorplateMat === m ? "" : m)}
-                        isLight={isLight}
-                      />
-                    ))}
-                  </div>
-                  <input
-                    className="wink-input"
-                    value={doorplateMat}
-                    onChange={(e) => setDoorplateMat(e.target.value)}
-                    placeholder={ui.doorplateMatPh}
-                  />
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 }}>
+                  {STAMP_MAT_OPTIONS.map((mat) => {
+                    const sel = stampMatId === mat.id;
+                    return (
+                      <button
+                        key={mat.id}
+                        type="button"
+                        onClick={() => setStampMatId(mat.id)}
+                        style={{
+                          textAlign: "left",
+                          padding: "14px 16px",
+                          borderRadius: 12,
+                          cursor: "pointer",
+                          border: sel
+                            ? "2px solid rgba(201,168,76,0.85)"
+                            : isLight ? "1px solid rgba(0,0,0,0.12)" : "1px solid rgba(120,160,255,0.18)",
+                          background: sel
+                            ? isLight ? "rgba(201,168,76,0.10)" : "rgba(201,168,76,0.08)"
+                            : isLight ? "rgba(248,248,252,0.95)" : "rgba(11,22,52,0.6)",
+                          boxShadow: sel ? "0 4px 16px rgba(201,168,76,0.15)" : "none",
+                          transition: "all 0.15s",
+                          position: "relative",
+                        }}
+                      >
+                        {sel && (
+                          <span style={{
+                            position: "absolute", top: 10, right: 10,
+                            width: 18, height: 18, borderRadius: "50%",
+                            background: "rgba(201,168,76,0.9)",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            fontSize: 11, color: "#070e28", fontWeight: 800,
+                          }}>✓</span>
+                        )}
+                        <div style={{
+                          fontSize: 14, fontWeight: 700, marginBottom: 2,
+                          color: sel
+                            ? "rgba(201,168,76,0.97)"
+                            : isLight ? "rgba(20,30,55,0.92)" : "rgba(220,228,245,0.92)",
+                        }}>
+                          {mat.label}
+                        </div>
+                        <div style={{
+                          fontSize: 11, marginBottom: 8,
+                          color: isLight ? "rgba(60,70,90,0.58)" : "rgba(180,192,215,0.58)",
+                        }}>
+                          {mat.sub}
+                        </div>
+                        <div style={{
+                          fontSize: 15, fontWeight: 800,
+                          color: sel ? "rgba(201,168,76,0.97)" : isLight ? "rgba(20,30,55,0.75)" : "rgba(201,210,235,0.75)",
+                        }}>
+                          {formatKRW(mat.price)}
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
-              )}
-            </div>
+              </div>
+            )}
+            {products.has("doorplate") && (
+              <div>
+                <div className="wink-section-title" style={{ marginBottom: 10, fontSize: 16 }}>
+                  {ui.doorplateMatLabel}
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  {DOORPLATE_MATERIALS.map((m) => {
+                    const sel = doorplateMat === m;
+                    return (
+                      <button
+                        key={m}
+                        type="button"
+                        onClick={() => setDoorplateMat(sel ? "" : m)}
+                        style={{
+                          padding: "6px 14px", borderRadius: 999, fontSize: 13, fontWeight: 600,
+                          cursor: "pointer", transition: "all 0.15s",
+                          border: sel ? "1px solid rgba(201,168,76,0.8)" : isLight ? "1px solid rgba(0,0,0,0.15)" : "1px solid rgba(120,160,255,0.22)",
+                          background: sel ? "rgba(201,168,76,0.14)" : isLight ? "rgba(0,0,0,0.04)" : "rgba(255,255,255,0.04)",
+                          color: sel ? "rgba(201,140,30,0.98)" : isLight ? "rgba(30,40,60,0.82)" : "rgba(200,215,240,0.8)",
+                        }}
+                      >
+                        {m}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </section>
         )}
 
