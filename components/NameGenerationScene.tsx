@@ -7,6 +7,7 @@ type Props = {
   subtitle: string;
   previewName?: string;
   isComplete?: boolean;
+  statusMessage?: string;
 };
 
 // #1B2A5E navy, #C9A84C gold
@@ -34,6 +35,7 @@ export default function NameGenerationScene({
   subtitle,
   previewName,
   isComplete = false,
+  statusMessage,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef<number>(0);
@@ -410,13 +412,44 @@ export default function NameGenerationScene({
               color: "rgba(200, 212, 235, 0.82)",
               maxWidth: 480,
               marginInline: "auto",
+              minHeight: 60,
+              transition: "opacity 0.5s ease",
             }}
           >
-            이름은 정해진 목록에서 꺼내지는 것이 아니라,
-            <br />
-            입력하신 마음과 의미, 성씨와의 흐름 위에
-            <br />
-            빛처럼 모여 한 글자씩 선명해지고 있습니다.
+            {statusMessage ? (
+              <span style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                color: "rgba(201,168,76,0.9)",
+                fontWeight: 600,
+                fontSize: 15,
+              }}>
+                <span style={{
+                  display: "inline-block",
+                  width: 7,
+                  height: 7,
+                  borderRadius: "50%",
+                  background: "rgba(201,168,76,0.85)",
+                  animation: "winkPulse 1.1s ease-in-out infinite",
+                }} />
+                {statusMessage}
+                <style jsx>{`
+                  @keyframes winkPulse {
+                    0%, 100% { opacity: 0.4; transform: scale(0.85); }
+                    50% { opacity: 1; transform: scale(1.2); }
+                  }
+                `}</style>
+              </span>
+            ) : (
+              <>
+                이름은 정해진 목록에서 꺼내지는 것이 아니라,
+                <br />
+                입력하신 마음과 의미, 성씨와의 흐름 위에
+                <br />
+                빛처럼 모여 한 글자씩 선명해지고 있습니다.
+              </>
+            )}
           </div>
         </div>
       </div>

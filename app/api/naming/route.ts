@@ -290,7 +290,7 @@ ${sajuText ? `\n${sajuText}` : ""}
         { role: "user", content: userPrompt },
       ],
       temperature: 0.75,
-      max_tokens: 3500,
+      max_tokens: 2200,
       stream: true,
     });
 
@@ -299,18 +299,69 @@ ${sajuText ? `\n${sajuText}` : ""}
     const readable = new ReadableStream({
       async start(controller) {
         let fullText = "";
+
+        // ── 증분 JSON 파싱 상태 ───────────────────────────────
+        let inArray = false;   // '[' 를 만났는지
+        let inString = false;  // 문자열 내부인지
+        let escape = false;    // 이스케이프 문자 다음인지
+        let braceDepth = 0;    // 현재 중괄호 깊이
+        let objectStart = 0;   // 현재 name 객체 시작 위치
+        let namesSent = 0;     // 전송한 이름 수
+
         try {
           for await (const chunk of streamResponse) {
             const delta = chunk.choices[0]?.delta?.content ?? "";
-            if (delta) {
-              fullText += delta;
-              controller.enqueue(
-                encoder.encode(`data: ${JSON.stringify({ delta })}\n\n`)
-              );
+            if (!delta) continue;
+
+            // 한 글자씩 파싱해서 완성된 이름 객체 즉시 전송
+            for (const char of delta) {
+              const pos = fullText.length;
+              fullText += char;
+
+              // 이스케이프 처리
+              if (escape) { escape = false; continue; }
+              if (char === "\\" && inString) { escape = true; continue; }
+
+              // 문자열 경계
+              if (char === '"') { inString = !inString; continue; }
+              if (inString) continue;
+
+              // 배열 시작 '[' 이전은 무시
+              if (!inArray) {
+                if (char === "[") inArray = true;
+                continue;
+              }
+
+              // 중괄호 깊이 추적
+              if (char === "{") {
+                if (braceDepth === 0) objectStart = pos; // name 객체 시작
+                braceDepth++;
+              } else if (char === "}") {
+                braceDepth--;
+                if (braceDepth === 0) {
+                  // name 객체 하나 완성 → 즉시 파싱 후 전송
+                  const objStr = fullText.slice(objectStart);
+                  try {
+                    const nameObj = JSON.parse(objStr);
+                    controller.enqueue(
+                      encoder.encode(
+                        `data: ${JSON.stringify({ name: nameObj, index: namesSent })}\n\n`
+                      )
+                    );
+                    namesSent++;
+                  } catch {
+                    // 파싱 실패 시 done 이벤트 fallback 에서 처리
+                  }
+                }
+              }
             }
           }
 
-          const cleaned = fullText.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
+          // 최종 전체 파싱 (fallback + done 신호)
+          const cleaned = fullText
+            .replace(/^```(?:json)?\s*/i, "")
+            .replace(/```\s*$/i, "")
+            .trim();
           const results = JSON.parse(cleaned);
           controller.enqueue(
             encoder.encode(`data: ${JSON.stringify({ done: true, results })}\n\n`)

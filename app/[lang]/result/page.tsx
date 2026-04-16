@@ -1436,6 +1436,7 @@ export default function ResultPage() {
   const [isError, setIsError] = useState(false);
   const [showScene, setShowScene] = useState(false);
   const [sceneComplete, setSceneComplete] = useState(false);
+  const [progressMsg, setProgressMsg] = useState("");
   const [selectedPackage, setSelectedPackage] = useState<PackageType | "">("");
   const [message, setMessage] = useState("");
   const [briefId, setBriefId] = useState("");
@@ -1575,11 +1576,27 @@ export default function ResultPage() {
 
     hasCalledGPT.current = true;
 
+    // ── 진행 메시지 순환 ──────────────────────────────────────
+    const PROGRESS_MSGS = [
+      "이름을 설계하고 있습니다...",
+      "한자 오행을 분석하고 있습니다...",
+      "성씨와의 음운 조화를 검토하고 있습니다...",
+      "최적의 이름을 선별하고 있습니다...",
+    ];
+    let msgIdx = 0;
+    setProgressMsg(PROGRESS_MSGS[0]);
+    const msgTimer = setInterval(() => {
+      msgIdx = (msgIdx + 1) % PROGRESS_MSGS.length;
+      setProgressMsg(PROGRESS_MSGS[msgIdx]);
+    }, 3200);
+
     const callGPT = async () => {
       setIsGenerating(true);
       setShowScene(true);
       setSceneComplete(false);
       setIsError(false);
+
+      let incrementalCount = 0; // 증분으로 받은 이름 수
 
       try {
         const res = await fetch("/api/naming", {
@@ -1609,15 +1626,41 @@ export default function ResultPage() {
 
             if (payload.error) throw new Error(String(payload.error));
 
+            // ── 이름 1개 완성 즉시 표시 ──────────────────────
+            if (payload.name && typeof payload.index === "number") {
+              const nameResult = payload.name as NameResult;
+              incrementalCount++;
+              setResults((prev) => [...prev, nameResult]);
+
+              if (incrementalCount === 1) {
+                // 첫 이름 도착 → 씬 완료 애니메이션 후 결과 표시
+                clearInterval(msgTimer);
+                setProgressMsg("");
+                setSceneComplete(true);
+                await new Promise((r) => setTimeout(r, 500));
+                setShowScene(false);
+                playReveal();
+              }
+            }
+
+            // ── 전체 완료 (fallback + 확정) ───────────────────
             if (payload.done && Array.isArray(payload.results)) {
-              // Trigger completion animation, then reveal results
-              setSceneComplete(true);
-              await new Promise((r) => setTimeout(r, 1600));
+              clearInterval(msgTimer);
+              setProgressMsg("");
               const nameResults = payload.results as NameResult[];
-              setResults(nameResults);
-              setShowScene(false);
-              playReveal();
-              // GA: 이름 생성 완료 이벤트
+
+              if (incrementalCount === 0) {
+                // 증분 없이 한꺼번에 완료된 경우 (기존 동작)
+                setSceneComplete(true);
+                await new Promise((r) => setTimeout(r, 800));
+                setResults(nameResults);
+                setShowScene(false);
+                playReveal();
+              } else {
+                // 이미 증분으로 표시 중 → 전체 결과로 교체 (순서·완전성 보장)
+                setResults(nameResults);
+              }
+
               trackEvent("name_generated", {
                 category: brief?.category ?? "unknown",
                 result_count: nameResults.length,
@@ -1627,6 +1670,8 @@ export default function ResultPage() {
           }
         }
       } catch (err) {
+        clearInterval(msgTimer);
+        setProgressMsg("");
         console.error("[GPT stream error]", err);
         setIsError(true);
         setShowScene(false);
@@ -2000,6 +2045,7 @@ export default function ResultPage() {
             subtitle={ui.generatingSub}
             previewName={brief?.familyName ? `${brief.familyName}○○` : "　"}
             isComplete={sceneComplete}
+            statusMessage={progressMsg}
           />
         </div>
       </main>
