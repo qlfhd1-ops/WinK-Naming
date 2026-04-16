@@ -1702,10 +1702,10 @@ export default function OrderPage() {
                 gap: 12,
               }}>
                 {([
-                  { n: 1 as const, img: "/images/stamp-ref-1.svg", label: ui.styleLabel1, desc: ui.styleDesc1 },
-                  { n: 2 as const, img: "/images/stamp-ref-2.svg", label: ui.styleLabel2, desc: ui.styleDesc2 },
-                  { n: 3 as const, img: "/images/stamp-ref-3.svg", label: ui.styleLabel3, desc: ui.styleDesc3 },
-                  { n: 4 as const, img: "/images/stamp-ref-4.svg", label: ui.styleLabel4, desc: ui.styleDesc4 },
+                  { n: 1 as const, img: "/images/stamp-ref-1.png", label: ui.styleLabel1, desc: ui.styleDesc1 },
+                  { n: 2 as const, img: "/images/stamp-ref-2.png", label: ui.styleLabel2, desc: ui.styleDesc2 },
+                  { n: 3 as const, img: "/images/stamp-ref-3.png", label: ui.styleLabel3, desc: ui.styleDesc3 },
+                  { n: 4 as const, img: "/images/stamp-ref-4.png", label: ui.styleLabel4, desc: ui.styleDesc4 },
                 ] as { n: 1|2|3|4; img: string; label: string; desc: string }[]).map((card) => (
                   <button
                     key={card.n}

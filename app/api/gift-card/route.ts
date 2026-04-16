@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { rateLimit } from "@/lib/rate-limiter";
 import { PRICING } from "@/lib/pricing";
+import { sendGiftEmail } from "@/lib/send-email";
 
 function getAdminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -65,6 +66,7 @@ export async function POST(req: Request) {
     const lang = body?.lang ?? "ko";
     const customerName = body?.customerName?.trim() ?? senderName;
     const customerEmail = body?.customerEmail?.trim() ?? "";
+    const recipientEmail = body?.recipientEmail?.trim() ?? "";
 
     if (!nameResult?.name) {
       return NextResponse.json({ ok: false, error: "nameResult.name required" }, { status: 400 });
@@ -144,6 +146,24 @@ export async function POST(req: Request) {
             .eq("id", cardRow.id);
         }
       }
+    }
+
+    // 3. 선물 이메일 발송 (받는 분 이메일이 있을 때)
+    if (recipientEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipientEmail)) {
+      const giftCardUrl = `https://yoonseul-naming.vercel.app/${lang}/gift/${finalToken}`;
+      sendGiftEmail({
+        recipientEmail,
+        recipientName,
+        senderName,
+        giftMessage: message,
+        name: nameResult.name,
+        hanja: nameResult.hanja ?? "",
+        hanjaMeaning: nameResult.hanja_meaning ?? "",
+        meaning: nameResult.meaning ?? "",
+        story: nameResult.story ?? "",
+        giftCardUrl,
+        lang,
+      }).catch((e) => console.error("[gift-card] sendGiftEmail error:", e));
     }
 
     return NextResponse.json({

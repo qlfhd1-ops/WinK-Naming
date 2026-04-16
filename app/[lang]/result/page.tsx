@@ -174,6 +174,8 @@ const COPY = {
     giftCardSelectName: "선물할 이름 선택",
     giftCardSender: "보내는 분 이름",
     giftCardRecipient: "받는 분 이름",
+    giftCardEmail: "받는 분 이메일 (선물 발송)",
+    giftCardEmailPlaceholder: "이메일 주소 입력 시 자동 발송됩니다",
     giftCardMessage: "전하고 싶은 메시지",
     giftCardSubmit: "선물 카드 생성 (₩9,900)",
     giftCardGenerating: "카드 생성 중...",
@@ -315,6 +317,8 @@ const COPY = {
     giftCardSelectName: "Select a name to gift",
     giftCardSender: "Sender name",
     giftCardRecipient: "Recipient name",
+    giftCardEmail: "Recipient email (auto-send gift)",
+    giftCardEmailPlaceholder: "Enter email to send gift automatically",
     giftCardMessage: "Personal message",
     giftCardSubmit: "Create Gift Card (₩9,900)",
     giftCardGenerating: "Generating card...",
@@ -440,6 +444,8 @@ const COPY = {
     giftCardSelectName: "选择要赠送的名字",
     giftCardSender: "发送者姓名",
     giftCardRecipient: "接收者姓名",
+    giftCardEmail: "接收者邮箱（自动发送礼品）",
+    giftCardEmailPlaceholder: "输入邮箱地址自动发送",
     giftCardMessage: "留言",
     giftCardSubmit: "创建礼品卡 (₩9,900)",
     giftCardGenerating: "正在生成...",
@@ -581,6 +587,8 @@ const COPY = {
     giftCardSelectName: "贈る名前を選択",
     giftCardSender: "送り主のお名前",
     giftCardRecipient: "受取人のお名前",
+    giftCardEmail: "受取人のメール（自動送信）",
+    giftCardEmailPlaceholder: "メールアドレスを入力すると自動送信されます",
     giftCardMessage: "メッセージ",
     giftCardSubmit: "ギフトカード生成 (₩9,900)",
     giftCardGenerating: "カード生成中...",
@@ -722,6 +730,8 @@ const COPY = {
     giftCardSelectName: "Seleccionar nombre para regalar",
     giftCardSender: "Nombre del remitente",
     giftCardRecipient: "Nombre del destinatario",
+    giftCardEmail: "Email del destinatario (envío automático)",
+    giftCardEmailPlaceholder: "Ingresa el email para envío automático",
     giftCardMessage: "Mensaje personal",
     giftCardSubmit: "Crear tarjeta regalo (₩9,900)",
     giftCardGenerating: "Generando tarjeta...",
@@ -863,6 +873,8 @@ const COPY = {
     giftCardSelectName: "Выбрать имя для подарка",
     giftCardSender: "Имя отправителя",
     giftCardRecipient: "Имя получателя",
+    giftCardEmail: "Email получателя (автоотправка)",
+    giftCardEmailPlaceholder: "Введите email для автоматической отправки",
     giftCardMessage: "Личное сообщение",
     giftCardSubmit: "Создать подарочную карточку (₩9,900)",
     giftCardGenerating: "Создание карточки...",
@@ -1004,6 +1016,8 @@ const COPY = {
     giftCardSelectName: "Sélectionner un nom à offrir",
     giftCardSender: "Nom de l'expéditeur",
     giftCardRecipient: "Nom du destinataire",
+    giftCardEmail: "Email du destinataire (envoi auto)",
+    giftCardEmailPlaceholder: "Entrez l'email pour un envoi automatique",
     giftCardMessage: "Message personnel",
     giftCardSubmit: "Créer la carte cadeau (₩9,900)",
     giftCardGenerating: "Génération de la carte...",
@@ -1145,6 +1159,8 @@ const COPY = {
     giftCardSelectName: "اختر اسماً للإهداء",
     giftCardSender: "اسم المرسل",
     giftCardRecipient: "اسم المستلم",
+    giftCardEmail: "بريد المستلم (إرسال تلقائي)",
+    giftCardEmailPlaceholder: "أدخل البريد للإرسال التلقائي",
     giftCardMessage: "رسالة شخصية",
     giftCardSubmit: "إنشاء بطاقة الهدية (₩9,900)",
     giftCardGenerating: "جارٍ إنشاء البطاقة...",
@@ -1286,6 +1302,8 @@ const COPY = {
     giftCardSelectName: "उपहार देने के लिए नाम चुनें",
     giftCardSender: "प्रेषक का नाम",
     giftCardRecipient: "प्राप्तकर्ता का नाम",
+    giftCardEmail: "प्राप्तकर्ता का ईमेल (स्वतः भेजें)",
+    giftCardEmailPlaceholder: "स्वतः भेजने के लिए ईमेल दर्ज करें",
     giftCardMessage: "व्यक्तिगत संदेश",
     giftCardSubmit: "उपहार कार्ड बनाएं (₩9,900)",
     giftCardGenerating: "कार्ड बन रहा है...",
@@ -1444,6 +1462,7 @@ export default function ResultPage() {
   const [giftCardNameIndex, setGiftCardNameIndex] = useState(0);
   const [giftCardSender, setGiftCardSender] = useState("");
   const [giftCardRecipient, setGiftCardRecipient] = useState("");
+  const [giftCardRecipientEmail, setGiftCardRecipientEmail] = useState("");
   const [giftCardMessage, setGiftCardMessage] = useState("");
   const [giftCardLoading, setGiftCardLoading] = useState(false);
   const [giftCardToken, setGiftCardToken] = useState("");
@@ -1776,6 +1795,7 @@ export default function ResultPage() {
           categoryLabel: brief ? (ui.categoryMap[normalizeCategory(brief.category) as keyof typeof ui.categoryMap] ?? "") : "",
           senderName: giftCardSender,
           recipientName: giftCardRecipient,
+          recipientEmail: giftCardRecipientEmail,
           giftMessage: giftCardMessage,
           userId,
           lang,
@@ -2807,6 +2827,19 @@ export default function ResultPage() {
                       value={giftCardRecipient}
                       onChange={(e) => setGiftCardRecipient(e.target.value)}
                       placeholder={ui.giftCardRecipient}
+                    />
+                  </div>
+                  <div>
+                    <div className="wink-result-label" style={{ marginBottom: 4 }}>
+                      {ui.giftCardEmail}
+                      <span style={{ marginLeft: 6, fontSize: 10, color: "rgba(201,168,76,0.7)", fontWeight: 600 }}>선택</span>
+                    </div>
+                    <input
+                      className="wink-input"
+                      type="email"
+                      value={giftCardRecipientEmail}
+                      onChange={(e) => setGiftCardRecipientEmail(e.target.value)}
+                      placeholder={ui.giftCardEmailPlaceholder}
                     />
                   </div>
                   <div>
