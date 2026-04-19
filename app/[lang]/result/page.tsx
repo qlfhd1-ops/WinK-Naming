@@ -12,6 +12,7 @@ import { trackEvent } from "@/components/GoogleAnalytics";
 import UpgradeModal from "@/components/UpgradeModal";
 import PrivacyConsentModal from "@/components/PrivacyConsentModal";
 import SealStamp from "@/components/SealStamp";
+import MultiLangNameCard from "@/components/MultiLangNameCard";
 import type { PlanId } from "@/lib/pricing";
 import { Sound, playClick, playTab, playReveal } from "@/lib/sound";
 
@@ -1448,6 +1449,7 @@ export default function ResultPage() {
   const [planLoaded, setPlanLoaded] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [nameCardIdx, setNameCardIdx] = useState<number | null>(null);
   const [userEmail, setUserEmail] = useState<string | undefined>(undefined);
   const freeUsageRecordedRef = useRef(false);
   const [arsEligible, setArsEligible] = useState(false);
@@ -2527,8 +2529,32 @@ export default function ResultPage() {
                   </div>
                 )}
 
+                {/* 네임카드 버튼 */}
+                <div style={{ marginTop: 12 }}>
+                  <button
+                    type="button"
+                    onClick={() => setNameCardIdx(idx)}
+                    style={{
+                      width: "100%",
+                      padding: "11px 0",
+                      borderRadius: 12,
+                      fontSize: 13,
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      border: "1px solid rgba(201,168,76,0.30)",
+                      background: "rgba(201,168,76,0.07)",
+                      color: "rgba(201,168,76,0.85)",
+                      letterSpacing: "0.05em",
+                      display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                      transition: "all 0.18s",
+                    }}
+                  >
+                    🪪 {lang === "ko" ? "다국어 네임카드 보기" : "View Name Card"}
+                  </button>
+                </div>
+
                 {/* Name selection button */}
-                <div style={{ marginTop: 20 }}>
+                <div style={{ marginTop: 8 }}>
                   <button
                     type="button"
                     onClick={() => {
@@ -3206,6 +3232,15 @@ export default function ResultPage() {
 
       </div>
     </main>
+
+    {/* 다국어 네임카드 모달 */}
+    {nameCardIdx !== null && results[nameCardIdx] && (
+      <MultiLangNameCard
+        data={results[nameCardIdx]}
+        lang={lang}
+        onClose={() => setNameCardIdx(null)}
+      />
+    )}
     </>
   );
 }
