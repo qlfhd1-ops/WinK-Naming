@@ -3287,29 +3287,32 @@ export default function ResultPage() {
         {isFreeUser && results.length > 0 && (
           <section
             style={{
-              marginTop: 24, padding: "28px 24px", borderRadius: 20,
-              border: "1px solid rgba(201,168,76,0.30)",
-              background: "linear-gradient(160deg, rgba(201,168,76,0.07), rgba(11,22,52,0.65))",
-              display: "flex", flexDirection: "column", gap: 12,
+              marginTop: 24, padding: "32px 28px", borderRadius: 20,
+              border: "2px solid rgba(201,168,76,0.55)",
+              background: "linear-gradient(160deg, rgba(201,168,76,0.10), rgba(11,22,52,0.70))",
+              boxShadow: "0 0 0 1px rgba(201,168,76,0.08), 0 12px 40px rgba(201,168,76,0.10)",
+              display: "flex", flexDirection: "column", gap: 14,
             }}
           >
-            <div style={{ fontSize: 18, fontWeight: 800, color: "var(--text-main)", lineHeight: 1.35 }}>
+            <div style={{ fontSize: 22, fontWeight: 800, color: "var(--text-main)", lineHeight: 1.35 }}>
               {lang === "ko" ? "어떠세요? 좀 아쉬운 마음이 드시나요?" : "Want more from your naming experience?"}
             </div>
-            <div className="wink-result-text" style={{ lineHeight: 1.85 }}>
+            <div className="wink-result-text" style={{ fontSize: 15, lineHeight: 1.9, whiteSpace: "pre-line" }}>
               {lang === "ko"
-                ? "결제를 통해 만족스러운 결과와 차원이 다른 서비스를 만나보세요.\n한 번에 3개씩 작명되고, 선택받은 이름은 이름 선물카드와 이미지 다운로드가 가능해집니다.\n원하는 이름이 설계될 때까지 최선을 다하겠습니다."
-                : "Upgrade to access 3 names at once, name gift cards, image downloads, and redesign support. We'll keep designing until you love your name."}
+                ? `결제를 통해 만족스러운 결과와 차원이 다른 서비스를 만나보세요.\n\n한 번에 2개씩 작명되고, 선택받은 이름은 이름 선물카드와 이미지 다운로드가 가능해집니다.\n원하는 이름이 설계될 때까지 최선을 다하겠습니다.`
+                : "Upgrade to access 2 names at once, name gift cards, image downloads, and redesign support.\nWe'll keep designing until you love your name."}
             </div>
             <button
               type="button"
               onClick={() => router.push(`/${lang}/category`)}
               style={{
-                alignSelf: "flex-start", padding: "12px 24px", borderRadius: 12, border: "none",
-                cursor: "pointer", fontSize: 15, fontWeight: 800,
-                background: "linear-gradient(135deg, #C9A84C, #E8C870)",
-                color: "#0a1228",
-                boxShadow: "0 4px 16px rgba(201,168,76,0.35)",
+                alignSelf: "stretch", padding: "16px 28px", borderRadius: 14, border: "none",
+                cursor: "pointer", fontSize: 17, fontWeight: 800,
+                background: "#C9A84C",
+                color: "#ffffff",
+                letterSpacing: "0.02em",
+                boxShadow: "0 6px 24px rgba(201,168,76,0.40)",
+                transition: "opacity 0.18s",
               }}
             >
               {lang === "ko" ? "지금 바로 시작하기 →" : "Start Now →"}

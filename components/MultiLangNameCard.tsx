@@ -33,8 +33,19 @@ export default function MultiLangNameCard({ data, lang = "ko", onClose }: Props)
   const cardRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [closing, setClosing] = useState(false);
 
   const isKo = lang === "ko";
+
+  function handleClose() {
+    // 1) 포커스 해제 (button outline artifact 방지)
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+    // 2) fade-out 시작 → 200ms 후 실제 unmount
+    setClosing(true);
+    setTimeout(onClose, 200);
+  }
 
   // 한국어 로마자: english 필드 활용 (GPT가 로마자 표기 생성)
   const koreanRomanized = data.english || data.name;
@@ -86,8 +97,11 @@ export default function MultiLangNameCard({ data, lang = "ko", onClose }: Props)
         display: "flex", alignItems: "center", justifyContent: "center",
         padding: "16px",
         overflowY: "auto",
+        opacity: closing ? 0 : 1,
+        transition: "opacity 0.18s ease",
+        outline: "none",
       }}
-      onClick={onClose}
+      onClick={handleClose}
     >
       <div
         style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16, width: "100%", maxWidth: 420 }}
@@ -348,9 +362,10 @@ export default function MultiLangNameCard({ data, lang = "ko", onClose }: Props)
         {/* 닫기 */}
         <button
           type="button"
-          onClick={onClose}
+          onClick={handleClose}
           style={{
-            background: "none", border: "none", color: "rgba(200,215,240,0.45)",
+            background: "none", border: "none", outline: "none",
+            color: "rgba(200,215,240,0.45)",
             fontSize: 13, cursor: "pointer", letterSpacing: "0.06em",
           }}
         >
