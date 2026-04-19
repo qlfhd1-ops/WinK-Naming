@@ -1450,6 +1450,7 @@ export default function ResultPage() {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [nameCardIdx, setNameCardIdx] = useState<number | null>(null);
+  const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
   const [userEmail, setUserEmail] = useState<string | undefined>(undefined);
   const freeUsageRecordedRef = useRef(false);
   const [arsEligible, setArsEligible] = useState(false);
@@ -2363,271 +2364,390 @@ export default function ResultPage() {
             </section>
           )}
 
-          {/* ── 상세 분석 카드 ── */}
-          <div className="wink-result-grid">
-            {[...results, ...extraResults].map((item, idx) => (
-              <article
-                key={`${item.name}-${item.rank_order}`}
-                className="wink-result-card"
-                style={selectedNameIndex === idx ? {
-                  border: "2px solid rgba(201,168,76,0.70)",
-                  boxShadow: "0 0 0 4px rgba(201,168,76,0.12)",
-                } : undefined}
-              >
+          {/* ── 이름 카드 그리드 ── */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            {[...results, ...extraResults].map((item, idx) => {
+              const chipStyle: React.CSSProperties = {
+                display: "inline-flex",
+                alignItems: "center",
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: "0.04em",
+                color: "rgba(180,200,240,0.70)",
+                background: "rgba(120,160,255,0.07)",
+                border: "1px solid rgba(120,160,255,0.14)",
+                borderRadius: 99,
+                padding: "3px 9px",
+              };
+              const labelStyle: React.CSSProperties = {
+                fontSize: 10,
+                fontWeight: 700,
+                letterSpacing: "0.12em",
+                textTransform: "uppercase" as const,
+                color: "rgba(180,200,240,0.50)",
+                marginBottom: 6,
+              };
+              const textStyle: React.CSSProperties = {
+                fontSize: 13,
+                lineHeight: 1.75,
+                color: "rgba(200,215,245,0.78)",
+              };
+              const isSelected = selectedNameIndex === idx;
+              const isDimmed  = selectedNameIndex !== null && !isSelected;
+              const isExpanded = isSelected || expandedIdx === idx;
 
-                {/* Card-level select button (상단) */}
-                <button
-                  type="button"
-                  onClick={() => { Sound.playTab(); Sound.playSeal(); setSelectedNameIndex(idx); setGiftCardNameIndex(idx); }}
+              return (
+                <article
+                  key={`${item.name}-${item.rank_order}`}
                   style={{
-                    width: "100%",
-                    marginBottom: 14,
-                    padding: "10px 0",
-                    borderRadius: 10,
-                    fontSize: 13,
-                    fontWeight: 700,
-                    cursor: "pointer",
-                    border: selectedNameIndex === idx
-                      ? "2px solid rgba(201,168,76,0.75)"
-                      : "1px solid var(--line-soft)",
-                    background: selectedNameIndex === idx
-                      ? "linear-gradient(135deg,rgba(201,168,76,0.20),rgba(201,168,76,0.08))"
-                      : "transparent",
-                    color: selectedNameIndex === idx ? "var(--gold-main)" : "var(--text-dim)",
-                    transition: "all 0.18s ease",
+                    borderRadius: 20,
+                    overflow: "hidden",
+                    border: isSelected
+                      ? "2px solid rgba(201,168,76,0.80)"
+                      : "1px solid rgba(120,160,255,0.14)",
+                    background: isSelected
+                      ? "linear-gradient(160deg,#0e1d46,#0a1228)"
+                      : "var(--bg-panel)",
+                    boxShadow: isSelected
+                      ? "0 0 0 4px rgba(201,168,76,0.12), 0 16px 48px rgba(0,0,0,0.3)"
+                      : "0 4px 16px rgba(0,0,0,0.1)",
+                    opacity: isDimmed ? 0.32 : 1,
+                    transform: isSelected ? "scale(1.01)" : "scale(1)",
+                    transition: "all 0.28s ease",
+                    pointerEvents: isDimmed ? "none" : "auto",
                   }}
                 >
-                  {selectedNameIndex === idx ? `${ui.nameSelectedBadge} · ${item.name}` : ui.selectThisName}
-                </button>
+                  {/* ── 접힌 헤더 (항상 표시) ── */}
+                  <div style={{ padding: "20px 20px 0" }}>
 
-                {/* Track badge */}
-                <div className="wink-panel" style={{ marginBottom: 14, padding: 16 }}>
-                  <div className="wink-section-title" style={{ fontSize: 20, marginBottom: 6 }}>
-                    {trackLabel(item.track, ui)}
-                  </div>
-                  <div className="wink-result-text">{trackDesc(item.track, ui)}</div>
-                </div>
-
-                {/* Name + score */}
-                <div className="wink-result-head">
-                  <div className="wink-card-title" style={{ fontSize: 30 }}>{item.name}</div>
-                  <div className="wink-score-pill">{ui.score} {item.score}</div>
-                </div>
-
-                {/* Hanja */}
-                {item.hanja && (
-                  <div className="wink-result-section">
-                    <div className="wink-result-label">{ui.hanja}</div>
-                    <div className="wink-result-text" style={{ fontSize: 18, letterSpacing: 2 }}>
-                      {item.hanja}
+                    {/* 트랙 뱃지 + 점수 */}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                      <span style={{
+                        fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
+                        color: isSelected ? "rgba(201,168,76,0.95)" : "rgba(180,195,230,0.65)",
+                        background: isSelected ? "rgba(201,168,76,0.12)" : "rgba(120,160,255,0.08)",
+                        border: `1px solid ${isSelected ? "rgba(201,168,76,0.30)" : "rgba(120,160,255,0.15)"}`,
+                        padding: "3px 10px", borderRadius: 99,
+                      }}>
+                        {trackLabel(item.track, ui)}
+                      </span>
+                      <span style={{
+                        fontSize: 12, fontWeight: 800,
+                        color: isSelected ? "rgba(201,168,76,0.90)" : "rgba(180,195,230,0.50)",
+                      }}>
+                        ✦ {item.score}
+                      </span>
                     </div>
-                    {item.hanja_meaning && (
-                      <div className="wink-result-text" style={{ marginTop: 4, opacity: 0.8 }}>
-                        {item.hanja_meaning}
+
+                    {/* 이름 크게 */}
+                    <div style={{
+                      fontSize: isSelected ? 42 : 34,
+                      fontWeight: 900,
+                      color: isSelected ? "#fff" : "var(--text-main)",
+                      letterSpacing: "0.06em",
+                      lineHeight: 1.1,
+                      transition: "font-size 0.25s ease",
+                      fontFamily: "serif",
+                    }}>
+                      {item.name}
+                    </div>
+
+                    {/* 한자 */}
+                    {item.hanja && (
+                      <div style={{
+                        marginTop: 6,
+                        fontSize: 16,
+                        letterSpacing: "0.14em",
+                        color: isSelected ? "rgba(201,168,76,0.85)" : "rgba(180,195,230,0.60)",
+                        fontFamily: "serif",
+                      }}>
+                        {item.hanja}
+                        {item.hanja_meaning && (
+                          <span style={{ fontSize: 11, marginLeft: 8, opacity: 0.65 }}>
+                            {item.hanja_meaning}
+                          </span>
+                        )}
                       </div>
                     )}
-                    {item.hanja_strokes && (
-                      <div className="wink-result-text" style={{ marginTop: 4, opacity: 0.7, fontSize: 13 }}>
-                        {ui.hanjaStrokes}: {item.hanja_strokes}
-                      </div>
-                    )}
-                  </div>
-                )}
 
-                {/* Five elements */}
-                {item.five_elements && (
-                  <div className="wink-result-section">
-                    <div className="wink-result-label">{ui.fiveElements}</div>
-                    <div className="wink-result-text">{item.five_elements}</div>
-                  </div>
-                )}
-
-                {/* Phonetic harmony */}
-                {item.phonetic_harmony && (
-                  <div className="wink-result-section">
-                    <div className="wink-result-label">{ui.phoneticHarmony}</div>
-                    <div className="wink-result-text">{item.phonetic_harmony}</div>
-                  </div>
-                )}
-
-                {/* Meaning */}
-                <div className="wink-result-section">
-                  <div className="wink-result-label">{ui.meaning}</div>
-                  <div className="wink-result-text">{item.meaning}</div>
-                </div>
-
-                {/* Story */}
-                <div className="wink-result-section">
-                  <div className="wink-result-label">{ui.story}</div>
-                  <div className="wink-result-text">{item.story}</div>
-                </div>
-
-                {/* Fit reason */}
-                <div className="wink-result-section">
-                  <div className="wink-result-label">{ui.fitReason}</div>
-                  <div className="wink-result-text">{item.fit_reason}</div>
-                </div>
-
-                {/* Global script */}
-                <div className="wink-result-section">
-                  <div className="wink-result-label">{ui.globalPron}</div>
-                  <div className="wink-global-grid">
-                    <div className="wink-mini-card">
-                      <div className="wink-mini-title">EN</div>
-                      <div>{item.english}</div>
-                    </div>
-                    <div className="wink-mini-card">
-                      <div className="wink-mini-title">中文</div>
-                      <div>{item.chinese}</div>
-                      <div className="wink-mini-sub">{item.chinese_pinyin}</div>
-                    </div>
-                    <div className="wink-mini-card">
-                      <div className="wink-mini-title">日本語</div>
-                      <div>{item.japanese_kana}</div>
-                      <div className="wink-mini-sub">{item.japanese_reading}</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Risk check */}
-                <div className="wink-result-section">
-                  <div className="wink-result-label">{ui.firstCheck}</div>
-                  <div className="wink-risk-grid">
-                    <div className={`wink-risk-chip ${riskClass(item.teasing_risk)}`}>
-                      {ui.teasingRisk}: {ui.level[item.teasing_risk]}
-                    </div>
-                    <div className={`wink-risk-chip ${riskClass(item.similarity_risk)}`}>
-                      {ui.similarityRisk}: {ui.level[item.similarity_risk]}
-                    </div>
-                    <div className={`wink-risk-chip ${riskClass(item.pronunciation_risk)}`}>
-                      {ui.pronunciationRisk}: {ui.level[item.pronunciation_risk]}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Caution */}
-                <div className="wink-result-section">
-                  <div className="wink-result-label">{ui.caution}</div>
-                  <div className="wink-result-text">{item.caution || "-"}</div>
-                </div>
-
-                {/* Connection analysis */}
-                {item.connection_analysis && (
-                  <div className="wink-result-section" style={{ background: "rgba(201,168,76,0.08)", borderRadius: 10, padding: "12px 14px" }}>
-                    <div className="wink-result-label" style={{ color: "#C9A84C" }}>{ui.connectionAnalysis}</div>
-                    <div className="wink-result-text" style={{ marginTop: 4 }}>{item.connection_analysis}</div>
-                  </div>
-                )}
-
-                {/* 인장 미리보기 — 선택된 이름 + 유료 + 카테고리 조건 */}
-                {selectedNameIndex === idx && showSeal && (
-                  <div
-                    className="wink-result-section"
-                    style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "20px 0 8px" }}
-                  >
-                    <SealStamp name={item.name} size={160} />
-                  </div>
-                )}
-
-                {/* 네임카드 버튼 */}
-                <div style={{ marginTop: 12 }}>
-                  <button
-                    type="button"
-                    onClick={() => setNameCardIdx(idx)}
-                    style={{
-                      width: "100%",
-                      padding: "11px 0",
-                      borderRadius: 12,
+                    {/* 핵심 의미 한 줄 */}
+                    <div style={{
+                      marginTop: 10, marginBottom: 16,
                       fontSize: 13,
-                      fontWeight: 700,
-                      cursor: "pointer",
-                      border: "1px solid rgba(201,168,76,0.30)",
-                      background: "rgba(201,168,76,0.07)",
-                      color: "rgba(201,168,76,0.85)",
-                      letterSpacing: "0.05em",
-                      display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                      transition: "all 0.18s",
-                    }}
-                  >
-                    🪪 {lang === "ko" ? "다국어 네임카드 보기" : "View Name Card"}
-                  </button>
-                </div>
+                      color: isSelected ? "rgba(210,225,255,0.80)" : "rgba(180,195,230,0.60)",
+                      lineHeight: 1.6,
+                      display: "-webkit-box",
+                      WebkitLineClamp: isExpanded ? "unset" : 2,
+                      WebkitBoxOrient: "vertical",
+                      overflow: isExpanded ? "visible" : "hidden",
+                    } as React.CSSProperties}>
+                      {item.meaning}
+                    </div>
 
-                {/* Name selection button */}
-                <div style={{ marginTop: 8 }}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      Sound.playTab();
-                      Sound.playSeal();
-                      setSelectedNameIndex(idx);
-                      setGiftCardNameIndex(idx);
-                    }}
-                    style={{
-                      width: "100%",
-                      padding: "13px 0",
-                      borderRadius: 12,
-                      fontSize: 15,
-                      fontWeight: 700,
-                      cursor: "pointer",
-                      border: selectedNameIndex === idx
-                        ? "2px solid rgba(201,168,76,0.80)"
-                        : "1px solid var(--line-strong)",
-                      background: selectedNameIndex === idx
-                        ? "linear-gradient(135deg,rgba(201,168,76,0.22),rgba(201,168,76,0.12))"
-                        : "transparent",
-                      color: selectedNameIndex === idx ? "var(--gold-main)" : "var(--text-soft)",
-                      transition: "all 0.2s ease",
-                    }}
-                  >
-                    {selectedNameIndex === idx ? ui.nameSelectedBadge : ui.selectThisName}
-                  </button>
-                </div>
+                    {/* 간결 정보 칩 (오행/획수/음운) */}
+                    {(item.five_elements || item.hanja_strokes || item.phonetic_harmony) && (
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 14 }}>
+                        {item.five_elements && (
+                          <span style={chipStyle}>⚡ {item.five_elements.split("—")[0].trim()}</span>
+                        )}
+                        {item.hanja_strokes && (
+                          <span style={chipStyle}>✦ {item.hanja_strokes.split("=")[1]?.trim() ?? item.hanja_strokes.slice(0, 12)}</span>
+                        )}
+                        {item.phonetic_harmony && (
+                          <span style={chipStyle}>◎ {item.phonetic_harmony.slice(0, 14)}</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
 
-              </article>
-            ))}
+                  {/* ── 자세히 보기 토글 ── */}
+                  {!isSelected && (
+                    <button
+                      type="button"
+                      onClick={() => setExpandedIdx(isExpanded ? null : idx)}
+                      style={{
+                        width: "100%", padding: "10px 20px",
+                        background: "none", border: "none",
+                        borderTop: "1px solid rgba(120,160,255,0.10)",
+                        cursor: "pointer",
+                        fontSize: 12, fontWeight: 600,
+                        color: "rgba(180,200,240,0.55)",
+                        display: "flex", alignItems: "center", justifyContent: "center", gap: 4,
+                        transition: "color 0.18s",
+                      }}
+                    >
+                      {isExpanded
+                        ? (lang === "ko" ? "접기 ▲" : "Collapse ▲")
+                        : (lang === "ko" ? "자세히 보기 ▾" : "View details ▾")}
+                    </button>
+                  )}
+
+                  {/* ── 펼쳐진 상세 영역 ── */}
+                  {isExpanded && (
+                    <div style={{ padding: "0 20px 20px" }}>
+                      <div style={{ height: 1, background: "rgba(201,168,76,0.12)", margin: "4px 0 18px" }} />
+
+                      {/* 설계 설명 (2줄 클램프) */}
+                      <div style={{ marginBottom: 14 }}>
+                        <div style={labelStyle}>{ui.story}</div>
+                        <div style={{
+                          ...textStyle,
+                          display: "-webkit-box",
+                          WebkitLineClamp: isSelected ? "unset" : 3,
+                          WebkitBoxOrient: "vertical",
+                          overflow: isSelected ? "visible" : "hidden",
+                        } as React.CSSProperties}>
+                          {item.story}
+                        </div>
+                      </div>
+
+                      {/* 글로벌 발음 */}
+                      <div style={{ marginBottom: 14 }}>
+                        <div style={labelStyle}>{ui.globalPron}</div>
+                        <div className="wink-global-grid">
+                          <div className="wink-mini-card">
+                            <div className="wink-mini-title">EN</div>
+                            <div>{item.english}</div>
+                          </div>
+                          <div className="wink-mini-card">
+                            <div className="wink-mini-title">中文</div>
+                            <div>{item.chinese}</div>
+                            <div className="wink-mini-sub">{item.chinese_pinyin}</div>
+                          </div>
+                          <div className="wink-mini-card">
+                            <div className="wink-mini-title">日本語</div>
+                            <div>{item.japanese_kana}</div>
+                            <div className="wink-mini-sub">{item.japanese_reading}</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 리스크 칩 */}
+                      <div style={{ marginBottom: 14 }}>
+                        <div style={labelStyle}>{ui.firstCheck}</div>
+                        <div className="wink-risk-grid">
+                          <div className={`wink-risk-chip ${riskClass(item.teasing_risk)}`}>
+                            {ui.teasingRisk}: {ui.level[item.teasing_risk]}
+                          </div>
+                          <div className={`wink-risk-chip ${riskClass(item.similarity_risk)}`}>
+                            {ui.similarityRisk}: {ui.level[item.similarity_risk]}
+                          </div>
+                          <div className={`wink-risk-chip ${riskClass(item.pronunciation_risk)}`}>
+                            {ui.pronunciationRisk}: {ui.level[item.pronunciation_risk]}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 주의사항 */}
+                      {item.caution && (
+                        <div style={{ marginBottom: 14 }}>
+                          <div style={labelStyle}>{ui.caution}</div>
+                          <div style={textStyle}>{item.caution}</div>
+                        </div>
+                      )}
+
+                      {/* 연결 분석 (선택 이름만) */}
+                      {isSelected && item.connection_analysis && (
+                        <div style={{
+                          background: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.18)",
+                          borderRadius: 12, padding: "14px 16px", marginBottom: 14,
+                        }}>
+                          <div style={{ ...labelStyle, color: "#C9A84C" }}>{ui.connectionAnalysis}</div>
+                          <div style={{ ...textStyle, marginTop: 4 }}>{item.connection_analysis}</div>
+                        </div>
+                      )}
+
+                      {/* 인장 미리보기 */}
+                      {isSelected && showSeal && (
+                        <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 8px" }}>
+                          <SealStamp name={item.name} size={148} />
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* ── 하단 액션 버튼 ── */}
+                  <div style={{
+                    padding: isExpanded ? "0 20px 20px" : "0 20px 16px",
+                    display: "flex", flexDirection: "column", gap: 8,
+                    borderTop: isExpanded ? "1px solid rgba(120,160,255,0.08)" : "none",
+                    paddingTop: isExpanded ? 16 : 0,
+                  }}>
+                    {/* 네임카드 버튼 */}
+                    <button
+                      type="button"
+                      onClick={() => setNameCardIdx(idx)}
+                      style={{
+                        width: "100%", padding: "11px 0", borderRadius: 12,
+                        fontSize: 13, fontWeight: 700, cursor: "pointer",
+                        border: "1px solid rgba(201,168,76,0.28)",
+                        background: "rgba(201,168,76,0.06)",
+                        color: "rgba(201,168,76,0.82)",
+                        display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
+                        transition: "all 0.18s",
+                      }}
+                    >
+                      🪪 {lang === "ko" ? "다국어 네임카드" : "Name Card"}
+                    </button>
+
+                    {/* 선택 버튼 */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        Sound.playTab();
+                        Sound.playSeal();
+                        setSelectedNameIndex(idx);
+                        setGiftCardNameIndex(idx);
+                        setExpandedIdx(null);
+                      }}
+                      style={{
+                        width: "100%", padding: "14px 0", borderRadius: 12,
+                        fontSize: 15, fontWeight: 800, cursor: "pointer",
+                        border: isSelected ? "2px solid rgba(201,168,76,0.80)" : "1.5px solid rgba(201,168,76,0.40)",
+                        background: isSelected
+                          ? "linear-gradient(135deg,#C9A84C,#a87c2a)"
+                          : "rgba(201,168,76,0.10)",
+                        color: isSelected ? "#0B1634" : "rgba(201,168,76,0.90)",
+                        letterSpacing: "0.03em",
+                        transition: "all 0.22s ease",
+                      }}
+                    >
+                      {isSelected ? `✓ ${ui.nameSelectedBadge}` : ui.selectThisName}
+                    </button>
+                  </div>
+
+                </article>
+              );
+            })}
           </div>
         </section>
 
-        {/* Selection trust banner */}
+        {/* Payment nudge banner */}
         {selectedNameIndex !== null && results[selectedNameIndex] && (
           <section
             style={{
               marginTop: 24,
-              padding: "22px 24px",
-              borderRadius: 16,
-              border: "1px solid rgba(201,168,76,0.40)",
-              background: "linear-gradient(160deg, rgba(201,168,76,0.10), rgba(11,22,52,0.70))",
-              boxShadow: "0 8px 32px rgba(201,168,76,0.08)",
+              padding: "32px 28px",
+              borderRadius: 20,
+              border: "1px solid rgba(201,168,76,0.45)",
+              background: "linear-gradient(160deg, rgba(201,168,76,0.13), rgba(11,22,52,0.80))",
+              boxShadow: "0 12px 48px rgba(201,168,76,0.12)",
+              textAlign: "center",
             }}
           >
+            {/* 선택 완료 라벨 */}
             <div style={{
-              display: "flex", alignItems: "center", gap: 10, marginBottom: 12,
+              display: "inline-block",
+              fontSize: 11, fontWeight: 700, letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              color: "rgba(201,168,76,0.80)",
+              marginBottom: 14,
             }}>
-              <div style={{
-                width: 40, height: 40, borderRadius: "50%",
-                background: "linear-gradient(135deg,rgba(201,168,76,0.3),rgba(201,168,76,0.12))",
-                border: "1px solid rgba(201,168,76,0.50)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 18, flexShrink: 0,
-              }}>✦</div>
-              <div>
-                <div style={{ fontSize: 11, letterSpacing: "0.1em", color: "rgba(201,168,76,0.85)", fontWeight: 700, textTransform: "uppercase", marginBottom: 2 }}>
-                  선택 완료 · {results[selectedNameIndex].name}
-                </div>
-                <div className="wink-section-title" style={{ fontSize: 16 }}>
-                  {ui.selectionTrustTitle}
-                </div>
-              </div>
+              ✓ 선택 완료 · {results[selectedNameIndex].name}
             </div>
-            <div className="wink-result-text" style={{ lineHeight: 1.85 }}>
-              {ui.selectionTrustBody}
+
+            {/* 제목 */}
+            <div style={{
+              fontSize: "clamp(20px, 4vw, 26px)",
+              fontWeight: 800,
+              color: "#f0f4ff",
+              lineHeight: 1.3,
+              marginBottom: 10,
+            }}>
+              이 이름을 평생 간직하세요 ✨
+            </div>
+
+            {/* 부제 */}
+            <div style={{
+              fontSize: 14,
+              color: "rgba(210,225,255,0.72)",
+              lineHeight: 1.7,
+              marginBottom: 24,
+              maxWidth: 400,
+              marginInline: "auto",
+            }}>
+              지금 선택하시면 이름 리포트 + 다국어 네임카드 + 도장 할인 혜택까지
+            </div>
+
+            {/* CTA 버튼 */}
+            <button
+              type="button"
+              onClick={() => {
+                const el = document.getElementById("wink-package-section");
+                el?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+              style={{
+                display: "inline-block",
+                padding: "16px 36px",
+                borderRadius: 14,
+                border: "none",
+                background: "linear-gradient(135deg, #C9A84C, #E8C870)",
+                color: "#0B1634",
+                fontSize: 16,
+                fontWeight: 800,
+                cursor: "pointer",
+                letterSpacing: "0.02em",
+                boxShadow: "0 4px 24px rgba(201,168,76,0.35)",
+                transition: "opacity 0.18s",
+                marginBottom: 16,
+              }}
+            >
+              지금 바로 패키지 선택하기 →
+            </button>
+
+            {/* 긴박감 */}
+            <div style={{
+              fontSize: 12,
+              color: "rgba(201,168,76,0.60)",
+              letterSpacing: "0.04em",
+            }}>
+              오늘 선택하신 이름은 24시간 동안 보관됩니다
             </div>
           </section>
         )}
 
         {/* Package selection */}
-        <section style={{ marginTop: 32, opacity: selectedNameIndex === null ? 0.45 : 1, transition: "opacity 0.3s" }}>
+        <section id="wink-package-section" style={{ marginTop: 32, opacity: selectedNameIndex === null ? 0.45 : 1, transition: "opacity 0.3s" }}>
           <div className="wink-section-head">
             <h2 className="wink-section-title">{ui.packageTitle}</h2>
             <p className="wink-section-desc">
