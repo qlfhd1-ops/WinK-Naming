@@ -365,6 +365,10 @@ export default function NameGenerationScene({
               60% { opacity: 0.6; filter: blur(3px); }
               100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
             }
+            @keyframes winkPulse {
+              0%, 100% { opacity: 0.4; transform: scale(0.85); }
+              50% { opacity: 1; transform: scale(1.2); }
+            }
           `}</style>
 
           <div
@@ -434,12 +438,6 @@ export default function NameGenerationScene({
                   animation: "winkPulse 1.1s ease-in-out infinite",
                 }} />
                 {statusMessage}
-                <style jsx>{`
-                  @keyframes winkPulse {
-                    0%, 100% { opacity: 0.4; transform: scale(0.85); }
-                    50% { opacity: 1; transform: scale(1.2); }
-                  }
-                `}</style>
               </span>
             ) : (
               <>
