@@ -886,23 +886,94 @@ function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-/** 카카오/Daum 우편번호 팝업 — 스크립트를 동적으로 로드 후 실행 */
+/** 카카오/Daum 우편번호 팝업 — 스크립트 동적 로드 + 모바일 대응 */
 function openDaumPostcode(onComplete: (zip: string, addr: string) => void) {
+  const SCRIPT_ID = "daum-postcode-script";
+  const SCRIPT_SRC = "https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+
   const run = () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    new (window as any).daum.Postcode({
-      oncomplete: (data: { zonecode: string; roadAddress: string; jibunAddress: string }) => {
-        onComplete(data.zonecode, data.roadAddress || data.jibunAddress);
-      },
-    }).open();
+    const DaumPostcode = (window as any).daum?.Postcode;
+    if (!DaumPostcode) return;
+
+    // 모바일(터치 기기) 감지 → iframe 팝업으로 표시
+    const isMobileDevice =
+      typeof window !== "undefined" &&
+      (window.innerWidth < 640 || "ontouchstart" in window);
+
+    if (isMobileDevice) {
+      // ── 모바일: 페이지 내 오버레이 iframe ──────────────────────
+      const overlay = document.createElement("div");
+      overlay.id = "daum-postcode-overlay";
+      Object.assign(overlay.style, {
+        position: "fixed", inset: "0", zIndex: "99999",
+        background: "rgba(0,0,0,0.55)", display: "flex",
+        flexDirection: "column", alignItems: "center", justifyContent: "flex-end",
+      });
+
+      const container = document.createElement("div");
+      Object.assign(container.style, {
+        width: "100%", maxHeight: "90dvh",
+        background: "#fff", borderRadius: "16px 16px 0 0",
+        overflow: "hidden", position: "relative",
+      });
+
+      // 닫기 버튼
+      const closeBtn = document.createElement("button");
+      closeBtn.textContent = "✕ 닫기";
+      Object.assign(closeBtn.style, {
+        position: "absolute", top: "10px", right: "14px",
+        zIndex: "1", background: "none", border: "none",
+        fontSize: "14px", fontWeight: "700", cursor: "pointer",
+        color: "#333", padding: "6px",
+      });
+      const removeOverlay = () => overlay.remove();
+      closeBtn.addEventListener("click", removeOverlay);
+      overlay.addEventListener("click", (e) => { if (e.target === overlay) removeOverlay(); });
+
+      container.appendChild(closeBtn);
+      overlay.appendChild(container);
+      document.body.appendChild(overlay);
+
+      new DaumPostcode({
+        oncomplete: (data: { zonecode: string; roadAddress: string; jibunAddress: string }) => {
+          removeOverlay();
+          onComplete(data.zonecode, data.roadAddress || data.jibunAddress);
+        },
+        onclose: removeOverlay,
+        width: "100%",
+        height: "100%",
+      }).embed(container, { autoClose: true });
+    } else {
+      // ── 데스크톱: 기존 팝업 ──────────────────────────────────
+      new DaumPostcode({
+        oncomplete: (data: { zonecode: string; roadAddress: string; jibunAddress: string }) => {
+          onComplete(data.zonecode, data.roadAddress || data.jibunAddress);
+        },
+        theme: {
+          bgColor: "#0B1634",
+          searchBgColor: "#1B2A5E",
+          contentBgColor: "#0B1634",
+          pageBgColor: "#0D1A40",
+          textColor: "#E0EAFF",
+          queryTextColor: "#FFFFFF",
+          postcodeTextColor: "#C9A84C",
+          emphTextColor: "#C9A84C",
+          outlineColor: "rgba(120,160,255,0.18)",
+        },
+      }).open({ autoClose: true });
+    }
   };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  if ((window as any).daum?.Postcode) {
+
+  // 스크립트 중복 방지 후 로드
+  if (document.getElementById(SCRIPT_ID)) {
     run();
   } else {
     const script = document.createElement("script");
-    script.src = "https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+    script.id = SCRIPT_ID;
+    script.src = SCRIPT_SRC;
     script.onload = run;
+    script.onerror = () => console.error("[DaumPostcode] 스크립트 로드 실패");
     document.head.appendChild(script);
   }
 }
@@ -1092,6 +1163,9 @@ export default function OrderPage() {
   const [deliveryAddr, setDeliveryAddr] = useState("");
   const [deliveryAddrDetail, setDeliveryAddrDetail] = useState("");
   const [deliveryMemo, setDeliveryMemo] = useState("");
+  // 상세 주소 자동 포커스 ref (step1 / confirm step 각각)
+  const addrDetailRef1 = useRef<HTMLInputElement>(null);
+  const addrDetailRef2 = useRef<HTMLInputElement>(null);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [orderId, setOrderId] = useState("");
@@ -1430,7 +1504,10 @@ export default function OrderPage() {
                       placeholder="00000" style={{ maxWidth: 140 }} readOnly />
                     <button type="button"
                       onClick={() => openDaumPostcode((zip, addr) => {
-                        setDeliveryZip(zip); setDeliveryAddr(addr); setDeliveryAddrDetail("");
+                        setDeliveryZip(zip);
+                        setDeliveryAddr(addr);
+                        setDeliveryAddrDetail("");
+                        setTimeout(() => addrDetailRef2.current?.focus(), 100);
                       })}
                       style={{
                         padding: "0 20px", borderRadius: 10, fontSize: 13, fontWeight: 700,
@@ -1452,7 +1529,9 @@ export default function OrderPage() {
                 </div>
                 <div className="wink-field wink-field-full">
                   <label>{ui.deliveryAddrDetailLabel}</label>
-                  <input className="wink-input" value={deliveryAddrDetail}
+                  <input
+                    ref={addrDetailRef2}
+                    className="wink-input" value={deliveryAddrDetail}
                     onChange={(e) => setDeliveryAddrDetail(e.target.value)}
                     placeholder={ui.deliveryAddrDetailPh} autoComplete="address-line2" />
                 </div>
@@ -2030,6 +2109,7 @@ export default function OrderPage() {
                       setDeliveryZip(zip);
                       setDeliveryAddr(addr);
                       setDeliveryAddrDetail("");
+                      setTimeout(() => addrDetailRef1.current?.focus(), 100);
                     })
                   }
                   style={{
@@ -2067,6 +2147,7 @@ export default function OrderPage() {
             <div className="wink-field wink-field-full">
               <label>{ui.deliveryAddrDetailLabel}</label>
               <input
+                ref={addrDetailRef1}
                 className="wink-input"
                 value={deliveryAddrDetail}
                 onChange={(e) => setDeliveryAddrDetail(e.target.value)}
