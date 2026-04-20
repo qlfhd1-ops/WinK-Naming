@@ -5,6 +5,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { AppLang, isSupportedLang } from "@/lib/lang-config";
 import { createClient } from "@/lib/supabase/browser";
 import { PRICING } from "@/lib/pricing";
+import SealStamp from "@/components/SealStamp";
 
 // ─── Types ───────────────────────────────────────────────
 type ProductType = "stamp" | "doorplate";
@@ -1041,13 +1042,18 @@ export default function OrderPage() {
 
   // ── Theme detection
   const [isLight, setIsLight] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
     const check = () =>
       setIsLight(document.documentElement.getAttribute("data-theme") === "light");
     check();
     const obs = new MutationObserver(check);
     obs.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-    return () => obs.disconnect();
+
+    const checkMobile = () => setIsMobile(window.innerWidth < 600);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => { obs.disconnect(); window.removeEventListener("resize", checkMobile); };
   }, []);
 
 
@@ -1499,6 +1505,22 @@ export default function OrderPage() {
         <h1 className="wink-title">{ui.title}</h1>
         <p className="wink-sub">{ui.sub}</p>
 
+        {/* 디자이너 안내 배너 */}
+        <div style={{
+          display: "flex", alignItems: "flex-start", gap: 12,
+          padding: "14px 18px", borderRadius: 12, marginBottom: 24,
+          border: "1px solid rgba(201,168,76,0.35)",
+          background: isLight ? "rgba(201,168,76,0.07)" : "rgba(201,168,76,0.06)",
+        }}>
+          <span style={{ fontSize: 22, lineHeight: 1, flexShrink: 0 }}>✍️</span>
+          <div style={{
+            fontSize: 13, lineHeight: 1.75,
+            color: isLight ? "rgba(80,60,20,0.88)" : "rgba(210,198,160,0.88)",
+          }}>
+            {ui.designerNotice}
+          </div>
+        </div>
+
         {/* Product selection */}
         <section className="wink-panel" style={{ marginBottom: 20 }}>
           <div className="wink-section-title" style={{ marginBottom: 14 }}>
@@ -1581,7 +1603,7 @@ export default function OrderPage() {
           )}
 
           {/* 두 컬럼: 왼쪽 도장 / 오른쪽 문패 */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 20 }}>
 
             {/* 왼쪽: 도장 이름 */}
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -1797,6 +1819,53 @@ export default function OrderPage() {
                   {ui.styleNotice}
                 </div>
               </div>
+
+              {/* 품질 안내 */}
+              <div style={{
+                marginTop: 10,
+                fontSize: 11, lineHeight: 1.7,
+                color: isLight ? "rgba(80,80,100,0.55)" : "rgba(160,175,205,0.50)",
+                textAlign: "center",
+                padding: "0 4px",
+              }}>
+                {ui.previewQualityNote}
+              </div>
+            </div>
+          )}
+
+          {/* ── 실시간 인장 미리보기 ── */}
+          {products.has("stamp") && name.trim() && (
+            <div style={{
+              marginTop: 24,
+              padding: "24px 20px",
+              borderRadius: 16,
+              border: `1px solid ${isLight ? "rgba(201,168,76,0.35)" : "rgba(201,168,76,0.22)"}`,
+              background: isLight
+                ? "radial-gradient(circle at 50% 30%, rgba(201,168,76,0.10), transparent 60%), rgba(252,248,238,0.98)"
+                : "radial-gradient(circle at 50% 30%, rgba(201,168,76,0.08), transparent 60%), rgba(11,18,42,0.85)",
+              display: "flex", flexDirection: "column", alignItems: "center", gap: 8,
+            }}>
+              <div style={{
+                fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase",
+                color: "rgba(201,168,76,0.75)", marginBottom: 4,
+              }}>
+                {ui.previewTitle}
+              </div>
+              <SealStamp
+                name={stampNameLang === "hanja" && hanja.trim() ? hanja.trim() : name.trim()}
+                size={160}
+              />
+              {stampStyle && (
+                <div style={{
+                  fontSize: 12, fontWeight: 600,
+                  color: "rgba(201,168,76,0.75)",
+                  background: "rgba(201,168,76,0.10)",
+                  border: "1px solid rgba(201,168,76,0.25)",
+                  borderRadius: 99, padding: "3px 12px", marginTop: 4,
+                }}>
+                  {ui.styleSelected}: {stampStyle === 1 ? ui.styleLabel1 : stampStyle === 2 ? ui.styleLabel2 : stampStyle === 3 ? ui.styleLabel3 : ui.styleLabel4}
+                </div>
+              )}
             </div>
           )}
         </section>
