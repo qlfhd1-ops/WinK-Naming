@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toPng } from "html-to-image";
 
 export interface NameCardData {
@@ -22,33 +22,52 @@ interface Props {
   onClose: () => void;
 }
 
-const LANGS = [
-  { flag: "🇰🇷", label: "Korean", labelKo: "한국어", key: "korean" },
-  { flag: "🇺🇸", label: "English", labelKo: "영어", key: "english" },
-  { flag: "🇨🇳", label: "Chinese", labelKo: "중국어", key: "chinese" },
-  { flag: "🇯🇵", label: "Japanese", labelKo: "일본어", key: "japanese" },
-];
-
 export default function MultiLangNameCard({ data, lang = "ko", onClose }: Props) {
   const cardRef = useRef<HTMLDivElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
   const [copied, setCopied] = useState(false);
+  // closing: true → opacity 0 트랜지션 시작, onTransitionEnd에서 onClose() 호출
   const [closing, setClosing] = useState(false);
+  // 중복 호출 방지
+  const closingRef = useRef(false);
 
   const isKo = lang === "ko";
+  const koreanRomanized = data.english || data.name;
+
+  // 마운트 시 body 스크롤 잠금, 언마운트 시 복원
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, []);
+
+  // ESC 키로 닫기
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") handleClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function handleClose() {
-    // 1) 포커스 해제 (button outline artifact 방지)
+    if (closingRef.current) return; // 중복 방지
+    closingRef.current = true;
+
+    // 포커스 해제 → button outline artifact 방지
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur();
     }
-    // 2) fade-out 시작 → 200ms 후 실제 unmount
-    setClosing(true);
-    setTimeout(onClose, 200);
-  }
 
-  // 한국어 로마자: english 필드 활용 (GPT가 로마자 표기 생성)
-  const koreanRomanized = data.english || data.name;
+    setClosing(true);
+    // onTransitionEnd 미발생 안전망 (300ms fallback)
+    const timer = setTimeout(onClose, 300);
+    overlayRef.current?.addEventListener(
+      "transitionend",
+      () => { clearTimeout(timer); onClose(); },
+      { once: true }
+    );
+  }
 
   async function handleDownload() {
     if (!cardRef.current || downloading) return;
@@ -67,6 +86,10 @@ export default function MultiLangNameCard({ data, lang = "ko", onClose }: Props)
       console.error("[namecard download]", e);
     } finally {
       setDownloading(false);
+      // html-to-image가 body에 남긴 숨겨진 iframe·canvas 정리
+      document.querySelectorAll<HTMLElement>(
+        "body > iframe[style*='visibility:hidden'], body > canvas[style*='display:none']"
+      ).forEach((el) => el.remove());
     }
   }
 
@@ -91,20 +114,40 @@ export default function MultiLangNameCard({ data, lang = "ko", onClose }: Props)
 
   return (
     <div
+      ref={overlayRef}
+      role="dialog"
+      aria-modal="true"
       style={{
-        position: "fixed", inset: 0, zIndex: 9999,
-        background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)",
-        display: "flex", alignItems: "center", justifyContent: "center",
+        position: "fixed",
+        inset: 0,
+        zIndex: 9999,
+        background: "rgba(0,0,0,0.75)",
+        backdropFilter: "blur(8px)",
+        WebkitBackdropFilter: "blur(8px)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
         padding: "16px",
         overflowY: "auto",
+        // 닫히는 중: 완전 투명 + 클릭·터치 차단
         opacity: closing ? 0 : 1,
-        transition: "opacity 0.18s ease",
+        pointerEvents: closing ? "none" : "auto",
+        transition: "opacity 0.22s ease",
         outline: "none",
+        // isolation: contain으로 자식 border/shadow가 overlay 밖으로 번지지 않도록
+        isolation: "isolate",
       }}
       onClick={handleClose}
     >
       <div
-        style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16, width: "100%", maxWidth: 420 }}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 16,
+          width: "100%",
+          maxWidth: 420,
+        }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* ── 카드 본체 (다운로드 대상) ── */}
@@ -150,47 +193,29 @@ export default function MultiLangNameCard({ data, lang = "ko", onClose }: Props)
               {data.name}
             </div>
 
-            {/* 한자 */}
             {data.hanja && (
               <div style={{ marginTop: 10 }}>
-                <div style={{
-                  fontSize: 22,
-                  letterSpacing: "0.18em",
-                  color: "rgba(201,168,76,0.88)",
-                  fontFamily: "serif",
-                }}>
+                <div style={{ fontSize: 22, letterSpacing: "0.18em", color: "rgba(201,168,76,0.88)", fontFamily: "serif" }}>
                   {data.hanja}
                 </div>
                 {data.hanja_meaning && (
-                  <div style={{
-                    fontSize: 11,
-                    color: "rgba(201,168,76,0.50)",
-                    marginTop: 4,
-                    letterSpacing: "0.06em",
-                  }}>
+                  <div style={{ fontSize: 11, color: "rgba(201,168,76,0.50)", marginTop: 4, letterSpacing: "0.06em" }}>
                     {data.hanja_meaning}
                   </div>
                 )}
               </div>
             )}
 
-            {/* 골드 구분선 */}
             <div style={{
-              margin: "20px auto",
-              height: 1,
-              width: 80,
+              margin: "20px auto", height: 1, width: 80,
               background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.6), transparent)",
             }} />
 
-            {/* 의미 한 줄 요약 */}
             {data.meaning && (
               <div style={{
-                fontSize: 13,
-                color: "rgba(210,222,245,0.80)",
-                lineHeight: 1.7,
-                fontStyle: "italic",
-                padding: "0 8px",
-                marginBottom: 24,
+                fontSize: 13, color: "rgba(210,222,245,0.80)",
+                lineHeight: 1.7, fontStyle: "italic",
+                padding: "0 8px", marginBottom: 24,
               }}>
                 &ldquo;{data.meaning.length > 60 ? data.meaning.slice(0, 58) + "…" : data.meaning}&rdquo;
               </div>
@@ -200,82 +225,38 @@ export default function MultiLangNameCard({ data, lang = "ko", onClose }: Props)
           {/* 다국어 발음 그리드 */}
           <div style={{ padding: "0 20px 24px" }}>
             <div style={{
-              background: "rgba(0,0,0,0.28)",
-              borderRadius: 16,
-              border: "1px solid rgba(201,168,76,0.15)",
-              overflow: "hidden",
+              background: "rgba(0,0,0,0.28)", borderRadius: 16,
+              border: "1px solid rgba(201,168,76,0.15)", overflow: "hidden",
             }}>
-              {/* 헤더 */}
               <div style={{
                 padding: "10px 16px",
                 background: "rgba(201,168,76,0.08)",
                 borderBottom: "1px solid rgba(201,168,76,0.12)",
-                fontSize: 10,
-                letterSpacing: "0.15em",
-                color: "rgba(201,168,76,0.70)",
-                fontWeight: 700,
-                textTransform: "uppercase",
+                fontSize: 10, letterSpacing: "0.15em",
+                color: "rgba(201,168,76,0.70)", fontWeight: 700, textTransform: "uppercase",
               }}>
                 {isKo ? "다국어 발음" : "Global Pronunciation"}
               </div>
 
-              {/* 발음 행 */}
               {[
-                {
-                  flag: "🇰🇷",
-                  label: isKo ? "한국어" : "Korean",
-                  main: data.name,
-                  sub: koreanRomanized !== data.name ? koreanRomanized : "",
-                },
-                {
-                  flag: "🇺🇸",
-                  label: isKo ? "영어" : "English",
-                  main: data.english || "—",
-                  sub: "",
-                },
-                {
-                  flag: "🇨🇳",
-                  label: isKo ? "중국어" : "Chinese",
-                  main: data.chinese || "—",
-                  sub: data.chinese_pinyin || "",
-                },
-                {
-                  flag: "🇯🇵",
-                  label: isKo ? "일본어" : "Japanese",
-                  main: data.japanese_kana || "—",
-                  sub: data.japanese_reading || "",
-                },
+                { flag: "🇰🇷", label: isKo ? "한국어" : "Korean",  main: data.name,              sub: koreanRomanized !== data.name ? koreanRomanized : "" },
+                { flag: "🇺🇸", label: isKo ? "영어"   : "English", main: data.english || "—",    sub: "" },
+                { flag: "🇨🇳", label: isKo ? "중국어" : "Chinese", main: data.chinese || "—",    sub: data.chinese_pinyin || "" },
+                { flag: "🇯🇵", label: isKo ? "일본어" : "Japanese",main: data.japanese_kana || "—", sub: data.japanese_reading || "" },
               ].map((row, i, arr) => (
-                <div
-                  key={row.label}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 12,
-                    padding: "12px 16px",
-                    borderBottom: i < arr.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none",
-                  }}
-                >
+                <div key={row.label} style={{
+                  display: "flex", alignItems: "center", gap: 12,
+                  padding: "12px 16px",
+                  borderBottom: i < arr.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none",
+                }}>
                   <span style={{ fontSize: 18, flexShrink: 0, width: 24, textAlign: "center" }}>{row.flag}</span>
-                  <span style={{
-                    fontSize: 11,
-                    color: "rgba(201,168,76,0.60)",
-                    fontWeight: 600,
-                    width: 52,
-                    flexShrink: 0,
-                    letterSpacing: "0.04em",
-                  }}>
+                  <span style={{ fontSize: 11, color: "rgba(201,168,76,0.60)", fontWeight: 600, width: 52, flexShrink: 0, letterSpacing: "0.04em" }}>
                     {row.label}
                   </span>
                   <div style={{ flex: 1 }}>
                     <span style={{ fontSize: 15, fontWeight: 700, color: "#f0f4ff" }}>{row.main}</span>
                     {row.sub && (
-                      <span style={{
-                        marginLeft: 8,
-                        fontSize: 12,
-                        color: "rgba(201,168,76,0.70)",
-                        fontStyle: "italic",
-                      }}>
+                      <span style={{ marginLeft: 8, fontSize: 12, color: "rgba(201,168,76,0.70)", fontStyle: "italic" }}>
                         {row.sub}
                       </span>
                     )}
@@ -287,10 +268,8 @@ export default function MultiLangNameCard({ data, lang = "ko", onClose }: Props)
 
           {/* 하단 */}
           <div style={{
-            padding: "14px 28px 20px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
+            padding: "14px 28px 20px", display: "flex",
+            justifyContent: "space-between", alignItems: "center",
             borderTop: "1px solid rgba(201,168,76,0.10)",
           }}>
             <div style={{ fontSize: 10, color: "rgba(201,168,76,0.40)", letterSpacing: "0.12em" }}>
@@ -298,38 +277,28 @@ export default function MultiLangNameCard({ data, lang = "ko", onClose }: Props)
             </div>
             {data.score && (
               <div style={{
-                fontSize: 10,
-                color: "rgba(201,168,76,0.55)",
-                background: "rgba(201,168,76,0.10)",
-                border: "1px solid rgba(201,168,76,0.22)",
-                borderRadius: 99,
-                padding: "3px 10px",
-                fontWeight: 700,
-                letterSpacing: "0.06em",
+                fontSize: 10, color: "rgba(201,168,76,0.55)",
+                background: "rgba(201,168,76,0.10)", border: "1px solid rgba(201,168,76,0.22)",
+                borderRadius: 99, padding: "3px 10px", fontWeight: 700, letterSpacing: "0.06em",
               }}>
                 ✦ {data.score}
               </div>
             )}
           </div>
 
-          {/* 하단 골드 라인 */}
           <div style={{ height: 3, background: "linear-gradient(90deg, transparent, #C9A84C, transparent)" }} />
         </div>
 
-        {/* ── 버튼 영역 (다운로드 제외) ── */}
+        {/* ── 버튼 영역 ── */}
         <div style={{ display: "flex", gap: 10, width: "100%" }}>
           <button
             type="button"
             onClick={handleDownload}
             disabled={downloading}
             style={{
-              flex: 1,
-              padding: "14px 0",
-              borderRadius: 12,
+              flex: 1, padding: "14px 0", borderRadius: 12,
               background: "linear-gradient(135deg,#C9A84C,#a87c2a)",
-              color: "#0B1634",
-              fontWeight: 800,
-              fontSize: 14,
+              color: "#0B1634", fontWeight: 800, fontSize: 14,
               border: "none",
               cursor: downloading ? "not-allowed" : "pointer",
               opacity: downloading ? 0.7 : 1,
@@ -343,13 +312,9 @@ export default function MultiLangNameCard({ data, lang = "ko", onClose }: Props)
             type="button"
             onClick={handleShare}
             style={{
-              flex: 1,
-              padding: "14px 0",
-              borderRadius: 12,
-              background: "rgba(201,168,76,0.12)",
-              color: "#C9A84C",
-              fontWeight: 700,
-              fontSize: 14,
+              flex: 1, padding: "14px 0", borderRadius: 12,
+              background: "rgba(201,168,76,0.12)", color: "#C9A84C",
+              fontWeight: 700, fontSize: 14,
               border: "1px solid rgba(201,168,76,0.35)",
               cursor: "pointer",
               display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
@@ -367,6 +332,7 @@ export default function MultiLangNameCard({ data, lang = "ko", onClose }: Props)
             background: "none", border: "none", outline: "none",
             color: "rgba(200,215,240,0.45)",
             fontSize: 13, cursor: "pointer", letterSpacing: "0.06em",
+            WebkitTapHighlightColor: "transparent",
           }}
         >
           ✕ {isKo ? "닫기" : "Close"}
