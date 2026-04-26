@@ -886,94 +886,101 @@ function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-/** 카카오/Daum 우편번호 팝업 — 스크립트 동적 로드 + 모바일 대응 */
+/**
+ * 카카오/Daum 우편번호 — iframe embed 방식 (팝업 차단 우회)
+ * 데스크탑: 화면 중앙 모달 / 모바일: 하단 슬라이드 시트
+ */
 function openDaumPostcode(onComplete: (zip: string, addr: string) => void) {
-  const SCRIPT_ID = "daum-postcode-script";
+  const SCRIPT_ID  = "daum-postcode-script";
   const SCRIPT_SRC = "https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
 
   const run = () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const DaumPostcode = (window as any).daum?.Postcode;
-    if (!DaumPostcode) return;
-
-    // 모바일(터치 기기) 감지 → iframe 팝업으로 표시
-    const isMobileDevice =
-      typeof window !== "undefined" &&
-      (window.innerWidth < 640 || "ontouchstart" in window);
-
-    if (isMobileDevice) {
-      // ── 모바일: 페이지 내 오버레이 iframe ──────────────────────
-      const overlay = document.createElement("div");
-      overlay.id = "daum-postcode-overlay";
-      Object.assign(overlay.style, {
-        position: "fixed", inset: "0", zIndex: "99999",
-        background: "rgba(0,0,0,0.55)", display: "flex",
-        flexDirection: "column", alignItems: "center", justifyContent: "flex-end",
-      });
-
-      const container = document.createElement("div");
-      Object.assign(container.style, {
-        width: "100%", maxHeight: "90dvh",
-        background: "#fff", borderRadius: "16px 16px 0 0",
-        overflow: "hidden", position: "relative",
-      });
-
-      // 닫기 버튼
-      const closeBtn = document.createElement("button");
-      closeBtn.textContent = "✕ 닫기";
-      Object.assign(closeBtn.style, {
-        position: "absolute", top: "10px", right: "14px",
-        zIndex: "1", background: "none", border: "none",
-        fontSize: "14px", fontWeight: "700", cursor: "pointer",
-        color: "#333", padding: "6px",
-      });
-      const removeOverlay = () => overlay.remove();
-      closeBtn.addEventListener("click", removeOverlay);
-      overlay.addEventListener("click", (e) => { if (e.target === overlay) removeOverlay(); });
-
-      container.appendChild(closeBtn);
-      overlay.appendChild(container);
-      document.body.appendChild(overlay);
-
-      new DaumPostcode({
-        oncomplete: (data: { zonecode: string; roadAddress: string; jibunAddress: string }) => {
-          removeOverlay();
-          onComplete(data.zonecode, data.roadAddress || data.jibunAddress);
-        },
-        onclose: removeOverlay,
-        width: "100%",
-        height: "100%",
-      }).embed(container, { autoClose: true });
-    } else {
-      // ── 데스크톱: 기존 팝업 ──────────────────────────────────
-      new DaumPostcode({
-        oncomplete: (data: { zonecode: string; roadAddress: string; jibunAddress: string }) => {
-          onComplete(data.zonecode, data.roadAddress || data.jibunAddress);
-        },
-        theme: {
-          bgColor: "#0B1634",
-          searchBgColor: "#1B2A5E",
-          contentBgColor: "#0B1634",
-          pageBgColor: "#0D1A40",
-          textColor: "#E0EAFF",
-          queryTextColor: "#FFFFFF",
-          postcodeTextColor: "#C9A84C",
-          emphTextColor: "#C9A84C",
-          outlineColor: "rgba(120,160,255,0.18)",
-        },
-      }).open({ autoClose: true });
+    if (!DaumPostcode) {
+      alert("주소 검색 스크립트 로드에 실패했습니다. 페이지를 새로고침 후 다시 시도해 주세요.");
+      return;
     }
+
+    const isMobile = window.innerWidth < 640 || "ontouchstart" in window;
+
+    // ── 공통 오버레이 ────────────────────────────────────────────
+    const overlay = document.createElement("div");
+    overlay.id = "daum-postcode-overlay";
+    Object.assign(overlay.style, {
+      position: "fixed", inset: "0", zIndex: "99999",
+      background: "rgba(0,0,0,0.60)",
+      display: "flex", alignItems: isMobile ? "flex-end" : "center",
+      justifyContent: "center",
+    });
+
+    // ── 컨테이너 (embed 대상) ────────────────────────────────────
+    const container = document.createElement("div");
+    Object.assign(container.style, isMobile
+      ? {
+          width: "100%", height: "80dvh",
+          background: "#fff", borderRadius: "16px 16px 0 0",
+          overflow: "hidden", position: "relative",
+        }
+      : {
+          width: "560px", height: "500px",
+          background: "#fff", borderRadius: "12px",
+          overflow: "hidden", position: "relative",
+          boxShadow: "0 24px 64px rgba(0,0,0,0.45)",
+        }
+    );
+
+    // ── 닫기 버튼 ────────────────────────────────────────────────
+    const closeBtn = document.createElement("button");
+    closeBtn.textContent = "✕";
+    Object.assign(closeBtn.style, {
+      position: "absolute", top: "10px", right: "12px", zIndex: "10",
+      background: "rgba(0,0,0,0.08)", border: "none", borderRadius: "50%",
+      width: "30px", height: "30px", fontSize: "14px",
+      fontWeight: "700", cursor: "pointer", color: "#333",
+      display: "flex", alignItems: "center", justifyContent: "center",
+    });
+
+    const removeOverlay = () => overlay.remove();
+    closeBtn.addEventListener("click", removeOverlay);
+    overlay.addEventListener("click", (e) => { if (e.target === overlay) removeOverlay(); });
+
+    container.appendChild(closeBtn);
+    overlay.appendChild(container);
+    document.body.appendChild(overlay);
+
+    // ── embed (팝업 차단 없음) ───────────────────────────────────
+    new DaumPostcode({
+      oncomplete: (data: { zonecode: string; roadAddress: string; jibunAddress: string }) => {
+        removeOverlay();
+        onComplete(data.zonecode, data.roadAddress || data.jibunAddress);
+      },
+      onclose: removeOverlay,
+      width: "100%",
+      height: "100%",
+    }).embed(container, { autoClose: true });
   };
 
-  // 스크립트 중복 방지 후 로드
-  if (document.getElementById(SCRIPT_ID)) {
-    run();
+  // 스크립트 중복 없이 로드
+  const existing = document.getElementById(SCRIPT_ID) as HTMLScriptElement | null;
+  if (existing) {
+    // 이미 로드 완료인지 확인
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((window as any).daum?.Postcode) {
+      run();
+    } else {
+      // 아직 로딩 중 — onload 추가
+      existing.addEventListener("load", run, { once: true });
+    }
   } else {
     const script = document.createElement("script");
-    script.id = SCRIPT_ID;
-    script.src = SCRIPT_SRC;
+    script.id   = SCRIPT_ID;
+    script.src  = SCRIPT_SRC;
     script.onload = run;
-    script.onerror = () => console.error("[DaumPostcode] 스크립트 로드 실패");
+    script.onerror = () => {
+      console.error("[DaumPostcode] 스크립트 로드 실패");
+      alert("주소 검색 스크립트를 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.");
+    };
     document.head.appendChild(script);
   }
 }
