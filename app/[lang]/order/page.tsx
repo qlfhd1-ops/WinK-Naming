@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
+import Script from "next/script";
 import { AppLang, isSupportedLang } from "@/lib/lang-config";
 import { createClient } from "@/lib/supabase/browser";
 import { PRICING } from "@/lib/pricing";
@@ -887,21 +888,22 @@ function isValidEmail(email: string) {
 }
 
 /**
- * 카카오/Daum 우편번호 — iframe embed 방식 (팝업 차단 완전 우회)
- * - embed() API 사용: 팝업 허용 불필요
- * - 컨테이너 크기를 px 고정값으로 전달 (dvh 미지원 브라우저 대응)
- * - 데스크탑: 화면 중앙 모달 560×500px
- * - 모바일(< 640px): 하단 슬라이드 시트 100% × 60vh
+ * 카카오/Daum 우편번호 — next/script로 미리 로드된 스크립트 사용
+ * - document.head.appendChild 완전 제거 (Next.js App Router 비호환)
+ * - window.daum.Postcode 미준비 시 최대 10회(3초) 재시도
  */
 function openDaumPostcode(onComplete: (zip: string, addr: string) => void) {
-  const SCRIPT_ID  = "daum-postcode-script";
-  const SCRIPT_SRC = "https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+  let retries = 0;
 
   const run = () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const DaumPostcode = (window as any).daum?.Postcode;
     if (!DaumPostcode) {
-      alert("주소 검색 스크립트 로드에 실패했습니다. 페이지를 새로고침 후 다시 시도해 주세요.");
+      if (retries++ < 10) {
+        setTimeout(run, 300);
+      } else {
+        alert("주소 검색 스크립트 로드에 실패했습니다. 페이지를 새로고침 후 다시 시도해 주세요.");
+      }
       return;
     }
 
@@ -972,23 +974,7 @@ function openDaumPostcode(onComplete: (zip: string, addr: string) => void) {
     }).embed(container);
   };
 
-  // 스크립트 로드 (중복 방지)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  if ((window as any).daum?.Postcode) {
-    run();
-    return;
-  }
-  const existing = document.getElementById(SCRIPT_ID);
-  if (existing) {
-    existing.addEventListener("load", run, { once: true });
-    return;
-  }
-  const script = document.createElement("script");
-  script.id  = SCRIPT_ID;
-  script.src = SCRIPT_SRC;
-  script.onload  = run;
-  script.onerror = () => alert("주소 검색 스크립트를 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.");
-  document.head.appendChild(script);
+  run();
 }
 
 function formatKRW(n: number) {
@@ -1374,6 +1360,11 @@ export default function OrderPage() {
   if (step === "confirm") {
     return (
       <main className="wink-page">
+        <Script
+          id="kakao-postcode"
+          src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"
+          strategy="afterInteractive"
+        />
         <div className="wink-container">
           <div className="wink-chip">{ui.chip}</div>
           <h1 className="wink-title">{ui.step2Title}</h1>
@@ -1592,6 +1583,11 @@ export default function OrderPage() {
   // ─── Render: Form (step 1) ────────────────────────────
   return (
     <main className="wink-page">
+      <Script
+        id="kakao-postcode"
+        src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"
+        strategy="afterInteractive"
+      />
       <div className="wink-container">
         <div className="wink-chip">{ui.chip}</div>
         <h1 className="wink-title">{ui.title}</h1>
