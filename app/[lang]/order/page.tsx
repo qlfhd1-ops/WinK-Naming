@@ -2,7 +2,6 @@
 
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import Script from "next/script";
 import { AppLang, isSupportedLang } from "@/lib/lang-config";
 import { createClient } from "@/lib/supabase/browser";
 import { PRICING } from "@/lib/pricing";
@@ -1126,6 +1125,18 @@ export default function OrderPage() {
     return () => { obs.disconnect(); window.removeEventListener("resize", checkMobile); };
   }, []);
 
+  // ── 카카오/Daum 우편번호 스크립트 사전 로드 (step 전환 시 중복 삽입 방지)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if ((window as any).daum?.Postcode) return;
+    if (document.getElementById("kakao-postcode-script")) return;
+    const s = document.createElement("script");
+    s.id = "kakao-postcode-script";
+    s.src = "https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+    s.async = true;
+    document.head.appendChild(s);
+  }, []);
+
 
   // ── URL params (결과 페이지 연동)
   const searchParams = useSearchParams();
@@ -1360,11 +1371,6 @@ export default function OrderPage() {
   if (step === "confirm") {
     return (
       <main className="wink-page">
-        <Script
-          id="kakao-postcode"
-          src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"
-          strategy="afterInteractive"
-        />
         <div className="wink-container">
           <div className="wink-chip">{ui.chip}</div>
           <h1 className="wink-title">{ui.step2Title}</h1>
@@ -1583,11 +1589,6 @@ export default function OrderPage() {
   // ─── Render: Form (step 1) ────────────────────────────
   return (
     <main className="wink-page">
-      <Script
-        id="kakao-postcode"
-        src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"
-        strategy="afterInteractive"
-      />
       <div className="wink-container">
         <div className="wink-chip">{ui.chip}</div>
         <h1 className="wink-title">{ui.title}</h1>
