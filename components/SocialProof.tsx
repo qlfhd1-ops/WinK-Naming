@@ -1,6 +1,70 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import type { AppLang } from "@/lib/lang-config";
+
+// ─── 다국어 UI 텍스트 ──────────────────────────────────────────
+const UI_COPY: Record<AppLang, {
+  countLabel: string;
+  countUnit: string;
+  reviewsLabel: string;
+  badges: [string, string, string];
+}> = {
+  ko: {
+    countLabel: "지금까지 설계된 이름",
+    countUnit: "개",
+    reviewsLabel: "사용자 후기",
+    badges: ["AI + 전문 작명가 검수", "개인정보 비공개 보장", "글로벌 표기 동시 설계"],
+  },
+  en: {
+    countLabel: "Names designed so far",
+    countUnit: "",
+    reviewsLabel: "User Reviews",
+    badges: ["AI + Expert Review", "Private & Confidential", "Global Spelling Included"],
+  },
+  ja: {
+    countLabel: "これまでに設計された名前",
+    countUnit: "件",
+    reviewsLabel: "ユーザーレビュー",
+    badges: ["AI＋専門家レビュー", "プライバシー保護", "グローバル表記対応"],
+  },
+  zh: {
+    countLabel: "已设计的名字总数",
+    countUnit: "个",
+    reviewsLabel: "用户评价",
+    badges: ["AI＋专家审核", "隐私保护", "全球写法同步设计"],
+  },
+  es: {
+    countLabel: "Nombres diseñados hasta ahora",
+    countUnit: "",
+    reviewsLabel: "Reseñas de usuarios",
+    badges: ["IA + Revisión experta", "Privacidad garantizada", "Escritura global incluida"],
+  },
+  ru: {
+    countLabel: "Имён разработано на сегодня",
+    countUnit: "",
+    reviewsLabel: "Отзывы пользователей",
+    badges: ["ИИ + экспертная проверка", "Конфиденциальность", "Глобальное написание"],
+  },
+  fr: {
+    countLabel: "Noms conçus jusqu'à présent",
+    countUnit: "",
+    reviewsLabel: "Avis des utilisateurs",
+    badges: ["IA + Révision experte", "Confidentialité garantie", "Orthographe mondiale"],
+  },
+  ar: {
+    countLabel: "الأسماء المصممة حتى الآن",
+    countUnit: "",
+    reviewsLabel: "آراء المستخدمين",
+    badges: ["ذكاء اصطناعي + مراجعة خبراء", "خصوصية مضمونة", "كتابة عالمية"],
+  },
+  hi: {
+    countLabel: "अब तक डिज़ाइन किए गए नाम",
+    countUnit: "",
+    reviewsLabel: "उपयोगकर्ता समीक्षाएं",
+    badges: ["AI + विशेषज्ञ समीक्षा", "गोपनीयता सुनिश्चित", "वैश्विक वर्तनी शामिल"],
+  },
+};
 
 // ─── 더미 후기 데이터 ─────────────────────────────────────────
 const REVIEWS = [
@@ -80,7 +144,8 @@ function useCountUp(target: number, duration = 1600): number {
 }
 
 // ─── 메인 컴포넌트 ─────────────────────────────────────────────
-export default function SocialProof({ isLight }: { isLight: boolean }) {
+export default function SocialProof({ isLight, lang = "ko" }: { isLight: boolean; lang?: AppLang }) {
+  const t = UI_COPY[lang] ?? UI_COPY.ko;
   const [totalCount, setTotalCount] = useState(0);
   const [reviewIdx, setReviewIdx] = useState(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -156,20 +221,18 @@ export default function SocialProof({ isLight }: { isLight: boolean }) {
             >
               {displayCount.toLocaleString()}
             </span>
-            <span style={{ fontSize: 16, fontWeight: 700, color: textMain }}>개</span>
+            {t.countUnit && (
+            <span style={{ fontSize: 16, fontWeight: 700, color: textMain }}>{t.countUnit}</span>
+          )}
           </div>
           <span style={{ fontSize: 13, color: textSoft, fontWeight: 500 }}>
-            지금까지 설계된 이름
+            {t.countLabel}
           </span>
         </div>
 
         {/* 전문가 검수 뱃지 2개 */}
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-          {[
-            { icon: "✦", label: "AI + 전문 작명가 검수" },
-            { icon: "🔒", label: "개인정보 비공개 보장" },
-            { icon: "🌐", label: "글로벌 표기 동시 설계" },
-          ].map((b) => (
+          {(["✦", "🔒", "🌐"] as const).map((icon, i) => ({ icon, label: t.badges[i] })).map((b) => (
             <div
               key={b.label}
               style={{
@@ -223,7 +286,7 @@ export default function SocialProof({ isLight }: { isLight: boolean }) {
                 textTransform: "uppercase",
               }}
             >
-              사용자 후기
+              {t.reviewsLabel}
             </span>
             <span
               style={{

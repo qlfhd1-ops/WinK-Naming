@@ -8,6 +8,7 @@ import SocialProof from "@/components/SocialProof";
 const LANG_STORAGE_KEY = "wink.naming.preferred-lang";
 const SUPPORTED_LANGS = new Set<AppLang>(["ko", "en", "ja", "zh", "es", "ru", "fr", "ar", "hi"]);
 
+
 const COPY: Record<
   AppLang,
   {
@@ -47,11 +48,11 @@ const COPY: Record<
     changeLanguageButton: "언어 다시 고르기",
   },
   en: {
-    chip: "윙크 네이밍",
-    welcome: "Welcome. This is 윙크 네이밍.",
+    chip: "Wink Naming",
+    welcome: "Welcome to Wink Naming.",
     title: "We design names that elevate the value of life.",
     subtitle: "A premium naming experience for people, families, and brands.",
-    desc: "A name is not simply generated. It is designed across meaning, pronunciation, spelling, impression, and long-term usability. 윙크 네이밍 offers a premium naming experience for personal, family, brand, and global contexts.",
+    desc: "A name is not simply generated. It is designed across meaning, pronunciation, spelling, impression, and long-term usability. Wink Naming offers a premium naming experience for personal, family, brand, and global contexts.",
     trust: [
       "Names are managed privately",
       "Brand names are suggested after an initial similarity check",
@@ -67,11 +68,11 @@ const COPY: Record<
     changeLanguageButton: "Choose another language",
   },
   ja: {
-    chip: "윙크 네이밍",
-    welcome: "ようこそ。윙크 네이밍です。",
+    chip: "ウィンクネーミング",
+    welcome: "ようこそ。ウィンクネーミングへ。",
     title: "人生の価値を高める名前を設計します",
-    subtitle: "We design names that elevate the value of life.",
-    desc: "名前は単に作るものではなく、意味・発音・表記・印象・拡張性まで含めて設計するものです。윙크 네이밍は個人、家族、ブランド、グローバル用途まで支えるプレミアムネーミング体験を提供します。",
+    subtitle: "個人・ご家族・ブランドのためのプレミアムネーミング体験",
+    desc: "名前は単に作るものではなく、意味・発音・表記・印象・拡張性まで含めて設計するものです。ウィンクネーミングは個人、家族、ブランド、グローバル用途まで支えるプレミアムネーミング体験を提供します。",
     trust: [
       "名前は非公開で管理されます",
       "ブランド名は一次類似確認後に提案されます",
@@ -87,11 +88,11 @@ const COPY: Record<
     changeLanguageButton: "別の言語を選ぶ",
   },
   zh: {
-    chip: "윙크 네이밍",
-    welcome: "欢迎来到 윙크 네이밍。",
+    chip: "Wink Naming",
+    welcome: "欢迎来到 Wink Naming。",
     title: "我们设计能够提升人生价值的名字",
-    subtitle: "We design names that elevate the value of life.",
-    desc: "名字不是简单生成的，而是要把含义、发音、写法、印象与延展性一起设计。윙크 네이밍 提供适用于个人、家庭、品牌与全球场景的高端命名体验。",
+    subtitle: "为个人、家庭和品牌提供高端命名体验",
+    desc: "名字不是简单生成的，而是要把含义、发音、写法、印象与延展性一起设计。Wink Naming 提供适用于个人、家庭、品牌与全球场景的高端命名体验。",
     trust: [
       "名字将以隐私方式管理",
       "品牌名在初步近似检视后提出",
@@ -107,11 +108,11 @@ const COPY: Record<
     changeLanguageButton: "重新选择语言",
   },
   es: {
-    chip: "윙크 네이밍",
-    welcome: "Bienvenido. Esto es 윙크 네이밍.",
+    chip: "Wink Naming",
+    welcome: "Bienvenido a Wink Naming.",
     title: "Diseñamos nombres que elevan el valor de la vida",
-    subtitle: "We design names that elevate the value of life.",
-    desc: "Un nombre no se genera simplemente. Se diseña considerando significado, pronunciación, escritura, impresión y proyección. 윙크 네이밍 ofrece una experiencia premium para personas, familias, marcas y usos globales.",
+    subtitle: "Una experiencia de naming premium para personas, familias y marcas",
+    desc: "Un nombre no se genera simplemente. Se diseña considerando significado, pronunciación, escritura, impresión y proyección. Wink Naming ofrece una experiencia premium para personas, familias, marcas y usos globales.",
     trust: [
       "Los nombres se gestionan de forma privada",
       "Las marcas se sugieren tras una revisión inicial de similitud",
@@ -127,11 +128,11 @@ const COPY: Record<
     changeLanguageButton: "Elegir otro idioma",
   },
   ru: {
-    chip: "윙크 네이밍",
-    welcome: "Добро пожаловать. Это 윙크 네이밍.",
+    chip: "Wink Naming",
+    welcome: "Добро пожаловать в Wink Naming.",
     title: "Мы создаём имена, которые повышают ценность жизни",
-    subtitle: "We design names that elevate the value of life.",
-    desc: "Имя — это не просто генерация. Это проектирование значения, произношения, написания, впечатления и долгосрочной применимости. 윙크 네이밍 предлагает премиальный опыт именования для личных, семейных, брендовых и глобальных нужд.",
+    subtitle: "Премиальный опыт именования для людей, семей и брендов",
+    desc: "Имя — это не просто генерация. Это проектирование значения, произношения, написания, впечатления и долгосрочной применимости. Wink Naming предлагает премиальный опыт именования для личных, семейных, брендовых и глобальных нужд.",
     trust: [
       "Имена хранятся конфиденциально",
       "Названия брендов предлагаются после первичной проверки",
@@ -147,11 +148,11 @@ const COPY: Record<
     changeLanguageButton: "Выбрать другой язык",
   },
   fr: {
-    chip: "윙크 네이밍",
-    welcome: "Bienvenue. Voici 윙크 네이밍.",
+    chip: "Wink Naming",
+    welcome: "Bienvenue chez Wink Naming.",
     title: "Nous créons des noms qui élèvent la valeur de la vie",
-    subtitle: "We design names that elevate the value of life.",
-    desc: "Un nom ne se génère pas simplement. Il se conçoit en intégrant sens, prononciation, orthographe, impression et durabilité. 윙크 네이밍 offre une expérience de naming premium pour les personnes, les familles, les marques et les usages globaux.",
+    subtitle: "Une expérience de naming premium pour les personnes, les familles et les marques",
+    desc: "Un nom ne se génère pas simplement. Il se conçoit en intégrant sens, prononciation, orthographe, impression et durabilité. Wink Naming offre une expérience de naming premium pour les personnes, les familles, les marques et les usages globaux.",
     trust: [
       "Les noms sont gérés de façon confidentielle",
       "Les noms de marque sont proposés après une vérification initiale",
@@ -167,11 +168,11 @@ const COPY: Record<
     changeLanguageButton: "Choisir une autre langue",
   },
   ar: {
-    chip: "윙크 네이밍",
-    welcome: "مرحباً. هذا هو 윙크 네이밍.",
+    chip: "Wink Naming",
+    welcome: "مرحباً بكم في Wink Naming.",
     title: "نصمم أسماء ترفع من قيمة الحياة",
-    subtitle: "We design names that elevate the value of life.",
-    desc: "الاسم لا يُولَّد فحسب، بل يُصمَّم بعناية ليشمل المعنى والنطق والكتابة والانطباع والاستخدام على المدى الطويل. تقدم 윙크 네이밍 تجربة تسمية متميزة للأفراد والعائلات والعلامات التجارية والاستخدامات العالمية.",
+    subtitle: "تجربة تسمية متميزة للأفراد والعائلات والعلامات التجارية",
+    desc: "الاسم لا يُولَّد فحسب، بل يُصمَّم بعناية ليشمل المعنى والنطق والكتابة والانطباع والاستخدام على المدى الطويل. تقدم Wink Naming تجربة تسمية متميزة للأفراد والعائلات والعلامات التجارية والاستخدامات العالمية.",
     trust: [
       "تُدار الأسماء بسرية تامة",
       "تُقترح أسماء العلامات التجارية بعد مراجعة أولية",
@@ -187,11 +188,11 @@ const COPY: Record<
     changeLanguageButton: "اختر لغة أخرى",
   },
   hi: {
-    chip: "윙크 네이밍",
-    welcome: "स्वागत है। यह है 윙크 네이밍।",
+    chip: "Wink Naming",
+    welcome: "Wink Naming में आपका स्वागत है।",
     title: "हम ऐसे नाम डिज़ाइन करते हैं जो जीवन की कीमत बढ़ाएं",
-    subtitle: "We design names that elevate the value of life.",
-    desc: "एक नाम सिर्फ बनाया नहीं जाता — इसे अर्थ, उच्चारण, लेखन, प्रभाव और दीर्घकालिक उपयोगिता के साथ डिज़ाइन किया जाता है। 윙크 네이밍 व्यक्तिगत, पारिवारिक, ब्रांड और वैश्विक संदर्भों के लिए एक प्रीमियम नामकरण अनुभव प्रदान करता है।",
+    subtitle: "व्यक्तियों, परिवारों और ब्रांड के लिए प्रीमियम नामकरण अनुभव",
+    desc: "एक नाम सिर्फ बनाया नहीं जाता — इसे अर्थ, उच्चारण, लेखन, प्रभाव और दीर्घकालिक उपयोगिता के साथ डिज़ाइन किया जाता है। Wink Naming व्यक्तिगत, पारिवारिक, ब्रांड और वैश्विक संदर्भों के लिए एक प्रीमियम नामकरण अनुभव प्रदान करता है।",
     trust: [
       "नामों को गोपनीय रखा जाता है",
       "ब्रांड नाम प्रारंभिक समानता जांच के बाद सुझाए जाते हैं",
@@ -297,7 +298,6 @@ export default function HomePage() {
               maxWidth: 920,
               lineHeight: 1.08,
               fontSize: "clamp(24px, 3.8vw, 52px)",
-              whiteSpace: "nowrap",
             }}
           >
             {ui.title}
@@ -315,7 +315,7 @@ export default function HomePage() {
           ))}
         </div>
 
-        <SocialProof isLight={isLight} />
+        <SocialProof isLight={isLight} lang={savedLang ?? "ko"} />
 
         {shouldShowContinue ? (
           <section className="wink-form-section" style={s.continueSection}>
