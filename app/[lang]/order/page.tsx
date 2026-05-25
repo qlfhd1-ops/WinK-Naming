@@ -887,34 +887,29 @@ function isValidEmail(email: string) {
 }
 
 /**
- * 카카오/Daum 우편번호 — next/script로 미리 로드된 스크립트 사용
- * - document.head.appendChild 완전 제거 (Next.js App Router 비호환)
- * - window.daum.Postcode 미준비 시 최대 10회(3초) 재시도
+ * 카카오/Daum 우편번호 embed 방식
+ * - 스크립트 미로드 시 직접 삽입 → onload 콜백으로 실행 (레이스 컨디션 없음)
+ * - 이미 로드됐으면 바로 실행
+ * - script 태그가 존재하지만 아직 로드 중이면 load 이벤트 대기
  */
 function openDaumPostcode(onComplete: (zip: string, addr: string) => void) {
-  let retries = 0;
+  const SCRIPT_ID  = "daum-postcode-sdk";
+  const SCRIPT_SRC = "https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
 
-  const run = () => {
+  function showEmbed() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const DaumPostcode = (window as any).daum?.Postcode;
     if (!DaumPostcode) {
-      if (retries++ < 10) {
-        setTimeout(run, 300);
-      } else {
-        alert("주소 검색 스크립트 로드에 실패했습니다. 페이지를 새로고침 후 다시 시도해 주세요.");
-      }
+      alert("주소 검색 스크립트 로드에 실패했습니다. 페이지를 새로고침 후 다시 시도해 주세요.");
       return;
     }
 
-    // 기존 overlay 중복 방지
     document.getElementById("daum-postcode-overlay")?.remove();
 
     const isMobile = window.innerWidth < 640;
-    // embed()에 전달할 픽셀 고정 크기
     const W = isMobile ? window.innerWidth : 560;
     const H = isMobile ? Math.floor(window.innerHeight * 0.6) : 500;
 
-    // ── 오버레이 배경 ────────────────────────────────────────────
     const overlay = document.createElement("div");
     overlay.id = "daum-postcode-overlay";
     Object.assign(overlay.style, {
@@ -927,7 +922,6 @@ function openDaumPostcode(onComplete: (zip: string, addr: string) => void) {
       justifyContent: "center",
     });
 
-    // ── iframe 삽입 컨테이너 ─────────────────────────────────────
     const container = document.createElement("div");
     Object.assign(container.style, {
       width:  W + "px",
@@ -940,7 +934,6 @@ function openDaumPostcode(onComplete: (zip: string, addr: string) => void) {
       flexShrink: "0",
     });
 
-    // ── 닫기 버튼 ────────────────────────────────────────────────
     const closeBtn = document.createElement("button");
     closeBtn.textContent = "✕";
     Object.assign(closeBtn.style, {
@@ -954,14 +947,12 @@ function openDaumPostcode(onComplete: (zip: string, addr: string) => void) {
 
     const remove = () => overlay.remove();
     closeBtn.addEventListener("click", remove);
-    // 오버레이 배경 클릭 시 닫기
     overlay.addEventListener("mousedown", (e) => { if (e.target === overlay) remove(); });
 
     container.appendChild(closeBtn);
     overlay.appendChild(container);
     document.body.appendChild(overlay);
 
-    // ── embed (팝업 차단 없음) — 크기 px 명시 ───────────────────
     new DaumPostcode({
       width:  W,
       height: H,
@@ -971,9 +962,39 @@ function openDaumPostcode(onComplete: (zip: string, addr: string) => void) {
       },
       onclose: remove,
     }).embed(container);
-  };
+  }
 
-  run();
+  // ① 이미 로드 완료
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if ((window as any).daum?.Postcode) {
+    showEmbed();
+    return;
+  }
+
+  // ② script 태그가 존재 (로드 중 또는 완료)
+  const existing = document.getElementById(SCRIPT_ID) as HTMLScriptElement | null;
+  if (existing) {
+    // data-loaded="1" 이면 이미 완료됐지만 daum 객체가 없는 경우 (오류)
+    if (existing.dataset.loaded === "1") {
+      showEmbed(); // alert로 처리됨
+    } else {
+      existing.addEventListener("load", showEmbed, { once: true });
+    }
+    return;
+  }
+
+  // ③ 최초 로드
+  const script = document.createElement("script");
+  script.id  = SCRIPT_ID;
+  script.src = SCRIPT_SRC;
+  script.onload = () => {
+    script.dataset.loaded = "1";
+    showEmbed();
+  };
+  script.onerror = () => {
+    alert("주소 검색 스크립트를 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.");
+  };
+  document.head.appendChild(script);
 }
 
 function formatKRW(n: number) {
@@ -1125,17 +1146,6 @@ export default function OrderPage() {
     return () => { obs.disconnect(); window.removeEventListener("resize", checkMobile); };
   }, []);
 
-  // ── 카카오/Daum 우편번호 스크립트 사전 로드 (step 전환 시 중복 삽입 방지)
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if ((window as any).daum?.Postcode) return;
-    if (document.getElementById("kakao-postcode-script")) return;
-    const s = document.createElement("script");
-    s.id = "kakao-postcode-script";
-    s.src = "https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
-    s.async = true;
-    document.head.appendChild(s);
-  }, []);
 
 
   // ── URL params (결과 페이지 연동)
