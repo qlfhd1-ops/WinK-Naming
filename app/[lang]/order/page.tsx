@@ -886,115 +886,109 @@ function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-/**
- * 카카오/Daum 우편번호 embed 방식
- * - 스크립트 미로드 시 직접 삽입 → onload 콜백으로 실행 (레이스 컨디션 없음)
- * - 이미 로드됐으면 바로 실행
- * - script 태그가 존재하지만 아직 로드 중이면 load 이벤트 대기
- */
-function openDaumPostcode(onComplete: (zip: string, addr: string) => void) {
-  const SCRIPT_ID  = "daum-postcode-sdk";
-  const SCRIPT_SRC = "https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+// ─── 카카오/Daum 우편번호 오버레이 컴포넌트 ──────────────────
+// 수동 DOM 조작 없이 React 컴포넌트로 관리
+// useEffect 안에서 containerRef.current(이미 DOM에 마운트된 div)에 embed
+function PostcodeOverlay({
+  onComplete,
+  onClose,
+}: {
+  onComplete: (zip: string, addr: string) => void;
+  onClose: () => void;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  function showEmbed() {
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const SCRIPT_ID  = "daum-postcode-sdk";
+    const SCRIPT_SRC = "https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+
+    function initEmbed() {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const DaumPostcode = (window as any).daum?.Postcode;
+      if (!DaumPostcode) return;
+
+      const W = container!.offsetWidth  || (window.innerWidth < 640 ? window.innerWidth : 560);
+      const H = container!.offsetHeight || (window.innerWidth < 640 ? Math.floor(window.innerHeight * 0.6) : 500);
+
+      new DaumPostcode({
+        width:  W,
+        height: H,
+        oncomplete: (data: { zonecode: string; roadAddress: string; jibunAddress: string }) => {
+          onComplete(data.zonecode, data.roadAddress || data.jibunAddress);
+          onClose();
+        },
+        onclose: onClose,
+      }).embed(container);
+    }
+
+    // ① 이미 로드 완료
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const DaumPostcode = (window as any).daum?.Postcode;
-    if (!DaumPostcode) {
-      alert("주소 검색 스크립트 로드에 실패했습니다. 페이지를 새로고침 후 다시 시도해 주세요.");
+    if ((window as any).daum?.Postcode) {
+      initEmbed();
       return;
     }
 
-    document.getElementById("daum-postcode-overlay")?.remove();
-
-    const isMobile = window.innerWidth < 640;
-    const W = isMobile ? window.innerWidth : 560;
-    const H = isMobile ? Math.floor(window.innerHeight * 0.6) : 500;
-
-    const overlay = document.createElement("div");
-    overlay.id = "daum-postcode-overlay";
-    Object.assign(overlay.style, {
-      position: "fixed",
-      top: "0", left: "0", right: "0", bottom: "0",
-      zIndex: "99999",
-      background: "rgba(0,0,0,0.60)",
-      display: "flex",
-      alignItems: isMobile ? "flex-end" : "center",
-      justifyContent: "center",
-    });
-
-    const container = document.createElement("div");
-    Object.assign(container.style, {
-      width:  W + "px",
-      height: H + "px",
-      background: "#fff",
-      borderRadius: isMobile ? "16px 16px 0 0" : "12px",
-      overflow: "hidden",
-      position: "relative",
-      boxShadow: "0 24px 64px rgba(0,0,0,0.5)",
-      flexShrink: "0",
-    });
-
-    const closeBtn = document.createElement("button");
-    closeBtn.textContent = "✕";
-    Object.assign(closeBtn.style, {
-      position: "absolute", top: "8px", right: "10px", zIndex: "10",
-      background: "rgba(0,0,0,0.10)", border: "none",
-      borderRadius: "50%", width: "28px", height: "28px",
-      fontSize: "13px", fontWeight: "700",
-      cursor: "pointer", color: "#222",
-      lineHeight: "1",
-    });
-
-    const remove = () => overlay.remove();
-    closeBtn.addEventListener("click", remove);
-    overlay.addEventListener("mousedown", (e) => { if (e.target === overlay) remove(); });
-
-    container.appendChild(closeBtn);
-    overlay.appendChild(container);
-    document.body.appendChild(overlay);
-
-    new DaumPostcode({
-      width:  W,
-      height: H,
-      oncomplete: (data: { zonecode: string; roadAddress: string; jibunAddress: string }) => {
-        remove();
-        onComplete(data.zonecode, data.roadAddress || data.jibunAddress);
-      },
-      onclose: remove,
-    }).embed(container);
-  }
-
-  // ① 이미 로드 완료
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  if ((window as any).daum?.Postcode) {
-    showEmbed();
-    return;
-  }
-
-  // ② script 태그가 존재 (로드 중 또는 완료)
-  const existing = document.getElementById(SCRIPT_ID) as HTMLScriptElement | null;
-  if (existing) {
-    // data-loaded="1" 이면 이미 완료됐지만 daum 객체가 없는 경우 (오류)
-    if (existing.dataset.loaded === "1") {
-      showEmbed(); // alert로 처리됨
-    } else {
-      existing.addEventListener("load", showEmbed, { once: true });
+    // ② script 태그 존재 (로드 중)
+    const existing = document.getElementById(SCRIPT_ID) as HTMLScriptElement | null;
+    if (existing) {
+      existing.addEventListener("load", initEmbed, { once: true });
+      return;
     }
-    return;
-  }
 
-  // ③ 최초 로드
-  const script = document.createElement("script");
-  script.id  = SCRIPT_ID;
-  script.src = SCRIPT_SRC;
-  script.onload = () => {
-    script.dataset.loaded = "1";
-    showEmbed();
-  };
-  script.onerror = () => {
-    alert("주소 검색 스크립트를 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.");
-  };
-  document.head.appendChild(script);
+    // ③ 최초 로드
+    const script = document.createElement("script");
+    script.id  = SCRIPT_ID;
+    script.src = SCRIPT_SRC;
+    script.addEventListener("load", initEmbed, { once: true });
+    document.head.appendChild(script);
+  // onComplete/onClose는 매 렌더마다 바뀌지 않는 stable 함수이므로 deps 제외
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
+
+  return (
+    <div
+      style={{
+        position: "fixed", inset: 0, zIndex: 99999,
+        background: "rgba(0,0,0,0.60)",
+        display: "flex",
+        alignItems: isMobile ? "flex-end" : "center",
+        justifyContent: "center",
+      }}
+      onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div
+        style={{
+          position: "relative",
+          width:  isMobile ? "100%" : "560px",
+          height: isMobile ? `${Math.floor(window.innerHeight * 0.6)}px` : "500px",
+          background: "#fff",
+          borderRadius: isMobile ? "16px 16px 0 0" : "12px",
+          overflow: "hidden",
+          boxShadow: "0 24px 64px rgba(0,0,0,0.5)",
+          flexShrink: 0,
+        }}
+      >
+        <button
+          type="button"
+          onClick={onClose}
+          style={{
+            position: "absolute", top: 8, right: 10, zIndex: 10,
+            background: "rgba(0,0,0,0.10)", border: "none",
+            borderRadius: "50%", width: 28, height: 28,
+            fontSize: 13, fontWeight: 700,
+            cursor: "pointer", color: "#222", lineHeight: 1,
+          }}
+        >✕</button>
+        {/* Daum SDK가 이 div 안에 iframe을 삽입함 */}
+        <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
+      </div>
+    </div>
+  );
 }
 
 function formatKRW(n: number) {
@@ -1185,6 +1179,8 @@ export default function OrderPage() {
   const [deliveryMemo, setDeliveryMemo] = useState("");
   // 상세 주소 자동 포커스 ref (step1 / confirm step 각각)
   const addrDetailRef1 = useRef<HTMLInputElement>(null);
+  // 우편번호 검색 오버레이 (어느 step에서 열었는지 추적)
+  const [postcodeOpen, setPostcodeOpen] = useState<"step1" | "confirm" | null>(null);
   const addrDetailRef2 = useRef<HTMLInputElement>(null);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -1311,10 +1307,29 @@ export default function OrderPage() {
     }
   };
 
+  // ─── 우편번호 오버레이 (모든 step 공통) ───────────────────
+  const postcodeOverlay = postcodeOpen ? (
+    <PostcodeOverlay
+      onComplete={(zip, addr) => {
+        setDeliveryZip(zip);
+        setDeliveryAddr(addr);
+        setDeliveryAddrDetail("");
+        setPostcodeOpen(null);
+        setTimeout(() => {
+          if (postcodeOpen === "step1") addrDetailRef1.current?.focus();
+          else addrDetailRef2.current?.focus();
+        }, 100);
+      }}
+      onClose={() => setPostcodeOpen(null)}
+    />
+  ) : null;
+
   // ─── Render: Done ──────────────────────────────────────
   if (step === "done") {
     return (
-      <main className="wink-page">
+      <>
+        {postcodeOverlay}
+        <main className="wink-page">
         <div className="wink-container">
           <div className="wink-chip">{ui.chip}</div>
 
@@ -1374,13 +1389,16 @@ export default function OrderPage() {
           </div>
         </div>
       </main>
+      </>
     );
   }
 
   // ─── Render: Confirm (step 2) ─────────────────────────
   if (step === "confirm") {
     return (
-      <main className="wink-page">
+      <>
+        {postcodeOverlay}
+        <main className="wink-page">
         <div className="wink-container">
           <div className="wink-chip">{ui.chip}</div>
           <h1 className="wink-title">{ui.step2Title}</h1>
@@ -1523,12 +1541,7 @@ export default function OrderPage() {
                       onChange={(e) => setDeliveryZip(e.target.value)}
                       placeholder="00000" style={{ maxWidth: 140 }} readOnly />
                     <button type="button"
-                      onClick={() => openDaumPostcode((zip, addr) => {
-                        setDeliveryZip(zip);
-                        setDeliveryAddr(addr);
-                        setDeliveryAddrDetail("");
-                        setTimeout(() => addrDetailRef2.current?.focus(), 100);
-                      })}
+                      onClick={() => setPostcodeOpen("confirm")}
                       style={{
                         padding: "0 20px", borderRadius: 10, fontSize: 13, fontWeight: 700,
                         cursor: "pointer", whiteSpace: "nowrap", transition: "all 0.15s",
@@ -1593,12 +1606,15 @@ export default function OrderPage() {
           </form>
         </div>
       </main>
+      </>
     );
   }
 
   // ─── Render: Form (step 1) ────────────────────────────
   return (
-    <main className="wink-page">
+    <>
+      {postcodeOverlay}
+      <main className="wink-page">
       <div className="wink-container">
         <div className="wink-chip">{ui.chip}</div>
         <h1 className="wink-title">{ui.title}</h1>
@@ -2124,14 +2140,7 @@ export default function OrderPage() {
                 />
                 <button
                   type="button"
-                  onClick={() =>
-                    openDaumPostcode((zip, addr) => {
-                      setDeliveryZip(zip);
-                      setDeliveryAddr(addr);
-                      setDeliveryAddrDetail("");
-                      setTimeout(() => addrDetailRef1.current?.focus(), 100);
-                    })
-                  }
+                  onClick={() => setPostcodeOpen("step1")}
                   style={{
                     padding: "0 20px",
                     borderRadius: 10,
@@ -2208,5 +2217,6 @@ export default function OrderPage() {
         </div>
       </div>
     </main>
+    </>
   );
 }
