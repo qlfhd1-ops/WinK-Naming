@@ -5,7 +5,7 @@
 
 const RESEND_API = "https://api.resend.com/emails";
 const FROM = "윙크 네이밍 <onboarding@resend.dev>";
-const BASE_URL = "https://yoonseul-naming.vercel.app";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? "https://yoonseul-naming.vercel.app";
 
 /** 공통 헤더 HTML — 네이비 + 골드 브랜딩 */
 function emailWrap(content: string): string {

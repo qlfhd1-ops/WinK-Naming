@@ -150,7 +150,7 @@ export async function POST(req: Request) {
 
     // 3. 선물 이메일 발송 (받는 분 이메일이 있을 때)
     if (recipientEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipientEmail)) {
-      const giftCardUrl = `https://yoonseul-naming.vercel.app/${lang}/gift/${finalToken}`;
+      const giftCardUrl = `${process.env.NEXT_PUBLIC_BASE_URL ?? "https://yoonseul-naming.vercel.app"}/${lang}/gift/${finalToken}`;
       sendGiftEmail({
         recipientEmail,
         recipientName,

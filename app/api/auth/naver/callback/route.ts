@@ -5,7 +5,7 @@ import { createAdminClient, createCookieClient } from "@/utils/supabase/server";
  * GET /api/auth/naver/callback
  * 네이버가 code + state 를 쿼리파라미터로 전달 → 토큰 교환 → 사용자 생성/로그인 → "/" 리다이렉트
  */
-const BASE_URL     = "https://yoonseul-naming.vercel.app";
+const BASE_URL     = process.env.NEXT_PUBLIC_BASE_URL ?? "https://yoonseul-naming.vercel.app";
 const CALLBACK_URL = `${BASE_URL}/api/auth/naver/callback`;
 
 export async function GET(req: NextRequest) {

@@ -22,11 +22,11 @@ export const metadata: Metadata = {
   keywords: ["작명", "AI 작명", "이름 짓기", "아이 이름", "브랜드명", "반려동물 이름", "윙크 네이밍", "네이밍 서비스"],
   authors: [{ name: "윙크 네이밍" }],
   creator: "윙크 네이밍",
-  metadataBase: new URL("https://wink-naming.vercel.app"),
+  metadataBase: new URL("https://yoonseul-naming.vercel.app"),
   openGraph: {
     type: "website",
     locale: "ko_KR",
-    url: "https://wink-naming.vercel.app",
+    url: "https://yoonseul-naming.vercel.app",
     siteName: "윙크 네이밍",
     title: "윙크 네이밍 - AI 작명 서비스",
     description: "자녀, 브랜드, 반려동물 이름을 AI가 설계합니다",

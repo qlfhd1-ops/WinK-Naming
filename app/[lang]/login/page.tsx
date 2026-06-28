@@ -357,7 +357,7 @@ export default function LoginPage() {
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: "https://yoonseul-naming.vercel.app/auth/callback",
+          redirectTo: `${process.env.NEXT_PUBLIC_BASE_URL ?? (typeof window !== "undefined" ? window.location.origin : "https://yoonseul-naming.vercel.app")}/auth/callback`,
           ...(provider === "kakao" && { scopes: "profile_nickname profile_image" }),
         },
       });

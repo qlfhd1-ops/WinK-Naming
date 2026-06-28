@@ -3,7 +3,7 @@
 import { forwardRef } from "react";
 import { QRCodeSVG } from "qrcode.react";
 
-const SITE_URL = "https://wink-naming.vercel.app";
+const SITE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? "https://yoonseul-naming.vercel.app";
 
 type Props = {
   name: string;
