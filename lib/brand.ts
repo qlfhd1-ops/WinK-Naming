@@ -1,6 +1,6 @@
 export const BRAND = {
   ko: "윙크 작명",
-  en: "윙크 네이밍",
+  en: "Wink Naming",
   tagline: "이름을 평가하지 않고, 미래를 설계합니다.",
   subtagline: "사람을 응원하는 마음을 담아 이름, 의미, 인장까지 제안하는 글로벌 네이밍 플랫폼",
   philosophy:

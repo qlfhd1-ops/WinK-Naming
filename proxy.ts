@@ -1,17 +1,56 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
 
 /**
- * Next.js 16 Proxy (formerly middleware.ts) — 보안 헤더 + 기초 가드
+ * Next.js 16 Proxy (formerly middleware.ts) — 보안 + Rate Limit + 관리자 인증
  *
  * Next.js 16에서 middleware.ts → proxy.ts 로 마이그레이션.
- * 레이트 리미팅은 Node.js API 라우트 내부(lib/rate-limiter.ts)에서 처리.
  */
-export function proxy(req: NextRequest) {
+
+// ─── Rate limiter (Upstash Redis) ────────────────────────
+function makeRateLimiter(requests: number, window: `${number} s` | `${number} m`) {
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) return null;
+
+  return new Ratelimit({
+    redis: new Redis({ url, token }),
+    limiter: Ratelimit.slidingWindow(requests, window),
+    analytics: false,
+  });
+}
+
+const heavyLimiter = makeRateLimiter(10, "1 m"); // AI 생성 API
+const lightLimiter = makeRateLimiter(30, "1 m"); // 조회/검증 API
+
+// ─── IP 추출 ──────────────────────────────────────────────
+function getIp(req: NextRequest): string {
+  return (
+    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
+    req.headers.get("x-real-ip") ??
+    "unknown"
+  );
+}
+
+// ─── Admin 인증 (헤더 존재 여부만 1차 필터링) ─────────────
+function hasAdminCredential(req: NextRequest): boolean {
+  const adminPw = process.env.ADMIN_PASSWORD;
+  if (adminPw) {
+    const pw = req.headers.get("x-admin-password") ?? "";
+    if (pw === adminPw) return true;
+  }
+  // Bearer 토큰 존재 여부만 확인 (실제 role 검증은 route handler에서)
+  const auth = req.headers.get("authorization") ?? "";
+  return auth.startsWith("Bearer ") && auth.length > 10;
+}
+
+export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const { method } = req;
 
-  // ── /admin 라우트: Supabase 세션 쿠키 없으면 홈으로 redirect ──
+  // ── 1. Admin 페이지 라우트: Supabase 세션 쿠키 없으면 홈으로 redirect ──
   if (pathname.startsWith("/admin")) {
     const hasSession = req.cookies.getAll().some(
       (c) => c.name.includes("auth-token") && c.value.length > 10
@@ -21,7 +60,17 @@ export function proxy(req: NextRequest) {
     }
   }
 
-  // ── 빈 User-Agent 차단 (봇/스크래퍼)
+  // ── 2. Admin API 보호 (/api/admin/* — /api/admin/auth 제외) ──────────
+  if (pathname.startsWith("/api/admin/") && !pathname.startsWith("/api/admin/auth")) {
+    if (!hasAdminCredential(req)) {
+      return NextResponse.json(
+        { ok: false, error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+  }
+
+  // ── 3. 빈 User-Agent 차단 (봇/스크래퍼)
   const ua = req.headers.get("user-agent") ?? "";
   if (!ua && pathname.startsWith("/api/")) {
     return new NextResponse(
@@ -30,24 +79,21 @@ export function proxy(req: NextRequest) {
     );
   }
 
-  // ── POST 전용 mutation 엔드포인트에 GET 차단
+  // ── 4. POST 전용 mutation 엔드포인트에 GET 차단
   const postOnlyPaths = [
     "/api/naming",
     "/api/direct-order",
     "/api/ars",
     "/api/gift-card",
   ];
-  if (
-    postOnlyPaths.some((p) => pathname.startsWith(p)) &&
-    method !== "POST"
-  ) {
+  if (postOnlyPaths.some((p) => pathname.startsWith(p)) && method !== "POST") {
     return new NextResponse(
       JSON.stringify({ ok: false, error: "Method not allowed" }),
       { status: 405, headers: { "Content-Type": "application/json" } }
     );
   }
 
-  // ── POST body의 Content-Type 검사
+  // ── 5. POST body의 Content-Type 검사
   if (method === "POST" && pathname.startsWith("/api/")) {
     const ct = req.headers.get("content-type") ?? "";
     if (!ct.includes("application/json")) {
@@ -58,9 +104,51 @@ export function proxy(req: NextRequest) {
     }
   }
 
+  // ── 6. AI 생성 API Rate Limit ────────────────────────────
+  const isHeavy =
+    pathname === "/api/generate" ||
+    pathname === "/api/naming" ||
+    pathname === "/api/global-naming" ||
+    pathname === "/api/ars";
+
+  const isLightApi =
+    pathname === "/api/brief" ||
+    pathname === "/api/brand-validate" ||
+    pathname === "/api/free-usage";
+
+  if (isHeavy && heavyLimiter) {
+    const ip = getIp(req);
+    const { success, limit, remaining, reset } = await heavyLimiter.limit(ip);
+    if (!success) {
+      return NextResponse.json(
+        { ok: false, error: "요청이 너무 많습니다. 잠시 후 다시 시도해 주세요." },
+        {
+          status: 429,
+          headers: {
+            "X-RateLimit-Limit": String(limit),
+            "X-RateLimit-Remaining": String(remaining),
+            "X-RateLimit-Reset": String(reset),
+            "Retry-After": String(Math.ceil((reset - Date.now()) / 1000)),
+          },
+        }
+      );
+    }
+  }
+
+  if (isLightApi && lightLimiter) {
+    const ip = getIp(req);
+    const { success } = await lightLimiter.limit(`light:${ip}`);
+    if (!success) {
+      return NextResponse.json(
+        { ok: false, error: "요청이 너무 많습니다. 잠시 후 다시 시도해 주세요." },
+        { status: 429 }
+      );
+    }
+  }
+
   const res = NextResponse.next();
 
-  // ── 보안 응답 헤더
+  // ── 7. 보안 응답 헤더
   res.headers.set("X-Content-Type-Options", "nosniff");
   res.headers.set("X-Frame-Options", "DENY");
   res.headers.set("X-XSS-Protection", "1; mode=block");
@@ -73,10 +161,12 @@ export function proxy(req: NextRequest) {
     "Content-Security-Policy",
     [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://developers.kakao.com",
+      // Kakao/Daum SDK + 우편번호 SDK
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://developers.kakao.com https://t1.daumcdn.net",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
       "connect-src 'self' https://*.supabase.co https://api.openai.com",
+      "frame-src https://postcode.map.daum.net",
       "frame-ancestors 'none'",
     ].join("; ")
   );

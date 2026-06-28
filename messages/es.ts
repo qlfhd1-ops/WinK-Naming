@@ -1,4 +1,4 @@
-const BRAND = "윙크 네이밍";
+const BRAND = "Wink Naming";
 
 const es = {
   brand: BRAND,

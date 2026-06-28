@@ -30,7 +30,7 @@ export default function ReturningWelcome({ lang, relationship }: Props) {
           relationship.visitCount <= 1
             ? "윙크 네이밍은 이름을 검색하는 곳이 아니라, 누군가의 시작을 응원하는 마음으로 이름을 선물하는 곳입니다."
             : lastName
-              ? `지난번 ${lastTarget ? `${lastTarget} ` : ""}선물하셨던 이름 “${lastName}”을 기억하고 있습니다. 다시 와주셔서 반갑습니다.`
+              ? `지난번 ${lastTarget ? `${lastTarget} ` : ""}선물하셨던 이름 "${lastName}"을 기억하고 있습니다. 다시 와주셔서 반갑습니다.`
               : "당신이 다시 찾아와 주신 것을 윙크 네이밍은 소중하게 기억합니다.",
         badge:
           relationship.visitCount <= 1
@@ -48,10 +48,10 @@ export default function ReturningWelcome({ lang, relationship }: Props) {
             : "Thank you for coming back",
         desc:
           relationship.visitCount <= 1
-            ? "윙크 네이밍 is not just a place to search names. It is where names are designed and gifted for meaningful beginnings."
+            ? "Wink Naming is not just a place to search names. It is where names are designed and gifted for meaningful beginnings."
             : lastName
-              ? `We remember the name gift “${lastName}”${lastTarget ? ` for ${lastTarget}` : ""}. We are glad to welcome you back.`
-              : "윙크 네이밍 remembers that you chose to return.",
+              ? `We remember the name gift "${lastName}"${lastTarget ? ` for ${lastTarget}` : ""}. We are glad to welcome you back.`
+              : "Wink Naming remembers that you chose to return.",
         badge:
           relationship.visitCount <= 1
             ? "First Visit"
@@ -68,10 +68,10 @@ export default function ReturningWelcome({ lang, relationship }: Props) {
             : "また来てくださってありがとうございます",
         desc:
           relationship.visitCount <= 1
-            ? "윙크 네이밍は名前を検索する場所ではなく、誰かの始まりを応援する気持ちで名前を贈る場所です。"
+            ? "ウィンクネーミングは名前を検索する場所ではなく、誰かの始まりを応援する気持ちで名前を贈る場所です。"
             : lastName
               ? `前回${lastTarget ? `${lastTarget}へ ` : ""}贈られた名前「${lastName}」を覚えています。再訪ありがとうございます。`
-              : "再び訪れてくださったことを、윙크 네이밍は大切に覚えています。",
+              : "再び訪れてくださったことを、ウィンクネーミングは大切に覚えています。",
         badge:
           relationship.visitCount <= 1
             ? "First Visit"
@@ -88,10 +88,10 @@ export default function ReturningWelcome({ lang, relationship }: Props) {
             : "感谢你再次回来",
         desc:
           relationship.visitCount <= 1
-            ? "윙크 네이밍 不是单纯搜索名字的地方，而是为某个重要开始送上名字礼物的平台。"
+            ? "Wink Naming 不是单纯搜索名字的地方，而是为某个重要开始送上名字礼物的平台。"
             : lastName
-              ? `我们记得你上次${lastTarget ? `送给${lastTarget}的` : ""}名字礼物“${lastName}”。欢迎再次回来。`
-              : "윙크 네이밍 会记得你再次回来了。",
+              ? `我们记得你上次${lastTarget ? `送给${lastTarget}的` : ""}名字礼物"${lastName}"。欢迎再次回来。`
+              : "Wink Naming 会记得你再次回来了。",
         badge:
           relationship.visitCount <= 1
             ? "First Visit"
@@ -108,10 +108,10 @@ export default function ReturningWelcome({ lang, relationship }: Props) {
             : "Gracias por volver",
         desc:
           relationship.visitCount <= 1
-            ? "윙크 네이밍 no es solo un lugar para buscar nombres. Es un lugar para diseñar y regalar nombres con intención."
+            ? "Wink Naming no es solo un lugar para buscar nombres. Es un lugar para diseñar y regalar nombres con intención."
             : lastName
-              ? `Recordamos el nombre regalo “${lastName}”${lastTarget ? ` para ${lastTarget}` : ""}. Nos alegra verte de nuevo.`
-              : "윙크 네이밍 recuerda que has vuelto.",
+              ? `Recordamos el nombre regalo "${lastName}"${lastTarget ? ` para ${lastTarget}` : ""}. Nos alegra verte de nuevo.`
+              : "Wink Naming recuerda que has vuelto.",
         badge:
           relationship.visitCount <= 1
             ? "First Visit"
