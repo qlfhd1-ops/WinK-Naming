@@ -29,9 +29,15 @@ function makeRateLimiter(requests: number, window: `${number} s` | `${number} m`
   });
 }
 
-const heavyLimiter = makeRateLimiter(10, "1 m"); // AI 생성 API: IP당 10회/분
-const lightLimiter = makeRateLimiter(30, "1 m"); // 일반 API:   IP당 30회/분
-const authLimiter  = makeRateLimiter(5,  "1 m"); // 로그인 API: IP당 5회/분
+// Rate limiter는 요청 시점에 지연 생성 (top-level 초기화 시 Edge 크래시 방지)
+let heavyLimiter: ReturnType<typeof makeRateLimiter> = null;
+let lightLimiter: ReturnType<typeof makeRateLimiter> = null;
+let authLimiter:  ReturnType<typeof makeRateLimiter> = null;
+function ensureLimiters() {
+  if (heavyLimiter === null) heavyLimiter = makeRateLimiter(10, "1 m");
+  if (lightLimiter === null) lightLimiter = makeRateLimiter(30, "1 m");
+  if (authLimiter  === null) authLimiter  = makeRateLimiter(5,  "1 m");
+}
 
 function getIp(req: NextRequest): string {
   return (
@@ -175,6 +181,9 @@ export async function proxy(req: NextRequest) {
     pathname === "/api/free-usage";
 
   const ip = getIp(req);
+
+  // Rate limiter 지연 초기화 (top-level 초기화 제거로 인한 변경)
+  ensureLimiters();
 
   if (isAuthPath && authLimiter) {
     const { success } = await authLimiter.limit(`auth:${ip}`);
