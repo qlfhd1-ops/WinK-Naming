@@ -4,7 +4,16 @@ import { getFreeLimiter } from "@/lib/upstash";
 import { rateLimit } from "@/lib/rate-limiter";
 import { calcSaju, sajuToPromptText } from "@/lib/saju";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+// OpenAI 클라이언트 — 요청 시점에 초기화 (env var 누락 시 모듈 크래시 방지)
+let _openai: OpenAI | null = null;
+function getOpenAI(): OpenAI {
+  if (!_openai) {
+    const key = process.env.OPENAI_API_KEY;
+    if (!key) throw new Error("OPENAI_API_KEY is not set");
+    _openai = new OpenAI({ apiKey: key });
+  }
+  return _openai;
+}
 
 const CATEGORY_LABEL: Record<string, string> = {
   child: "태어날 아이·자녀 이름",
@@ -353,7 +362,7 @@ ${sajuText ? `\n${sajuText}` : ""}
 
     const userPrompt = isBrand ? brandUserPrompt : isKTF ? ktfUserPrompt : standardUserPrompt;
 
-    const streamResponse = await openai.chat.completions.create({
+    const streamResponse = await getOpenAI().chat.completions.create({
       model: "gpt-4o",
       messages: [
         { role: "system", content: systemPrompt },
