@@ -1,8 +1,6 @@
 import { ImageResponse } from "next/og";
 import { type NextRequest } from "next/server";
 
-export const runtime = "edge";
-
 /**
  * GET /api/og?name=이름&hanja=漢字&meaning=의미&sub=설명
  * Generates a 1200×630 OG image for social sharing.
