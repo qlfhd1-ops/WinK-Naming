@@ -107,14 +107,34 @@ export default function AdminPage() {
   const [stats,     setStats]    = useState<DashStats | null>(null);
   const [statsErr,  setStatsErr] = useState("");
   const [loading,   setLoading]  = useState(false);
+  const adminPwRef = useRef(""); // 비밀번호 인증 시 사용
 
-  // ── Supabase auth → admin role check ──────────────────
+  // ── 인증: 비밀번호(우선) → Supabase 세션 순서로 시도 ──────────────────
   useEffect(() => {
     const check = async () => {
       try {
+        // 방법 1: sessionStorage 비밀번호 인증
+        let pw = "";
+        try { pw = sessionStorage.getItem("wink_admin_pw") ?? ""; } catch { /* ignore */ }
+        if (pw) {
+          const res = await fetch("/api/admin/auth", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ password: pw }),
+          });
+          if (res.ok) {
+            adminPwRef.current = pw;
+            setAuthState("ok");
+            return;
+          }
+          // 비밀번호 틀리면 sessionStorage 초기화
+          try { sessionStorage.removeItem("wink_admin_pw"); } catch { /* ignore */ }
+        }
+
+        // 방법 2: Supabase 세션 + admin role
         const supabase = createClient();
         const { data: { session } } = await supabase.auth.getSession();
-        if (!session) { router.replace("/"); return; }
+        if (!session) { router.replace("/admin/login"); return; }
 
         accessTokenRef.current = session.access_token;
 
@@ -122,11 +142,11 @@ export default function AdminPage() {
           headers: { "Authorization": `Bearer ${session.access_token}` },
         });
         const json = await res.json();
-        if (!json.isAdmin) { router.replace("/"); return; }
+        if (!json.isAdmin) { router.replace("/admin/login"); return; }
 
         setAuthState("ok");
       } catch {
-        router.replace("/");
+        router.replace("/admin/login");
       }
     };
     check();
@@ -143,9 +163,10 @@ export default function AdminPage() {
     setLoading(true);
     setStatsErr("");
     try {
-      const res  = await fetch("/api/admin/stats", {
-        headers: { "Authorization": `Bearer ${accessTokenRef.current}` },
-      });
+      const authHeaders: Record<string, string> = adminPwRef.current
+        ? { "X-Admin-Password": adminPwRef.current }
+        : { "Authorization": `Bearer ${accessTokenRef.current}` };
+      const res  = await fetch("/api/admin/stats", { headers: authHeaders });
       const json = await res.json();
       if (!res.ok || !json.ok) { setStatsErr(json.error ?? "통계 조회 실패"); return; }
       setStats(json.stats);
@@ -154,8 +175,10 @@ export default function AdminPage() {
   };
 
   const handleSignOut = async () => {
+    try { sessionStorage.removeItem("wink_admin_pw"); } catch { /* ignore */ }
+    document.cookie = "wink_admin=;path=/;max-age=0";
     try { const s = createClient(); await s.auth.signOut(); } catch { /* ignore */ }
-    router.replace("/");
+    router.replace("/admin/login");
   };
 
   const updateOrderStatus = async (orderId: string, status: string) => {
@@ -219,6 +242,10 @@ export default function AdminPage() {
             style={{ padding: "7px 16px", borderRadius: 8, border: "1px solid rgba(200,218,248,0.15)", background: "transparent", color: "rgba(200,218,248,0.65)", fontSize: 12, cursor: "pointer", fontWeight: 600 }}>
             {loading ? "새로고침 중..." : "↻ 새로고침"}
           </button>
+          <a href="/admin/property"
+            style={{ padding: "7px 16px", borderRadius: 8, border: "1px solid rgba(100,200,150,0.3)", background: "transparent", color: "rgba(100,220,160,0.85)", fontSize: 12, cursor: "pointer", fontWeight: 600, textDecoration: "none" }}>
+            🏠 매물 관리
+          </a>
           <button type="button" onClick={handleSignOut}
             style={{ padding: "7px 16px", borderRadius: 8, border: "1px solid rgba(255,100,100,0.25)", background: "transparent", color: "rgba(255,120,120,0.75)", fontSize: 12, cursor: "pointer", fontWeight: 600 }}>
             로그아웃

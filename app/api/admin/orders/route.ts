@@ -3,10 +3,10 @@ import { createClient } from "@supabase/supabase-js";
 
 function getAdminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SECRET_KEY;
 
   if (!url || !key) {
-    throw new Error("Supabase service role env is missing.");
+    throw new Error("Supabase admin env is missing.");
   }
 
   return createClient(url, key, {

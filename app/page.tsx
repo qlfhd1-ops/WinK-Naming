@@ -265,8 +265,12 @@ export default function HomePage() {
   }, [savedLang]);
 
   const ui = useMemo(() => {
-    if (savedLang && !showSelector) {
-      return COPY[savedLang];
+    if (savedLang && !showSelector) return COPY[savedLang];
+    // 저장된 언어 없으면 브라우저 언어 감지: 한국어면 ko, 나머지는 en
+    if (typeof navigator !== "undefined") {
+      const bl = navigator.language?.slice(0, 2) ?? "ko";
+      const detected = bl === "ko" ? "ko" : "en";
+      return COPY[detected as AppLang] ?? COPY.ko;
     }
     return COPY.ko;
   }, [savedLang, showSelector]);

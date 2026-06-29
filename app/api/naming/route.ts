@@ -8,6 +8,7 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const CATEGORY_LABEL: Record<string, string> = {
   child: "태어날 아이·자녀 이름",
+  self: "나 자신의 이름·개명",
   brand: "브랜드·상호·서비스명",
   pet: "반려동물 이름",
   stage: "활동명·예명·닉네임",
@@ -119,7 +120,8 @@ export async function POST(req: Request) {
     } = brief;
 
     // ─── 카테고리별 프롬프트 분기 ────────────────────────────
-    const isKTF = category === "korean_to_foreign";
+    const isKTF   = category === "korean_to_foreign";
+    const isBrand = category === "brand";
 
     // ─── 사주 오행 계산 (child 카테고리, birthDate 있을 때) ───
     const sajuText = (category === "child" && birthDate)
@@ -129,7 +131,75 @@ export async function POST(req: Request) {
         })()
       : "";
 
-    const systemPrompt = isKTF
+    const brandSystemPrompt = `당신은 글로벌 브랜드 네이밍 전문가이자 상표 전략가입니다.
+
+[브랜드 네이밍 철학]
+이름은 브랜드의 첫 번째 마케팅입니다. 기억에 남고, 발음하기 쉽고, 트레이드마크로 보호받을 수 있어야 합니다.
+
+[핵심 설계 원칙]
+1. 글로벌 발음 가능성 — 한국어·영어·중국어·일본어 화자 모두 쉽게 발음 가능한 이름 우선
+2. 상표 차별성 — 기존 유명 브랜드와 유사하거나 충돌 가능성이 있는 이름 회피
+3. 도메인 가용성 — .com 도메인 확보 가능성 고려 (짧고 독특한 이름 선호)
+4. 기억 용이성 — 2음절 또는 3음절, 반복 패턴, 강한 모음 조합 선호
+5. 확장 가능성 — 브랜드가 성장해도 카테고리를 제한하지 않는 이름
+6. 의미 안전성 — 세계 주요 언어에서 부정적·저속한 의미 없음 확인
+7. 3방향 트랙: rank_order 1=안정형(safe·검증된 스타일), 2=세련형(refined·세련되고 현대적), 3=창의형(creative·독창적·미래지향적)
+
+[브랜드명 유형 예시]
+- 조어형(invented): Kodak, Häagen-Dazs, Xerox
+- 의미형(meaningful): Apple, Amazon, Nest
+- 축약형(abbreviated): IBM, BMW, KFC
+- 감성형(evocative): Dove, Kindle, Slack
+- 고유명(proper noun): Tesla, Nike, Adidas
+
+반드시 유효한 JSON 배열만 반환하세요. 마크다운 코드블록, 주석, 다른 텍스트는 절대 포함하지 마세요.`;
+
+    const brandUserPrompt = `아래 조건으로 브랜드명 후보 3개를 설계해주세요.
+
+[입력 조건]
+- 브랜드/서비스 성격: ${purpose}
+- 원하는 분위기·키워드: ${styleKeywords || "없음"}
+- 피하고 싶은 느낌·단어: ${avoidKeywords || "없음"}
+- 주 타깃 국가/언어권: ${targetCountry || "글로벌"}
+- 표기 방향: ${preferredScript || "한글+영문 병행"}
+- 추가 요청: ${memo || "없음"}
+- UI 언어: ${lang}
+${excludeNames.length > 0 ? `- 제외할 이름 (이미 제안한 이름, 반드시 다른 이름 설계): ${excludeNames.join(", ")}` : ""}
+
+[출력 형식 — JSON 배열만, 순수 텍스트로]
+[
+  {
+    "rank_order": 1,
+    "track": "safe",
+    "name": "브랜드명 (메인 표기)",
+    "hanja": "",
+    "hanja_meaning": "",
+    "hanja_strokes": "",
+    "five_elements": "",
+    "yinyang": "",
+    "english": "영문 표기",
+    "chinese": "중문 표기 (음차)",
+    "chinese_pinyin": "병음",
+    "japanese_kana": "가나 표기",
+    "japanese_reading": "로마자 읽기",
+    "meaning": "브랜드명의 의미·어원·유래 (2-3문장)",
+    "story": "이 이름이 브랜드 정체성을 어떻게 담는지: 발음·기억·확장성·차별성 관점 (3-4문장)",
+    "fit_reason": "안정형 트랙으로 선정한 이유 — 시장 내 포지셔닝 관점 (1-2문장)",
+    "phonetic_harmony": "글로벌 발음 용이성 분석 — 주요 언어권별 발음 평가 (1-2문장)",
+    "teasing_risk": "low",
+    "similarity_risk": "low",
+    "pronunciation_risk": "low",
+    "caution": "상표 등록 또는 도메인 확보 시 주의사항 (1문장)",
+    "connection_analysis": "입력하신 브랜드 성격·분위기·타깃 조건이 이 이름에 구체적으로 어떻게 반영되었는지 2-3문장",
+    "score": 95
+  },
+  { "rank_order": 2, "track": "refined", ... },
+  { "rank_order": 3, "track": "creative", ... }
+]`;
+
+    const systemPrompt = isBrand
+      ? brandSystemPrompt
+      : isKTF
       ? `당신은 한국 이름의 의미와 철학을 세계 언어로 아름답게 재탄생시키는 전문가입니다.
 
 [작명 철학]
@@ -281,7 +351,7 @@ ${sajuText ? `\n${sajuText}` : ""}
   { "rank_order": 3, "track": "creative", ... }
 ]`;
 
-    const userPrompt = isKTF ? ktfUserPrompt : standardUserPrompt;
+    const userPrompt = isBrand ? brandUserPrompt : isKTF ? ktfUserPrompt : standardUserPrompt;
 
     const streamResponse = await openai.chat.completions.create({
       model: "gpt-4o",

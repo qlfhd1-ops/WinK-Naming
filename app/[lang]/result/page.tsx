@@ -1363,7 +1363,7 @@ function toUiLang(l: string): UiLang {
   return (VALID_UI_LANGS as string[]).includes(l) ? (l as UiLang) : "ko";
 }
 
-const VALID_CATEGORIES = ["child", "brand", "pet", "stage", "korean_to_foreign", "foreign_to_korean"];
+const VALID_CATEGORIES = ["child", "self", "brand", "pet", "stage", "korean_to_foreign", "foreign_to_korean"];
 function normalizeCategory(v: string | null | undefined) {
   const c = v ?? "child";
   return VALID_CATEGORIES.includes(c) ? c : "child";
@@ -1444,6 +1444,7 @@ export default function ResultPage() {
   const [isSavingResult, setIsSavingResult] = useState(false);
   const [isSavingPackage, setIsSavingPackage] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [userLoaded, setUserLoaded] = useState(false); // 유저 확인 완료 여부
   const [freeUsage, setFreeUsage] = useState<{ used: boolean; usedCount: number; quota: number } | null>(null);
   const [userPlan, setUserPlan] = useState<PlanId>("free");
   const [planLoaded, setPlanLoaded] = useState(false);
@@ -1501,22 +1502,24 @@ export default function ResultPage() {
     try { supabaseRef.current = createClient(); } catch { supabaseRef.current = null; }
   }, []);
 
-  // Fetch current user
+  // Fetch current user — 완료 후 userLoaded = true
   useEffect(() => {
     const fetchUser = async () => {
-      if (!supabaseRef.current) return;
+      if (!supabaseRef.current) { setUserLoaded(true); return; }
       try {
         const { data: { user } } = await supabaseRef.current.auth.getUser();
         setUserId(user?.id ?? null);
         setUserEmail(user?.email ?? undefined);
-      } catch { /* ignore */ }
+      } catch { /* ignore */ } finally {
+        setUserLoaded(true); // 로그인 여부와 무관하게 확인 완료 신호
+      }
     };
     fetchUser();
   }, []);
 
-  // Fetch free usage + plan once user is known
+  // Fetch free usage + plan — userLoaded 이후에만 실행 (레이스 컨디션 방지)
   useEffect(() => {
-    if (userId === undefined) return;
+    if (!userLoaded) return; // 유저 확인 전엔 대기
     const uid = userId ?? "";
     const fetchUsageAndPlan = async () => {
       try {
@@ -1537,7 +1540,7 @@ export default function ResultPage() {
       }
     };
     fetchUsageAndPlan();
-  }, [userId]);
+  }, [userId, userLoaded]);
 
   // Fetch A/S eligibility once briefId is known
   useEffect(() => {

@@ -99,13 +99,13 @@ export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const { method }   = req;
 
-  // ── 1. Admin 페이지 — 세션 없으면 홈으로 ──────────────────
-  if (pathname.startsWith("/admin")) {
+  // ── 1. Admin 페이지 — 세션 없으면 로그인으로 ──────────────────
+  if (pathname.startsWith("/admin") && !pathname.startsWith("/admin/login")) {
     const hasSession = req.cookies.getAll().some(
-      (c) => c.name.includes("auth-token") && c.value.length > 10
+      (c) => (c.name.includes("auth-token") || c.name === "wink_admin") && c.value.length > 3
     );
     if (!hasSession) {
-      return NextResponse.redirect(new URL("/", req.url));
+      return NextResponse.redirect(new URL("/admin/login", req.url));
     }
   }
 

@@ -84,8 +84,8 @@ export const SHOW_NAMEPLATE: Record<string, boolean> = {
   foreign_to_korean: true,
 };
 
-/** 로그인 시 월 무료 이름 생성 횟수 */
-export const FREE_MONTHLY_QUOTA = 1;
+/** 로그인 시 월 무료 이름 생성 횟수 (베타 테스트 기간: 3회) */
+export const FREE_MONTHLY_QUOTA = 3;
 
 /** A/S 신청 가능 기간 (결제 후 일수) */
 export const ARS_ELIGIBLE_DAYS = 30;
