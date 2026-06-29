@@ -3,6 +3,9 @@ import type { NextRequest } from "next/server";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 
+// Node.js Runtime 명시 — Edge Runtime의 모듈 호환성 이슈 방지
+export const runtime = "nodejs";
+
 /**
  * Next.js 16 Proxy — 보안 + Rate Limit + 관리자 인증
  *
