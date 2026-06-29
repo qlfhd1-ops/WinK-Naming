@@ -90,13 +90,24 @@ export async function POST(req: Request) {
     if (!paid) {
       const upstash = getFreeLimiter();
       if (upstash) {
-        // Upstash 슬라이딩 윈도우: 시간당 5회
-        const { success, remaining } = await upstash.limit(`naming:${ip}`);
-        if (!success) {
-          return new Response(
-            `data: ${JSON.stringify({ error: "rate_limit", message: "시간당 5회 한도 초과. 잠시 후 다시 시도해 주세요." })}\n\n`,
-            { status: 429, headers: { "Content-Type": "text/event-stream", "X-RateLimit-Remaining": String(remaining) } }
-          );
+        // Upstash 슬라이딩 윈도우: 시간당 5회 (연결 실패 시 in-memory 폴백)
+        try {
+          const { success, remaining } = await upstash.limit(`naming:${ip}`);
+          if (!success) {
+            return new Response(
+              `data: ${JSON.stringify({ error: "rate_limit", message: "시간당 5회 한도 초과. 잠시 후 다시 시도해 주세요." })}\n\n`,
+              { status: 429, headers: { "Content-Type": "text/event-stream", "X-RateLimit-Remaining": String(remaining) } }
+            );
+          }
+        } catch {
+          // Upstash 연결 실패 → in-memory 폴백으로 계속 진행
+          const { allowed } = rateLimit(`naming:${ip}`, 5, 3600);
+          if (!allowed) {
+            return new Response(
+              `data: ${JSON.stringify({ error: "rate_limit", message: "시간당 5회 한도 초과. 잠시 후 다시 시도해 주세요." })}\n\n`,
+              { status: 429, headers: { "Content-Type": "text/event-stream" } }
+            );
+          }
         }
       } else {
         // Upstash 미설정 → in-memory 폴백: 시간당 5회
