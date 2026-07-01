@@ -170,7 +170,7 @@ export default function AdminPage() {
       const json = await res.json();
       if (!res.ok || !json.ok) { setStatsErr(json.error ?? "통계 조회 실패"); return; }
       setStats(json.stats);
-    } catch { setStatsErr("서버 연결 실패"); }
+    } catch (e) { setStatsErr(e instanceof Error ? e.message : "서버 연결 실패"); }
     finally  { setLoading(false); }
   };
 
