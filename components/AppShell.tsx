@@ -111,7 +111,7 @@ export default function AppShell({
     {
       key: "cart",
       label: safeLang === "ko" ? "장바구니" : "Cart",
-      path: "/cart",
+      path: `/${safeLang}/cart`,
       onClick: undefined as (() => void) | undefined,
     },
     {
