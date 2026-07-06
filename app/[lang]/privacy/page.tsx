@@ -9,9 +9,9 @@ export default function PrivacyPage() {
   const rawLang = String(params.lang || "ko");
   const lang = isSupportedLang(rawLang) ? rawLang : "ko";
 
-  const COMPANY = "[사업자명]";
-  const EMAIL = "[이메일@example.com]";
-  const today = "2026년 1월 1일";
+  const COMPANY = "윙크 네이밍";
+  const EMAIL = "qlfhd1@gmail.com";
+  const today = "2026년 7월 7일";
 
   return (
     <main className="wink-page">
@@ -114,7 +114,26 @@ export default function PrivacyPage() {
         </section>
 
         <section className="wink-panel" style={{ marginBottom: 20 }}>
-          <h2 className="wink-section-title" style={{ marginBottom: 12 }}>제7조 (쿠키의 사용)</h2>
+          <h2 className="wink-section-title" style={{ marginBottom: 12 }}>제7조 (숏리스트 및 로컬 저장 데이터)</h2>
+          <div className="wink-result-text" style={{ lineHeight: 2 }}>
+            이름 후보 숏리스트(저장 목록)는 이용자의 브라우저 내 로컬스토리지(localStorage)에만 저장됩니다.
+            서버로 전송되거나 외부에 공유되지 않으며, 브라우저 데이터를 삭제하면 즉시 제거됩니다.
+            회사는 이 데이터를 수집·분석·활용하지 않습니다.
+          </div>
+        </section>
+
+        <section className="wink-panel" style={{ marginBottom: 20 }}>
+          <h2 className="wink-section-title" style={{ marginBottom: 12 }}>제8조 (개인정보 최소 수집 원칙)</h2>
+          <div className="wink-result-text" style={{ lineHeight: 2 }}>
+            회사는 서비스 제공에 필요한 최소한의 개인정보만 수집합니다.
+            이름 설계 시 입력하는 성씨·목적·분위기 등의 브리프 정보는 AI 이름 설계 처리 목적으로만 사용되며,
+            개인 식별을 위한 프로파일링이나 교차 사이트 추적에 활용되지 않습니다.
+            로그인 없이도 서비스의 핵심 기능을 이용할 수 있습니다.
+          </div>
+        </section>
+
+        <section className="wink-panel" style={{ marginBottom: 20 }}>
+          <h2 className="wink-section-title" style={{ marginBottom: 12 }}>제9조 (쿠키의 사용)</h2>
           <div className="wink-result-text" style={{ lineHeight: 2 }}>
             회사는 이용자에게 개인화된 서비스를 제공하기 위하여 쿠키(cookie)를 사용합니다.
             쿠키는 브라우저 설정에서 언제든지 거부하거나 삭제할 수 있습니다.
@@ -123,7 +142,7 @@ export default function PrivacyPage() {
         </section>
 
         <section className="wink-panel" style={{ marginBottom: 20 }}>
-          <h2 className="wink-section-title" style={{ marginBottom: 12 }}>제8조 (개인정보의 안전성 확보 조치)</h2>
+          <h2 className="wink-section-title" style={{ marginBottom: 12 }}>제10조 (개인정보의 안전성 확보 조치)</h2>
           <div className="wink-result-text" style={{ lineHeight: 2 }}>
             <ul style={{ paddingLeft: 20, display: "flex", flexDirection: "column", gap: 6 }}>
               <li>개인정보 암호화 저장 및 전송 시 SSL/TLS 암호화</li>
@@ -135,7 +154,7 @@ export default function PrivacyPage() {
         </section>
 
         <section className="wink-panel" style={{ marginBottom: 20 }}>
-          <h2 className="wink-section-title" style={{ marginBottom: 12 }}>제9조 (개인정보 보호책임자)</h2>
+          <h2 className="wink-section-title" style={{ marginBottom: 12 }}>제11조 (개인정보 보호책임자)</h2>
           <div className="wink-result-text" style={{ lineHeight: 2 }}>
             <p>회사는 개인정보 처리에 관한 업무를 총괄하여 책임지는 개인정보 보호책임자를 지정하고 있습니다.</p>
             <ul style={{ marginTop: 10, paddingLeft: 20, display: "flex", flexDirection: "column", gap: 6 }}>
@@ -153,7 +172,7 @@ export default function PrivacyPage() {
         </section>
 
         <section className="wink-panel" style={{ marginBottom: 32 }}>
-          <h2 className="wink-section-title" style={{ marginBottom: 12 }}>제10조 (개인정보처리방침의 변경)</h2>
+          <h2 className="wink-section-title" style={{ marginBottom: 12 }}>제12조 (개인정보처리방침의 변경)</h2>
           <div className="wink-result-text" style={{ lineHeight: 2 }}>
             이 개인정보처리방침은 {today}부터 적용됩니다.
             변경 시 서비스 내 공지사항을 통해 사전 안내합니다.
