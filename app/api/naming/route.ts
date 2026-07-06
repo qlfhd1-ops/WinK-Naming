@@ -141,6 +141,7 @@ export async function POST(req: Request) {
 
     // ─── 카테고리별 프롬프트 분기 ────────────────────────────
     const isKTF   = category === "korean_to_foreign";
+    const isFTK   = category === "foreign_to_korean";
     const isBrand = category === "brand";
 
     // ─── 사주 오행 계산 (child 카테고리, birthDate 있을 때) ───
@@ -224,6 +225,90 @@ ${excludeNames.length > 0 ? `- 제외할 이름 (이미 제안한 이름, 반드
   { "rank_order": 3, "track": "creative", ... }
 ]`;
 
+    const ftkSystemPrompt = `당신은 외국 이름의 문화·어원·발음을 깊이 분석하여 한국어로 아름답게 재탄생시키는 전문가입니다.
+성명학·한자학·명리학 기반의 한국 작명 원칙과 원본 이름의 문화적 정체성을 동시에 살립니다.
+
+[작명 철학]
+이름의 발음과 의미를 한국어 안에서 재해석합니다.
+단순 음차(音借)가 아닌, 원본 이름이 담은 문화·가치관·어원이 한국 이름으로 자연스럽게 이어지도록 설계합니다.
+
+[핵심 설계 원칙]
+1. 원본 이름 분석 (필수) — 원본 이름의 언어권·어원·의미·문화적 맥락을 먼저 파악
+   예) Emma(독일어 Ermen=전체, 강인함), Liam(아일랜드어, 강한 의지·보호자), Sakura(일본어, 벚꽃)
+2. 발음 기반 한국어 표기 — 원본 발음에 가장 가까운 한글 음절을 선택하되, 발음이 자연스러운 이름 우선
+3. 의미 기반 한국 이름 재설계 — 원본 이름의 뜻을 한자로 재해석하여 새 이름 설계
+4. 한자 오행·획수 분석 (필수) — 각 한자의 오행(木火土金水)·획수·음양 반드시 명시
+   - 오행 상생: 木→火→土→金→水→木 (권장) / 오행 상극: 가능하면 회피
+5. 성씨 음운 조화 — 성씨가 있을 경우 성씨와의 발음·리듬 조화 최우선
+6. 놀림감·부정적 연상 필터 — 한국어에서 이상하거나 웃음거리가 될 수 있는 조합 완전 배제
+7. 흔한 이름 배제 — 도윤·서준·하준·지우 등 출생 빈출 이름 사용 금지
+8. 3방향 트랙 분리 — rank_order 1=발음 중심(safe), 2=의미 중심(refined), 3=창의 재해석(creative)
+
+[트랙별 설계 방향]
+- safe(발음 중심): 원본 이름 발음에 최대한 가까운 한글 이름 (음차 기반, 성씨 조화 포함)
+- refined(의미 중심): 원본 이름의 뜻을 한자로 재해석한 완전한 한국 이름 (발음 유사성 불필요)
+- creative(창의 재해석): 원본 이름의 문화·정서를 한국적 감성으로 새롭게 변환 (발음·의미 모두 자유롭게)
+
+[언어권별 문화 분석 가이드]
+- 영어권: 성경 어원(히브리어), 라틴어, 게르만어 계열 구분하여 어원 의미 파악
+- 일본어: 한자 이름이면 해당 한자 의미 직접 활용 가능, 가나 이름은 발음·계절·자연 연상 반영
+- 중국어: 한자 이름이면 해당 한자를 한국 한자음으로 변환 후 새 이름 설계
+- 유럽어(프랑스·스페인·이탈리아 등): 라틴어 어원 추적하여 의미 반영
+- 아랍어: 의미 중심(신앙·덕목·자연) — 발음보다 뜻 중심 재해석 권장
+
+[3개 후보 다양성 원칙 — 필수]
+3개 이름 후보는 반드시 서로 뚜렷하게 달라야 합니다:
+- 음절 구성이 달라야 함 (2음절·3음절 혼합, 또는 각각 다른 받침 구조)
+- 한자 계열이 달라야 함 (천지인·자연·덕목·의지 계열 각각)
+- 감성 방향이 달라야 함 — safe=발음 친숙, refined=의미 깊음, creative=새로운 해석
+- 3개 중 2개의 이름이 같은 음절이나 비슷한 느낌이면 절대 안 됨
+
+반드시 유효한 JSON 배열만 반환하세요. 마크다운 코드블록, 주석, 다른 텍스트는 절대 포함하지 마세요.`;
+
+    const ftkUserPrompt = `아래 외국 이름을 한국 이름으로 재탄생시켜주세요. 이름 후보 3가지를 설계해주세요.
+
+[입력 조건]
+- 원본 외국 이름: ${targetName || "없음"}
+- 성씨: ${familyName || "없음"}
+- 성별: ${gender || "미지정"}
+- 변환 방향/방법: ${styleKeywords || "없음"} (발음대로 / 의미 기반 / 혼합)
+- 원하는 분위기: ${purpose || "없음"}
+- 피하고 싶은 느낌: ${avoidKeywords || "없음"}
+- 추가 메모: ${memo || "없음"}
+- UI 언어: ${lang}
+${excludeNames.length > 0 ? `- 제외할 이름 (이미 제안한 이름, 반드시 다른 이름 설계): ${excludeNames.join(", ")}` : ""}
+
+[출력 형식 — JSON 배열만, 순수 텍스트로]
+[
+  {
+    "rank_order": 1,
+    "track": "safe",
+    "name": "한글이름",
+    "hanja": "漢字 (해당 없으면 빈 문자열)",
+    "hanja_meaning": "한자 각 글자의 뜻 (예: 旻=가을하늘 민, 俊=준걸 준)",
+    "hanja_strokes": "획수 상세 (예: 旻(8획,火,陰)+俊(9획,木,陽)=17획(陽))",
+    "five_elements": "오행 분석 (예: 火木 상생 — 화생목(火生木) / 발음오행: ㅁ(水)·ㅈ(金) 상생)",
+    "yinyang": "음양 판단 (예: 陽 — 총획 17획 홀수)",
+    "english": "로마자 표기 (원본 이름 발음 기준)",
+    "chinese": "중문 표기",
+    "chinese_pinyin": "병음",
+    "japanese_kana": "가나 표기",
+    "japanese_reading": "로마자 읽기",
+    "meaning": "이름 전체 의미 + 원본 이름과의 연결 (2-3문장)",
+    "story": "원본 이름 어원 분석 → 한국 이름 설계 과정 상세 설명 (3-4문장): 원본 언어권 문화·어원 → 한자 선택 이유 → 오행·획수·성씨 조화",
+    "fit_reason": "이 트랙(발음 중심)으로 선정한 이유 (1-2문장)",
+    "phonetic_harmony": "성씨+이름 음운 조화 분석 (1문장)",
+    "teasing_risk": "low",
+    "similarity_risk": "low",
+    "pronunciation_risk": "low",
+    "caution": "주의사항 — 발음 어색함·놀림 가능성·혼동 위험 등 (1문장)",
+    "connection_analysis": "원본 이름 '${targetName || "해당 이름"}'의 문화·어원·의미가 이 한국 이름에 어떻게 담겼는지 구체적 설명 (2-3문장)",
+    "score": 95
+  },
+  { "rank_order": 2, "track": "refined", ... },
+  { "rank_order": 3, "track": "creative", ... }
+]`;
+
     const systemPrompt = isBrand
       ? brandSystemPrompt
       : isKTF
@@ -266,6 +351,8 @@ ${excludeNames.length > 0 ? `- 제외할 이름 (이미 제안한 이름, 반드
 - 3개 중 2개가 같은 어원 계열이거나 비슷한 느낌이면 절대 안 됨
 
 반드시 유효한 JSON 배열만 반환하세요. 마크다운 코드블록, 주석, 다른 텍스트는 절대 포함하지 마세요.`
+      : isFTK
+      ? ftkSystemPrompt
       : `당신은 대한민국 최고 수준의 작명 전문가이자 성명학·명리학·한자학 전문가입니다.
 
 [작명 철학]
@@ -411,7 +498,7 @@ ${sajuText ? `\n${sajuText}` : ""}
   { "rank_order": 3, "track": "creative", ... }
 ]`;
 
-    const userPrompt = isBrand ? brandUserPrompt : isKTF ? ktfUserPrompt : standardUserPrompt;
+    const userPrompt = isBrand ? brandUserPrompt : isKTF ? ktfUserPrompt : isFTK ? ftkUserPrompt : standardUserPrompt;
 
     const streamResponse = await getOpenAI().chat.completions.create({
       model: "gpt-4o",
