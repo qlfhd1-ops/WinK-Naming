@@ -7,6 +7,7 @@ import {
   getShortlist,
   removeFromShortlist,
   clearShortlist,
+  updateMemo,
   type ShortlistItem,
 } from "@/lib/shortlist";
 
@@ -34,6 +35,8 @@ const COPY = {
     trackRefined: "세련형",
     trackCreative: "창의형",
     compareNote: "최대 20개까지 저장됩니다.",
+    memoPlaceholder: "메모를 남겨보세요 (장단점, 팀 의견, 검토 사항...)",
+    memoSaved: "저장됨",
   },
   en: {
     chip: "Wink Shortlist",
@@ -58,6 +61,8 @@ const COPY = {
     trackRefined: "Refined",
     trackCreative: "Creative",
     compareNote: "Up to 20 names can be saved.",
+    memoPlaceholder: "Add a note (pros, cons, team opinion...)",
+    memoSaved: "Saved",
   },
 } as const;
 
@@ -91,6 +96,7 @@ export default function ShortlistPage() {
 
   const [items, setItems] = useState<ShortlistItem[]>([]);
   const [copied, setCopied] = useState(false);
+  const [memoSavedId, setMemoSavedId] = useState<string | null>(null);
 
   useEffect(() => {
     setItems(getShortlist());
@@ -106,6 +112,13 @@ export default function ShortlistPage() {
     setItems([]);
   }
 
+  function handleMemoChange(id: string, memo: string) {
+    updateMemo(id, memo);
+    setItems(getShortlist());
+    setMemoSavedId(id);
+    setTimeout(() => setMemoSavedId(null), 1500);
+  }
+
   function handleCopyAll() {
     const text = items.map((item, i) => {
       const lines = [
@@ -114,6 +127,7 @@ export default function ShortlistPage() {
         item.english && item.english !== item.name ? `   로마자: ${item.english}` : "",
         item.five_elements ? `   오행: ${item.five_elements.split("—")[0].trim()}` : "",
         item.story ? `   설명: ${item.story.slice(0, 80)}…` : "",
+        item.memo ? `   메모: ${item.memo}` : "",
       ].filter(Boolean);
       return lines.join("\n");
     }).join("\n\n");
@@ -288,8 +302,37 @@ export default function ShortlistPage() {
                   )}
                 </div>
 
+                {/* 메모 입력 */}
+                <div style={{ padding: "0 18px 10px" }}>
+                  <div style={{ position: "relative" }}>
+                    <textarea
+                      rows={2}
+                      defaultValue={item.memo ?? ""}
+                      placeholder={ui.memoPlaceholder}
+                      onBlur={(e) => handleMemoChange(item.id, e.target.value)}
+                      style={{
+                        width: "100%", boxSizing: "border-box",
+                        padding: "9px 12px", borderRadius: 10,
+                        background: "rgba(120,160,255,0.05)",
+                        border: "1px solid rgba(120,160,255,0.14)",
+                        color: "rgba(200,215,245,0.80)",
+                        fontSize: 12, lineHeight: 1.6, resize: "none",
+                        outline: "none", fontFamily: "inherit",
+                      }}
+                    />
+                    {memoSavedId === item.id && (
+                      <span style={{
+                        position: "absolute", bottom: 8, right: 10,
+                        fontSize: 10, color: "rgba(120,200,160,0.80)", fontWeight: 700,
+                      }}>
+                        ✓ {ui.memoSaved}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
                 {/* 삭제 버튼 */}
-                <div style={{ padding: "10px 18px 14px" }}>
+                <div style={{ padding: "4px 18px 14px" }}>
                   <button
                     type="button"
                     onClick={() => handleRemove(item.id)}

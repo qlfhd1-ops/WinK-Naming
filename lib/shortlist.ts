@@ -15,6 +15,7 @@ export type ShortlistItem = {
   category?: string;
   lang?: string;
   savedAt: string;
+  memo?: string;
 };
 
 const KEY = "wink-shortlist";
@@ -48,6 +49,11 @@ export function addToShortlist(item: Omit<ShortlistItem, "id" | "savedAt">): boo
 
 export function removeFromShortlist(id: string) {
   const list = getShortlist().filter((x) => x.id !== id);
+  localStorage.setItem(KEY, JSON.stringify(list));
+}
+
+export function updateMemo(id: string, memo: string) {
+  const list = getShortlist().map((x) => x.id === id ? { ...x, memo } : x);
   localStorage.setItem(KEY, JSON.stringify(list));
 }
 
