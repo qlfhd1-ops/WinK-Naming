@@ -109,6 +109,12 @@ export default function AppShell({
       onClick: undefined as (() => void) | undefined,
     },
     {
+      key: "shortlist",
+      label: safeLang === "ko" ? "숏리스트" : "Shortlist",
+      path: `/${safeLang}/shortlist`,
+      onClick: undefined as (() => void) | undefined,
+    },
+    {
       key: "cart",
       label: safeLang === "ko" ? "장바구니" : "Cart",
       path: `/${safeLang}/cart`,
@@ -284,7 +290,7 @@ export default function AppShell({
       <nav className="wink-bottom-nav">
         {navItems.map((item) => {
           const active = item.path ? isActivePath(pathname, item.path) : false;
-          const icons: Record<string, string> = { category: "🏷️", cart: "🛒", auth: isLoggedIn ? "👤" : "🔑" };
+          const icons: Record<string, string> = { category: "🏷️", shortlist: "📋", cart: "🛒", auth: isLoggedIn ? "👤" : "🔑" };
           return (
             <button
               key={item.key}

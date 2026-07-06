@@ -6,6 +6,7 @@ import { toPng } from "html-to-image";
 import { createClient } from "@/lib/supabase/browser";
 import { AppLang, isSupportedLang } from "@/lib/lang-config";
 import { addCartItem } from "@/lib/cart";
+import { addToShortlist, isInShortlist } from "@/lib/shortlist";
 import NameGenerationScene from "@/components/NameGenerationScene";
 import { PRICING, PACKAGES, CATEGORY_PRICING, SHOW_SEAL, SHOW_NAMEPLATE } from "@/lib/pricing";
 import { trackEvent } from "@/components/GoogleAnalytics";
@@ -2487,20 +2488,26 @@ export default function ResultPage() {
                       {item.meaning}
                     </div>
 
-                    {/* 간결 정보 칩 (오행/획수/음운) */}
-                    {(item.five_elements || item.hanja_strokes || item.phonetic_harmony) && (
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 14 }}>
-                        {item.five_elements && (
-                          <span style={chipStyle}>⚡ {item.five_elements.split("—")[0].trim()}</span>
-                        )}
-                        {item.hanja_strokes && (
-                          <span style={chipStyle}>✦ {item.hanja_strokes.split("=")[1]?.trim() ?? item.hanja_strokes.slice(0, 12)}</span>
-                        )}
-                        {item.phonetic_harmony && (
-                          <span style={chipStyle}>◎ {item.phonetic_harmony.slice(0, 14)}</span>
-                        )}
-                      </div>
-                    )}
+                    {/* 간결 정보 칩 (음절수/로마자/오행/획수/음운) */}
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 14 }}>
+                      {/* 음절수 — 한글이름은 글자수=음절수, 외국이름은 영문 표기로 */}
+                      {/^[\uAC00-\uD7A3]+$/.test(item.name) && (
+                        <span style={chipStyle}>🔤 {item.name.length}음절</span>
+                      )}
+                      {/* 로마자 / 현지 발음 표기 */}
+                      {item.english && item.english !== item.name && (
+                        <span style={chipStyle}>🌐 {item.english}</span>
+                      )}
+                      {item.five_elements && (
+                        <span style={chipStyle}>⚡ {item.five_elements.split("—")[0].trim()}</span>
+                      )}
+                      {item.hanja_strokes && (
+                        <span style={chipStyle}>✦ {item.hanja_strokes.split("=")[1]?.trim() ?? item.hanja_strokes.slice(0, 12)}</span>
+                      )}
+                      {item.phonetic_harmony && (
+                        <span style={chipStyle}>◎ {item.phonetic_harmony.slice(0, 20)}</span>
+                      )}
+                    </div>
                   </div>
 
                   {/* ── 자세히 보기 토글 ── */}
@@ -2543,6 +2550,16 @@ export default function ResultPage() {
                           {item.story}
                         </div>
                       </div>
+
+                      {/* 트랙 선정 이유 */}
+                      {item.fit_reason && (
+                        <div style={{ marginBottom: 14 }}>
+                          <div style={labelStyle}>{ui.fitReason}</div>
+                          <div style={{ ...textStyle, fontSize: 12, color: "rgba(180,200,240,0.65)" }}>
+                            {item.fit_reason}
+                          </div>
+                        </div>
+                      )}
 
                       {/* 글로벌 발음 */}
                       <div style={{ marginBottom: 14 }}>
@@ -2616,6 +2633,48 @@ export default function ResultPage() {
                     borderTop: isExpanded ? "1px solid rgba(120,160,255,0.08)" : "none",
                     paddingTop: isExpanded ? 16 : 0,
                   }}>
+                    {/* 숏리스트 저장 버튼 */}
+                    {(() => {
+                      const saved = isInShortlist(item.name, brief?.category);
+                      return (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const ok = addToShortlist({
+                              name: item.name,
+                              hanja: item.hanja,
+                              hanja_meaning: item.hanja_meaning,
+                              hanja_strokes: item.hanja_strokes,
+                              five_elements: item.five_elements,
+                              phonetic_harmony: item.phonetic_harmony,
+                              meaning: item.meaning,
+                              story: item.story,
+                              fit_reason: item.fit_reason,
+                              english: item.english,
+                              track: item.track,
+                              score: item.score,
+                              category: brief?.category,
+                              lang: rawLang,
+                            });
+                            if (ok) setMessage(lang === "ko" ? "숏리스트에 저장됐습니다" : "Saved to shortlist");
+                            else setMessage(lang === "ko" ? "이미 저장된 이름입니다" : "Already in shortlist");
+                            setTimeout(() => setMessage(""), 2000);
+                          }}
+                          style={{
+                            width: "100%", padding: "10px 0", borderRadius: 12,
+                            fontSize: 13, fontWeight: 700, cursor: "pointer",
+                            border: saved ? "1px solid rgba(100,200,120,0.45)" : "1px solid rgba(120,200,160,0.28)",
+                            background: saved ? "rgba(80,180,120,0.10)" : "rgba(120,200,160,0.06)",
+                            color: saved ? "rgba(100,200,130,0.90)" : "rgba(120,200,160,0.70)",
+                            display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
+                            transition: "all 0.18s",
+                          }}
+                        >
+                          {saved ? "✓" : "+"} {lang === "ko" ? "숏리스트 저장" : "Save to Shortlist"}
+                        </button>
+                      );
+                    })()}
+
                     {/* 네임카드 버튼 */}
                     <button
                       type="button"
