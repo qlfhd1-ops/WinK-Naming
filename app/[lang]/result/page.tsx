@@ -2656,8 +2656,12 @@ export default function ResultPage() {
                               category: brief?.category,
                               lang: rawLang,
                             });
-                            if (ok) setMessage(lang === "ko" ? "숏리스트에 저장됐습니다" : "Saved to shortlist");
-                            else setMessage(lang === "ko" ? "이미 저장된 이름입니다" : "Already in shortlist");
+                            if (ok) {
+                              setMessage(lang === "ko" ? "숏리스트에 저장됐습니다" : "Saved to shortlist");
+                              trackEvent("shortlist_added", { name: item.name, category: brief?.category ?? "unknown", lang: rawLang });
+                            } else {
+                              setMessage(lang === "ko" ? "이미 저장된 이름입니다" : "Already in shortlist");
+                            }
                             setTimeout(() => setMessage(""), 2000);
                           }}
                           style={{

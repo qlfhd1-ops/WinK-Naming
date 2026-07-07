@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/browser";
 import { type AppLang, isSupportedLang } from "@/lib/lang-config";
+import { trackEvent } from "@/components/GoogleAnalytics";
 
 const BRAND_NAME = "윙크 네이밍";
 
@@ -848,6 +849,7 @@ export default function CategoryPage() {
       setLoginModalOpen(true);
       return;
     }
+    trackEvent("category_selected", { category: key, lang });
     router.push(`/${lang}/design?type=${key}`);
   };
 

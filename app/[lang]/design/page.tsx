@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/browser";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { AppLang, isSupportedLang } from "@/lib/lang-config";
 import type { BriefPayload } from "@/lib/naming-engine";
+import { trackEvent } from "@/components/GoogleAnalytics";
 
 type ValidCategory =
   | "child"
@@ -1847,6 +1848,7 @@ export default function DesignPage() {
     };
 
     setError("");
+    trackEvent("brief_submitted", { category, lang });
     sessionStorage.setItem("winkNamingBrief", JSON.stringify(payload));
     router.push(`/${lang}/result`);
   };
@@ -1869,6 +1871,7 @@ export default function DesignPage() {
       memo: ktfMemo.trim(),
     };
     setError("");
+    trackEvent("brief_submitted", { category: "korean_to_foreign", lang });
     sessionStorage.setItem("winkNamingBrief", JSON.stringify(payload));
     router.push(`/${lang}/result`);
   };
@@ -1890,6 +1893,7 @@ export default function DesignPage() {
       memo: ftkMemo.trim(),
     };
     setError("");
+    trackEvent("brief_submitted", { category: "foreign_to_korean", lang });
     sessionStorage.setItem("winkNamingBrief", JSON.stringify(payload));
     router.push(`/${lang}/result`);
   };
