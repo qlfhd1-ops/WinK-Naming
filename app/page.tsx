@@ -25,6 +25,10 @@ const COPY: Record<
     continueButton: string;
     selectButton: string;
     changeLanguageButton: string;
+    hangeulChip: string;
+    hangeulTitle: string;
+    hangeulBody: string;
+    hangeulGift: string;
   }
 > = {
   ko: {
@@ -46,6 +50,10 @@ const COPY: Record<
     continueButton: "이 언어로 계속",
     selectButton: "새로 선택하기",
     changeLanguageButton: "언어 다시 고르기",
+    hangeulChip: "한글의 우수성",
+    hangeulTitle: "세계가 주목하는 문자, 한글",
+    hangeulBody: "한글은 소리와 뜻을 동시에 담을 수 있도록 과학적으로 설계된 문자입니다. 자음과 모음이 어우러져 만들어내는 정교한 조화, 배우기 쉬우면서도 표현의 깊이가 남다른 언어 — 전 세계 언어학자들이 가장 우수한 문자 체계 중 하나로 꼽는 이유입니다.",
+    hangeulGift: "나와 소중한 사람들에게 한글 이름을 선물하세요. 뜻과 소리가 함께 깃든 한국식 이름은 단순한 호칭을 넘어 하나의 정체성이 됩니다. 언젠가 대한민국을 찾는 날, 자신만의 한국 이름으로 현지인과 마음을 나눠보세요.",
   },
   en: {
     chip: "Wink Naming",
@@ -66,6 +74,10 @@ const COPY: Record<
     continueButton: "Continue in this language",
     selectButton: "Choose again",
     changeLanguageButton: "Choose another language",
+    hangeulChip: "Why Hangul?",
+    hangeulTitle: "Hangul — The Script the World Admires",
+    hangeulBody: "Hangul was scientifically designed to capture both sound and meaning with perfect precision. Its elegant harmony of consonants and vowels makes it one of the most logical, learnable, and expressive writing systems ever created — celebrated by linguists worldwide as a true masterpiece of human design.",
+    hangeulGift: "Gift a Korean name to yourself and the people you love. A name rooted in both meaning and sound becomes more than a label — it becomes an identity. And when you one day set foot in Korea, that name becomes your first bridge to the people here.",
   },
   ja: {
     chip: "ウィンクネーミング",
@@ -86,6 +98,10 @@ const COPY: Record<
     continueButton: "この言語で続ける",
     selectButton: "新しく選ぶ",
     changeLanguageButton: "別の言語を選ぶ",
+    hangeulChip: "ハングルの優秀性",
+    hangeulTitle: "世界が注目する文字、ハングル",
+    hangeulBody: "ハングルは、音と意味を同時に表現できるよう科学的に設計された文字体系です。子音と母音が織り成す精巧な調和、習得しやすさと深い表現力を兼ね備えた言語として、世界中の言語学者から最も優れた文字体系のひとつに挙げられています。",
+    hangeulGift: "大切な人と自分へ、ハングルの名前を贈りましょう。意味と音が宿る韓国式の名前は、単なる呼び名を超えて、ひとつのアイデンティティになります。いつか韓国を訪れる日、その名前があなたと現地の人々をつなぐ橋になるでしょう。",
   },
   zh: {
     chip: "Wink Naming",
@@ -106,6 +122,10 @@ const COPY: Record<
     continueButton: "用此语言继续",
     selectButton: "重新选择",
     changeLanguageButton: "重新选择语言",
+    hangeulChip: "韩文的卓越性",
+    hangeulTitle: "举世瞩目的文字——韩文",
+    hangeulBody: "韩文是一套经过科学设计的文字体系，能够同时承载声音与意义。辅音与元音相互呼应，构成精妙的和谐，易于学习却深具表达力——这正是全球语言学家将其列为最优秀文字体系之一的原因。",
+    hangeulGift: "为自己和珍爱的人送上一个韩文名字吧。一个兼具意义与声音的韩国式名字，不仅仅是一个称呼，更是一种独特的身份认同。终有一天踏上韩国的土地时，那个名字将成为你与当地人心意相通的桥梁。",
   },
   es: {
     chip: "Wink Naming",
@@ -126,6 +146,10 @@ const COPY: Record<
     continueButton: "Continuar con este idioma",
     selectButton: "Elegir de nuevo",
     changeLanguageButton: "Elegir otro idioma",
+    hangeulChip: "La excelencia del Hangul",
+    hangeulTitle: "El alfabeto que el mundo admira: el Hangul",
+    hangeulBody: "El Hangul fue diseñado científicamente para capturar sonido y significado con precisión perfecta. Su armoniosa combinación de consonantes y vocales lo convierte en uno de los sistemas de escritura más lógicos, accesibles y expresivos jamás creados, celebrado por lingüistas de todo el mundo.",
+    hangeulGift: "Regálate a ti mismo y a quienes amas un nombre en coreano. Un nombre arraigado en el sonido y el significado se convierte en algo más que una etiqueta: se convierte en una identidad. Y cuando algún día pongas un pie en Corea, ese nombre será tu primer puente hacia su gente.",
   },
   ru: {
     chip: "Wink Naming",
@@ -146,6 +170,10 @@ const COPY: Record<
     continueButton: "Продолжить на этом языке",
     selectButton: "Выбрать снова",
     changeLanguageButton: "Выбрать другой язык",
+    hangeulChip: "Превосходство хангыля",
+    hangeulTitle: "Письмо, восхищающее весь мир — хангыль",
+    hangeulBody: "Хангыль был научно разработан для точной передачи звука и смысла одновременно. Гармоничное сочетание согласных и гласных делает его одной из самых логичных, доступных и выразительных письменных систем в мире — признанным лингвистами всей планеты шедевром человеческого замысла.",
+    hangeulGift: "Подарите себе и близким корейское имя. Имя, в котором живут звук и смысл, становится больше чем просто словом — оно становится частью вашей личности. И когда вы однажды окажетесь в Корее, именно это имя станет вашим первым мостом к местным жителям.",
   },
   fr: {
     chip: "Wink Naming",
@@ -166,6 +194,10 @@ const COPY: Record<
     continueButton: "Continuer dans cette langue",
     selectButton: "Choisir à nouveau",
     changeLanguageButton: "Choisir une autre langue",
+    hangeulChip: "L'excellence du Hangul",
+    hangeulTitle: "Hangul — L'écriture que le monde admire",
+    hangeulBody: "Le Hangul a été scientifiquement conçu pour capturer à la fois le son et le sens avec une précision parfaite. Son harmonie élégante entre consonnes et voyelles en fait l'un des systèmes d'écriture les plus logiques, accessibles et expressifs jamais créés — salué par les linguistes du monde entier comme un chef-d'œuvre de conception humaine.",
+    hangeulGift: "Offrez un prénom coréen à vous-même et aux êtres qui vous sont chers. Un nom ancré dans le son et le sens devient bien plus qu'une étiquette — il devient une identité. Et le jour où vous poserez le pied en Corée, ce nom sera votre premier pont vers ses habitants.",
   },
   ar: {
     chip: "Wink Naming",
@@ -186,6 +218,10 @@ const COPY: Record<
     continueButton: "المتابعة بهذه اللغة",
     selectButton: "اختر مجدداً",
     changeLanguageButton: "اختر لغة أخرى",
+    hangeulChip: "تميّز الهانغول",
+    hangeulTitle: "الهانغول — الخط الذي يُبهر العالم",
+    hangeulBody: "صُمِّم الهانغول بعناية علمية ليجمع بين الصوت والمعنى بدقة متناهية. تُشكّل الأحرف الساكنة والمتحركة تناسقاً بديعاً يجعل منه أحد أكثر أنظمة الكتابة منطقية وسهولة وتعبيراً في العالم — وهو ما يُشيد به علماء اللغة في كل مكان.",
+    hangeulGift: "أهدِ لنفسك ولمن تُحب اسماً كورياً. اسم تتجذّر فيه المعاني والأصوات يتجاوز مجرد لقب ليصبح هوية حقيقية. وحين تطأ قدماك يوماً أرض كوريا، سيكون هذا الاسم أوّل جسر يصلك بأهلها.",
   },
   hi: {
     chip: "Wink Naming",
@@ -206,6 +242,10 @@ const COPY: Record<
     continueButton: "इस भाषा में जारी रखें",
     selectButton: "फिर से चुनें",
     changeLanguageButton: "दूसरी भाषा चुनें",
+    hangeulChip: "हंगुल की उत्कृष्टता",
+    hangeulTitle: "हंगुल — वह लिपि जिसे पूरी दुनिया सराहती है",
+    hangeulBody: "हंगुल को वैज्ञानिक रूप से ध्वनि और अर्थ दोनों को एक साथ सटीकता से व्यक्त करने के लिए डिज़ाइन किया गया है। व्यंजन और स्वरों का यह सुंदर समन्वय इसे दुनिया की सबसे तार्किक, सरल और अभिव्यंजक लेखन प्रणालियों में से एक बनाता है — जिसे वैश्विक भाषाविद् मानव रचनात्मकता का उत्कृष्ट उदाहरण मानते हैं।",
+    hangeulGift: "अपने लिए और अपने प्रियजनों को एक कोरियाई नाम का उपहार दें। ध्वनि और अर्थ से भरा एक कोरियाई नाम महज एक पहचान से कहीं अधिक बन जाता है — यह एक अस्तित्व की पहचान बन जाता है। और जब कभी आप कोरिया की धरती पर कदम रखें, वह नाम ही आपको यहाँ के लोगों से जोड़ने का पहला सेतु बनेगा।",
   },
 };
 
@@ -320,6 +360,55 @@ export default function HomePage() {
         </div>
 
         <SocialProof isLight={isLight} lang={savedLang ?? "ko"} />
+
+        {/* 한글 우수성 섹션 */}
+        <section style={{
+          margin: "28px 0",
+          padding: "28px 28px 24px",
+          borderRadius: 22,
+          border: isLight
+            ? "1px solid rgba(160, 120, 60, 0.20)"
+            : "1px solid rgba(120, 160, 255, 0.14)",
+          background: isLight
+            ? "linear-gradient(135deg, rgba(255, 249, 235, 0.98), rgba(255, 244, 218, 0.95))"
+            : "linear-gradient(135deg, rgba(12, 26, 60, 0.80), rgba(7, 15, 36, 0.90))",
+        }}>
+          <div style={{
+            display: "inline-flex", alignItems: "center",
+            fontSize: 11, fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase" as const,
+            color: "rgba(201,168,76,0.85)",
+            background: "rgba(201,168,76,0.10)",
+            border: "1px solid rgba(201,168,76,0.28)",
+            borderRadius: 99, padding: "3px 11px", marginBottom: 16,
+          }}>
+            {ui.hangeulChip}
+          </div>
+          <h2 style={{
+            fontSize: "clamp(18px, 2.4vw, 26px)", fontWeight: 900,
+            color: "var(--text-main)", marginBottom: 12, lineHeight: 1.2,
+          }}>
+            {ui.hangeulTitle}
+          </h2>
+          <p style={{
+            fontSize: 14, lineHeight: 1.85, color: "var(--text-soft)",
+            maxWidth: 720, marginBottom: 16,
+          }}>
+            {ui.hangeulBody}
+          </p>
+          <p style={{
+            fontSize: 14, lineHeight: 1.85,
+            color: isLight ? "rgba(120, 80, 20, 0.78)" : "rgba(201,168,76,0.72)",
+            maxWidth: 720, marginBottom: 0,
+            padding: "14px 18px",
+            borderRadius: 12,
+            background: isLight
+              ? "rgba(201,168,76,0.08)"
+              : "rgba(201,168,76,0.06)",
+            border: "1px solid rgba(201,168,76,0.18)",
+          }}>
+            {ui.hangeulGift}
+          </p>
+        </section>
 
         {shouldShowContinue ? (
           <section className="wink-form-section" style={s.continueSection}>
