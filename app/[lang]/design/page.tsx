@@ -1724,11 +1724,18 @@ export default function DesignPage() {
   // Auth guard: redirect to login if not authenticated
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => {
+    const check = async () => {
+      let { data } = await supabase.auth.getUser();
+      if (!data.user) {
+        // 매직링크 콜백 직후 타이밍 이슈 방지 — 1회 재시도
+        await new Promise((r) => setTimeout(r, 1000));
+        ({ data } = await supabase.auth.getUser());
+      }
       if (!data.user) {
         router.replace(`/${lang}/login?next=${encodeURIComponent(`/${lang}/design?type=${category}`)}`);
       }
-    });
+    };
+    check();
   }, [lang, category, router]);
 
   useEffect(() => {

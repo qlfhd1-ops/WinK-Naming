@@ -31,24 +31,31 @@ function CallbackInner() {
       // Supabase가 #access_token=...&type=magiclink 형태로 전달
       const hash = typeof window !== "undefined" ? window.location.hash : "";
       if (hash.includes("access_token")) {
-        // Supabase 클라이언트가 자동으로 해시 파싱하여 세션 설정
+        // 해시 파싱 완료까지 대기 후 세션 확인
+        await new Promise((r) => setTimeout(r, 500));
         const { data, error } = await supabase.auth.getSession();
         if (error || !data.session) {
-          // 약간의 지연 후 재시도 (해시 파싱 타이밍)
-          await new Promise((r) => setTimeout(r, 800));
+          await new Promise((r) => setTimeout(r, 1000));
           const { data: retryData, error: retryError } = await supabase.auth.getSession();
           if (retryError || !retryData.session) {
             setMessage("로그인 처리에 실패했습니다. 다시 시도해 주세요.");
-            setTimeout(() => router.replace("/login"), 2000);
+            setTimeout(() => router.replace("/ko/login"), 2000);
             return;
           }
         }
+        // 세션 localStorage 저장 완료까지 추가 대기
+        await new Promise((r) => setTimeout(r, 300));
         router.replace(next);
         return;
       }
 
-      // ── 3. 아무것도 없으면 홈으로
-      router.replace(next);
+      // ── 3. 세션 없이 도착한 경우 — 세션이 이미 있으면 그냥 통과
+      const { data: existingSession } = await supabase.auth.getSession();
+      if (existingSession.session) {
+        router.replace(next);
+        return;
+      }
+      router.replace("/ko/login");
     };
 
     run();
