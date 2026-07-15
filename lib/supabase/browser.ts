@@ -22,10 +22,13 @@ function createFreshClient() {
 
   return createSupabaseClient(url, anonKey, {
     auth: {
-      // 서버에서는 localStorage 없음 → persistSession 비활성화
       persistSession:     isBrowser,
       autoRefreshToken:   isBrowser,
       detectSessionInUrl: isBrowser,
+      // PKCE: 매직링크를 code+verifier 방식으로 전환
+      // Gmail 보안스캐너가 링크를 미리 클릭해도 브라우저의 code_verifier 없이는
+      // 토큰 교환이 불가능해 1회용 토큰 소진 문제를 원천 차단합니다.
+      flowType: "pkce",
     },
   });
 }
