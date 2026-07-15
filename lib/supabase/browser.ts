@@ -9,9 +9,10 @@ import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 // 해결: SSR에서는 매번 새 클라이언트 생성 (싱글턴 없음)
 //       브라우저에서는 탭 당 1개 싱글턴 (각 탭이 독립 모듈 스코프 가짐)
 
-// NEXT_PUBLIC 변수는 브라우저에 노출되는 공개 값입니다
-const SUPABASE_URL  = process.env.NEXT_PUBLIC_SUPABASE_URL  ?? "https://cyntpbjhpklgzkiwbmph.supabase.co";
-const SUPABASE_ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5bnRwYmpocGtsZ3praXdibXBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5MzAzOTYsImV4cCI6MjA4NzUwNjM5Nn0.-821zOmHC7v3y8NzC1FJ1yc92Q5l1E77K3jDzp6P9fE";
+// NEXT_PUBLIC 키는 빌드 타임에 번들에 직접 포함되는 공개 값입니다.
+// Vercel 환경변수에 구형 sb_publishable_ 형식이 설정된 경우를 대비해 JWT 키를 직접 사용합니다.
+const SUPABASE_URL  = "https://cyntpbjhpklgzkiwbmph.supabase.co";
+const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5bnRwYmpocGtsZ3praXdibXBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5MzAzOTYsImV4cCI6MjA4NzUwNjM5Nn0.-821zOmHC7v3y8NzC1FJ1yc92Q5l1E77K3jDzp6P9fE";
 
 function createFreshClient() {
   const url     = SUPABASE_URL;
