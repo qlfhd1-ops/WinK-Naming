@@ -9,20 +9,13 @@ import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 // 해결: SSR에서는 매번 새 클라이언트 생성 (싱글턴 없음)
 //       브라우저에서는 탭 당 1개 싱글턴 (각 탭이 독립 모듈 스코프 가짐)
 
-function createFreshClient() {
-  const url     = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+// NEXT_PUBLIC 변수는 브라우저에 노출되는 공개 값입니다
+const SUPABASE_URL  = process.env.NEXT_PUBLIC_SUPABASE_URL  ?? "https://cyntpbjhpklgzkiwbmph.supabase.co";
+const SUPABASE_ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5bnRwYmpocGtsZ3praXdibXBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5MzAzOTYsImV4cCI6MjA4NzUwNjM5Nn0.-821zOmHC7v3y8NzC1FJ1yc92Q5l1E77K3jDzp6P9fE";
 
-  if (!url || !anonKey) {
-    const missing = [
-      !url     && "NEXT_PUBLIC_SUPABASE_URL",
-      !anonKey && "NEXT_PUBLIC_SUPABASE_ANON_KEY",
-    ].filter(Boolean).join(", ");
-    throw new Error(
-      `Supabase 초기화 실패 — 환경변수 없음: ${missing}. ` +
-      `Vercel 대시보드 → Settings → Environment Variables 를 확인하세요.`
-    );
-  }
+function createFreshClient() {
+  const url     = SUPABASE_URL;
+  const anonKey = SUPABASE_ANON;
 
   const isBrowser = typeof window !== "undefined";
 
