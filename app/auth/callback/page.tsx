@@ -11,55 +11,70 @@ function CallbackInner() {
   const [message, setMessage] = useState("로그인 처리 중입니다...");
 
   useEffect(() => {
-    const run = async () => {
-      const supabase = createClient();
-      const next = searchParams.get("next") ?? "/";
+    const supabase = createClient();
+    const next = searchParams.get("next") ?? "/ko/category";
 
-      // ── 1. OAuth PKCE 코드 교환 (소셜 로그인)
-      const code = searchParams.get("code");
-      if (code) {
-        const { error } = await supabase.auth.exchangeCodeForSession(code);
+    // ── 1. PKCE 코드 교환 (소셜 로그인 / PKCE 매직링크)
+    const code = searchParams.get("code");
+    if (code) {
+      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
         if (error) {
-          router.replace("/login?error=" + encodeURIComponent(error.message));
-          return;
+          setMessage("로그인 처리에 실패했습니다.");
+          setTimeout(() => router.replace("/ko/login"), 2000);
+        } else {
+          router.replace(next);
         }
+      });
+      return;
+    }
+
+    // ── 2. 이메일 매직링크 (implicit flow) — onAuthStateChange로 세션 감지
+    // detectSessionInUrl: true 가 URL 해시를 자동 파싱 → SIGNED_IN 이벤트 발생
+    let redirected = false;
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (redirected) return;
+      if (event === "SIGNED_IN" && session) {
+        redirected = true;
+        subscription.unsubscribe();
+        router.replace(next);
+      }
+    });
+
+    // 이미 세션이 있는 경우 (새로고침 등)
+    supabase.auth.getSession().then(({ data }) => {
+      if (redirected) return;
+      if (data.session) {
+        redirected = true;
+        subscription.unsubscribe();
         router.replace(next);
         return;
       }
 
-      // ── 2. 이메일 OTP 매직링크 — URL 해시에서 토큰 추출
-      // Supabase가 #access_token=...&type=magiclink 형태로 전달
+      // 해시에 access_token이 없고 세션도 없으면 — 3초 타임아웃 후 실패 처리
       const hash = typeof window !== "undefined" ? window.location.hash : "";
-      if (hash.includes("access_token")) {
-        // 해시 파싱 완료까지 대기 후 세션 확인
-        await new Promise((r) => setTimeout(r, 500));
-        const { data, error } = await supabase.auth.getSession();
-        if (error || !data.session) {
-          await new Promise((r) => setTimeout(r, 1000));
-          const { data: retryData, error: retryError } = await supabase.auth.getSession();
-          if (retryError || !retryData.session) {
-            setMessage("로그인 처리에 실패했습니다. 다시 시도해 주세요.");
-            setTimeout(() => router.replace("/ko/login"), 2000);
-            return;
-          }
-        }
-        // 세션 localStorage 저장 완료까지 추가 대기
-        await new Promise((r) => setTimeout(r, 300));
-        router.replace(next);
-        return;
+      if (!hash.includes("access_token")) {
+        redirected = true;
+        subscription.unsubscribe();
+        router.replace("/ko/login");
       }
+    });
 
-      // ── 3. 세션 없이 도착한 경우 — 세션이 이미 있으면 그냥 통과
-      const { data: existingSession } = await supabase.auth.getSession();
-      if (existingSession.session) {
-        router.replace(next);
-        return;
-      }
-      router.replace("/ko/login");
+    // 5초 안에 SIGNED_IN이 오지 않으면 실패 처리
+    const timeout = setTimeout(() => {
+      if (redirected) return;
+      redirected = true;
+      subscription.unsubscribe();
+      setMessage("로그인 처리에 실패했습니다. 다시 시도해 주세요.");
+      setTimeout(() => router.replace("/ko/login"), 2000);
+    }, 5000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timeout);
     };
-
-    run();
-  }, [router, searchParams]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <main
