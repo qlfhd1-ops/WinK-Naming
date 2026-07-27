@@ -2,7 +2,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import Script from "next/script";
-import { Noto_Serif_KR } from "next/font/google";
+import { Noto_Serif_KR, Noto_Sans_KR } from "next/font/google";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import AudioPlayer from "@/components/AudioPlayer";
 
@@ -10,6 +10,13 @@ const notoSerifKR = Noto_Serif_KR({
   weight: ["700", "900"],
   subsets: ["latin"],
   variable: "--font-noto-serif-kr",
+  display: "swap",
+});
+
+const notoSansKR = Noto_Sans_KR({
+  weight: ["400", "500", "700", "900"],
+  subsets: ["latin"],
+  variable: "--font-noto-sans-kr",
   display: "swap",
 });
 
@@ -65,7 +72,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko" suppressHydrationWarning>
-      <body className={notoSerifKR.variable}>
+      <body className={`${notoSerifKR.variable} ${notoSansKR.variable}`}>
         <Suspense fallback={null}>
           <GoogleAnalytics />
         </Suspense>
