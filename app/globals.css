@@ -1435,6 +1435,36 @@ html[data-theme="light"] .wink-bottom-nav {
   background: linear-gradient(90deg, #1B2A5E 0%, #C9A84C 100%);
 }
 
+/* ── 영상 플레이어 (PC 16:9) ── */
+.lg-video-player {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  aspect-ratio: 16 / 9;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(6, 14, 34, 0.40);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  flex-shrink: 0;
+}
+
+/* PIP 네임카드 — 스케일 다운 래퍼 */
+.lg-pip-wrapper {
+  position: absolute;
+  bottom: 14px;
+  right: 14px;
+  z-index: 3;
+  transform: scale(0.46);
+  transform-origin: bottom right;
+}
+
+.lg-pip-card {
+  width: 340px;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55);
+}
+
 /* ── 모바일 하단 탭바 ── */
 .lg-mobile-tabs {
   display: none;
@@ -1466,6 +1496,21 @@ html[data-theme="light"] .wink-bottom-nav {
 
   .lg-info-card {
     padding: 20px 18px;
+  }
+
+  /* 영상 플레이어: 모바일 9:16 (쇼츠/릴스 비율) */
+  .lg-video-player {
+    aspect-ratio: 9 / 16;
+    height: 62dvh;
+    width: auto;
+    max-width: 100%;
+    border-radius: 20px;
+  }
+
+  .lg-pip-wrapper {
+    transform: scale(0.35);
+    bottom: 10px;
+    right: 10px;
   }
 
   /* 모바일 하단 탭바 표시 */

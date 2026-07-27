@@ -923,31 +923,59 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* 오른쪽 */}
+        {/* 오른쪽: 영상 플레이어 */}
         <div className="lg-hero-right">
-          {/* 도장 인장 장식 */}
-          <div style={{ position: "absolute", top: 44, right: 32, opacity: 0.3, transform: "rotate(13deg)", pointerEvents: "none" }} aria-hidden="true">
-            <svg width="60" height="60" viewBox="0 0 60 60">
-              <circle cx="30" cy="30" r="28" fill="none" stroke="#C0392B" strokeWidth="2"/>
-              <circle cx="30" cy="30" r="21" fill="none" stroke="#C0392B" strokeWidth="1"/>
-              <text x="30" y="36" textAnchor="middle" fill="#C0392B" fontSize="16" fontWeight="900" fontFamily="serif">印</text>
-            </svg>
+          <div style={{ fontSize: 11, color: "#AAAAAA", letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: 12 }}>
+            {cat.emoji} {catCopy.label} · 이름 설계 프리뷰
           </div>
-          <div style={{ fontSize: 11, color: "#AAAAAA", letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: 16 }}>
-            {cat.emoji} {catCopy.label} · 실제 설계 사례
-          </div>
-          <div key={`${selectedId}-${animKey}`} style={{ animation: "lgFadeIn 0.4s ease", width: "100%", display: "flex", justifyContent: "center" }}>
-            <NameCard card={card} accent={theme.accent} />
-          </div>
-          <div style={{ display: "flex", gap: 8, marginTop: 20, alignItems: "center", justifyContent: "center" }}>
-            {cards.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => { setCardIdx(i); setAnimKey(k => k + 1); }}
-                aria-label={`예시 ${i + 1}`}
-                style={{ height: 6, borderRadius: 3, border: "none", cursor: "pointer", padding: 0, background: i === cardIdx ? "#1B2A5E" : "#DDDDDD", width: i === cardIdx ? 24 : 8, transition: "all 0.3s" }}
-              />
-            ))}
+
+          {/* ── 영상 플레이어 컨테이너 (PC 16:9 / 모바일 9:16) ──
+              나중에 이 자리를 <video> 또는 <iframe>으로 교체하세요.
+              예) <video src="/videos/naming-intro.mp4" controls className="lg-video-player" />
+                  <iframe src="https://youtube.com/embed/..." className="lg-video-player" />
+          */}
+          <div className="lg-video-player">
+            {/* 배경 그라디언트 */}
+            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(145deg, #060e22 0%, #1B2A5E 55%, #0c1830 100%)" }} aria-hidden="true" />
+
+            {/* 단청 문양 오버레이 */}
+            <div style={{ position: "absolute", inset: 0, opacity: 0.055 }} aria-hidden="true">
+              <DanchingBg />
+            </div>
+
+            {/* 중앙: 재생 버튼 + Coming Soon 오버레이 */}
+            <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14, zIndex: 2 }}>
+              <div style={{ width: 64, height: 64, borderRadius: "50%", background: "rgba(255,255,255,0.10)", border: "1.5px solid rgba(255,255,255,0.22)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" aria-label="재생" role="img">
+                  <path d="M8 5v14l11-7z" fill="rgba(255,255,255,0.65)" />
+                </svg>
+              </div>
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: "#C9A84C", letterSpacing: "0.16em", textTransform: "uppercase", marginBottom: 6 }}>Coming Soon</div>
+                <div style={{ fontSize: 13, color: "rgba(255,255,255,0.50)", letterSpacing: "0.04em" }}>이름 설계 영상</div>
+              </div>
+            </div>
+
+            {/* PIP 네임카드 (우하단) */}
+            <div
+              className="lg-pip-wrapper"
+              key={`${selectedId}-${animKey}`}
+              style={{ animation: "lgFadeIn 0.4s ease" }}
+            >
+              <div className="lg-pip-card">
+                <NameCard card={card} accent={theme.accent} />
+              </div>
+              <div style={{ display: "flex", gap: 5, marginTop: 8, justifyContent: "center" }}>
+                {cards.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => { setCardIdx(i); setAnimKey(k => k + 1); }}
+                    aria-label={`예시 ${i + 1}`}
+                    style={{ height: 4, borderRadius: 2, border: "none", cursor: "pointer", padding: 0, background: i === cardIdx ? "#C9A84C" : "rgba(255,255,255,0.35)", width: i === cardIdx ? 14 : 5, transition: "all 0.3s" }}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
