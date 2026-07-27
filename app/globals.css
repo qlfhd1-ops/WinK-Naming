@@ -1435,39 +1435,149 @@ html[data-theme="light"] .wink-bottom-nav {
   background: linear-gradient(90deg, #1B2A5E 0%, #C9A84C 100%);
 }
 
-/* ── 영상 플레이어 (PC 16:9) ── */
-.lg-video-player {
+/* ── 빅 네임카드 (16:9) ── */
+.lg-big-name-card {
   position: relative;
   width: 100%;
-  max-width: 640px;
+  max-width: 720px;
   aspect-ratio: 16 / 9;
-  border-radius: 16px;
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 20px 60px rgba(6, 14, 34, 0.40);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  flex-shrink: 0;
+  box-shadow: 0 20px 60px rgba(6, 14, 34, 0.28);
 }
 
-/* PIP 네임카드 — 스케일 다운 래퍼 */
-.lg-pip-wrapper {
+.lg-big-name-card-inner {
   position: absolute;
-  bottom: 14px;
-  right: 14px;
-  z-index: 3;
-  transform: scale(0.46);
-  transform-origin: bottom right;
+  inset: 0;
+  display: flex;
+  padding: 40px 44px;
+  gap: 36px;
+  z-index: 1;
 }
 
-.lg-pip-card {
-  width: 340px;
-  border-radius: 18px;
+.lg-big-name-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+.lg-big-name-right {
+  width: 45%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-left: 28px;
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55);
 }
 
-/* ── 모바일 하단 탭바 ── */
+/* ── 후기 섹션 ── */
+.lg-reviews-inner {
+  display: flex;
+  gap: 20px;
+  overflow: hidden;
+}
+
+.lg-review-card {
+  flex: 0 0 calc(33.33% - 14px);
+  min-width: 0;
+}
+
+.lg-review-card-mobile-hide {
+  display: flex;
+}
+
+/* ── 후기 탭 (카테고리별) ── */
+.lg-reviews-tab {
+  padding: 9px 18px;
+  border-radius: 20px;
+  border: 1px solid #E8E8E8;
+  background: #FFFFFF;
+  color: #555555;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--font-noto-sans-kr, 'Noto Sans KR', sans-serif);
+  white-space: nowrap;
+}
+.lg-reviews-tab:hover {
+  border-color: rgba(201, 168, 76, 0.4);
+  color: #1B2A5E;
+}
+.lg-reviews-tab.active {
+  background: #1B2A5E;
+  color: #FFFFFF;
+  border-color: #1B2A5E;
+  font-weight: 700;
+}
+
+/* ── 후기 카드 그리드 ── */
+.lg-reviews-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.lg-review-grid-card {
+  background: #FFFFFF;
+  border-radius: 20px;
+  padding: 28px 24px 24px;
+  box-shadow: 0 6px 24px rgba(27, 42, 94, 0.07);
+  border: 1px solid #EAEAEA;
+  display: flex;
+  flex-direction: column;
+  min-height: 240px;
+}
+
+/* ── 하단 고정 카테고리 바 (전 화면) ── */
 .lg-mobile-tabs {
-  display: none;
+  display: flex;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 60;
+  background: rgba(255, 255, 255, 0.97);
+  border-top: 1px solid #E8E8E8;
+  box-shadow: 0 -4px 20px rgba(27, 42, 94, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding-bottom: env(safe-area-inset-bottom);
+  justify-content: center;
+}
+
+/* PC: 아이콘 + 텍스트 가로 배치 */
+.lg-mobile-tab {
+  flex: 0 1 160px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 8px;
+  background: none;
+  border: none;
+  border-top: 3px solid transparent;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: #777777;
+  font-family: var(--font-noto-sans-kr, 'Noto Sans KR', sans-serif);
+  transition: color 0.18s, border-color 0.18s;
+  white-space: nowrap;
+}
+.lg-mobile-tab:hover { color: #1B2A5E; }
+.lg-mobile-tab.active {
+  color: #1B2A5E;
+  font-weight: 700;
+  border-top-color: #C9A84C;
+}
+
+.lg-mobile-tab-emoji {
+  font-size: 18px;
+  line-height: 1;
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -1498,55 +1608,49 @@ html[data-theme="light"] .wink-bottom-nav {
     padding: 20px 18px;
   }
 
-  /* 영상 플레이어: 모바일 9:16 (쇼츠/릴스 비율) */
-  .lg-video-player {
-    aspect-ratio: 9 / 16;
-    height: 62dvh;
-    width: auto;
+  /* 빅 네임카드: 모바일도 16:9 유지 */
+  .lg-big-name-card {
     max-width: 100%;
-    border-radius: 20px;
+    border-radius: 16px;
   }
 
-  .lg-pip-wrapper {
-    transform: scale(0.35);
-    bottom: 10px;
-    right: 10px;
+  .lg-big-name-card-inner {
+    padding: 20px 18px;
+    gap: 14px;
   }
 
-  /* 모바일 하단 탭바 표시 */
+  .lg-big-name-right {
+    width: 46%;
+    padding-left: 14px;
+  }
+
+  /* 후기 카드: 모바일 1열 */
+  .lg-review-card-mobile-hide {
+    display: none;
+  }
+
+  .lg-review-card {
+    flex: 0 0 100%;
+  }
+
+  /* 모바일: 탭바 세로 배치 */
   .lg-mobile-tabs {
-    display: flex;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 60;
-    background: rgba(250, 250, 248, 0.97);
-    border-top: 1px solid #E8E8E8;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    padding-bottom: env(safe-area-inset-bottom);
+    justify-content: stretch;
   }
 
   .lg-mobile-tab {
     flex: 1;
-    display: flex;
     flex-direction: column;
-    align-items: center;
     gap: 3px;
     padding: 10px 4px 8px;
-    background: none;
-    border: none;
-    cursor: pointer;
     font-size: 10px;
-    font-weight: 500;
-    color: #999999;
-    font-family: var(--font-noto-sans-kr, 'Noto Sans KR', sans-serif);
-    transition: color 0.18s;
+    border-top: 2px solid transparent;
   }
+
   .lg-mobile-tab.active {
     color: #1B2A5E;
     font-weight: 700;
+    border-top-color: #C9A84C;
   }
 
   .lg-mobile-tab-emoji {
@@ -1562,5 +1666,11 @@ html[data-theme="light"] .wink-bottom-nav {
   /* CTA 버튼 전체 너비 */
   .lg-cta-btn {
     width: 100%;
+  }
+
+  /* 후기 그리드: 모바일 1열 */
+  .lg-reviews-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
 }

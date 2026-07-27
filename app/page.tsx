@@ -132,6 +132,8 @@ const ALL_CARDS: Record<CatId, AnyCard[]> = {
     { cat: "korean-name", type: "korean-name", originalName: "Emma", nationality: "미국 · USA", flag: "🇺🇸", koreanName: "이하늘", hanja: "李夏訥", meaning: "하늘처럼 넓고 자유로운 영혼", story: "Emma의 부드럽고 밝은 음감을 살려 '하늘'로 연결했습니다. 여름 하늘처럼 넓고 자유로운 삶을 바라는 이름입니다." },
     { cat: "korean-name", type: "korean-name", originalName: "Michael", nationality: "영국 · UK", flag: "🇬🇧", koreanName: "강도윤", hanja: "姜道潤", meaning: "바른 길로 윤택하게", story: "Michael의 '신의 뜻을 따르는' 의미에서 '도윤(道潤)' — 바른 길을 따라 풍요롭게 — 로 설계했습니다." },
     { cat: "korean-name", type: "korean-name", originalName: "Yuki", nationality: "일본 · Japan", flag: "🇯🇵", koreanName: "박서연", hanja: "朴瑞蓮", meaning: "상서로운 연꽃처럼 아름답게", story: "雪(유키·눈)의 순수함을 '서연(瑞蓮)' — 상서로운 연꽃 — 으로 승화시켰습니다. 한국적 감성을 가득 담은 이름입니다." },
+    { cat: "korean-name", type: "korean-name", originalName: "Jake", nationality: "미국 · USA", flag: "🇺🇸", koreanName: "수지", hanja: "秀志", meaning: "빼어난 뜻을 품은 이름", story: "Jake의 명확하고 힘있는 음감에서 '수지(秀志)' — 빼어난 뜻 — 로 설계했습니다. 성씨 없이 이름만으로도 완성되는 한국 이름입니다." },
+    { cat: "korean-name", type: "korean-name", originalName: "Anna", nationality: "독일 · Germany", flag: "🇩🇪", koreanName: "선희", hanja: "善熙", meaning: "선하고 밝게 빛나는 존재", story: "Anna의 우아하고 따뜻한 음감을 살려 '선희(善熙)' — 선하고 빛나는 — 으로 설계했습니다. 스승님·가족의 성씨를 이어받아 지을 수도 있어요." },
   ],
   "child": [
     { cat: "child", type: "child", surname: "김", name: "서연", fullHanja: "金瑞姸", roman: "Kim Seoyeon", meaning: "상서로운 빛으로 곱게 피어남", story: "金(김) 성씨와 瑞(상서)·姸(곱다)의 조합. 오행 수·금의 조화가 고르고, 음운이 부드럽게 이어집니다." },
@@ -181,6 +183,7 @@ const HOME_COPY = {
       "foreign":      "이름 설계 시작하기",
       "goods":        "도장·굿즈 주문하기",
     },
+    reviewsTitle: "전 세계 고객의 한국이름 이야기",
   },
   en: {
     headline1: "Design Your", headline2: "Korean Name",
@@ -206,6 +209,7 @@ const HOME_COPY = {
       "foreign":      "Design a Name",
       "goods":        "Order Goods",
     },
+    reviewsTitle: "Stories from Around the World",
   },
   zh: {
     headline1: "为您设计", headline2: "韩国名字",
@@ -231,6 +235,7 @@ const HOME_COPY = {
       "foreign":      "开始名字设计",
       "goods":        "订购印章·商品",
     },
+    reviewsTitle: "来自全球客户的故事",
   },
   ja: {
     headline1: "あなたの韓国名を", headline2: "設計します",
@@ -256,6 +261,7 @@ const HOME_COPY = {
       "foreign":      "名前設計を始める",
       "goods":        "印鑑·グッズを注文",
     },
+    reviewsTitle: "世界中のお客様の声",
   },
   es: {
     headline1: "Diseña tu", headline2: "nombre coreano",
@@ -281,6 +287,7 @@ const HOME_COPY = {
       "foreign":      "Diseñar un nombre",
       "goods":        "Pedir sello · artículos",
     },
+    reviewsTitle: "Historias de clientes de todo el mundo",
   },
   fr: {
     headline1: "Concevez votre", headline2: "prénom coréen",
@@ -306,6 +313,7 @@ const HOME_COPY = {
       "foreign":      "Concevoir un prénom",
       "goods":        "Commander des articles",
     },
+    reviewsTitle: "Témoignages de clients du monde entier",
   },
   ru: {
     headline1: "Создайте ваше", headline2: "корейское имя",
@@ -331,6 +339,7 @@ const HOME_COPY = {
       "foreign":      "Начать дизайн имени",
       "goods":        "Заказать печать",
     },
+    reviewsTitle: "Истории клиентов со всего мира",
   },
   ar: {
     headline1: "صمّم", headline2: "اسمك الكوري",
@@ -356,6 +365,7 @@ const HOME_COPY = {
       "foreign":      "تصميم اسم",
       "goods":        "طلب ختم · بضائع",
     },
+    reviewsTitle: "قصص عملاء من حول العالم",
   },
   hi: {
     headline1: "अपना कोरियाई", headline2: "नाम डिज़ाइन करें",
@@ -381,6 +391,7 @@ const HOME_COPY = {
       "foreign":      "नाम डिज़ाइन शुरू करें",
       "goods":        "स्टाम्प ऑर्डर करें",
     },
+    reviewsTitle: "दुनिया भर के ग्राहकों की कहानियां",
   },
 } as const;
 
@@ -398,13 +409,11 @@ const PRICE_MAP: Record<Lang, { symbol: string; amount: string }> = {
   hi: { symbol: "₹", amount: "660" },
 };
 
-const MARQUEE_TEXT: Record<CatId, string> = {
-  "korean-name": "🏆 2026 남자이름 1위 도윤 ✦ 2위 도현 ✦ 3위 하준 ✦ 4위 서준 ✦ 5위 이준 ✦  🌸 여자이름 1위 서윤 ✦ 2위 하린 ✦ 3위 하윤 ✦ 4위 아린 ✦ 5위 서아 ✦  🇰🇷 당신의 한국 이름을 설계합니다 ✦",
-  "child":        "✨ 2026 아기이름 트렌드 ✦ 남아: 도윤 하준 서준 시우 주원 ✦ 여아: 서윤 하린 하윤 아린 서아 ✦ 순우리말: 하늘 가온 봄 누리 ✦ 오행 균형 + 성씨 조화 필수 ✦",
-  "pet":          "🐾 인기 반려동물 이름 ✦ 강아지: 초코 코코 뭉치 보리 ✦ 고양이: 나비 야옹 솜이 루나 ✦ 한국 고유어: 진주 두부 이슬 하늘 ✦ 부르기 쉽고 귀여운 이름으로 ✦",
-  "foreign":      "🌍 한국이름 → 외국이름 변환 ✦ 이민준 → James Lee (영어) ✦ 김소연 → Céline Kim (프랑스어) ✦ 박서준 → Haojun Park (중국어) ✦ 정유진 → Eugenia Jung (스페인어) ✦",
-  "goods":        "🏮 도장·굿즈 직접 픽업 가능 ✦ 부산 광안리점 ✦ 부산 해운대점 ✦ 이름 설계 후 연계 주문 시 10% 할인 ✦ 목인·흑단·자수정 도장 ✦ 한국문양 버킷햇·텀블러·마그네틱 ✦",
-};
+const MARQUEE_SEGMENTS: { text: string; color: string }[] = [
+  { text: "🏆 2026 남자이름 1위 도윤 ✦ 2위 도현 ✦ 3위 하준 ✦ 4위 서준 ✦ 5위 이준 ✦ 6위 시우 ✦ 7위 주원 ✦ 8위 지호 ✦ 9위 준서 ✦ 10위 윤우 ✦ 🌸 여자이름 1위 서윤 ✦ 2위 하린 ✦ 3위 하윤 ✦ 4위 아린 ✦ 5위 서아 ✦ 6위 지아 ✦ 7위 서하 ✦ 8위 아윤 ✦ 9위 윤서 ✦ 10위 설아 ✦ ", color: "#C9A84C" },
+  { text: "💬 Jake(미국) 태권도 사범님 덕분에 알게 된 윙크네이밍, 난 운이 좋다! ✦ ", color: "#FFFFFF" },
+  { text: "💬 Anna(독일) 한국 도착 후 가장 먼저 한국 이름 만들기. 친구들에게 윙크네이밍 추천 중! ✦ ", color: "#FFFFFF" },
+];
 
 const INFO_TABS = [
   { id: "rank",    label: "📊 인기순위" },
@@ -653,15 +662,169 @@ function NameCard({ card, accent }: { card: AnyCard; accent: string }) {
   return null;
 }
 
+// ── 빅 네임카드 (16:9) ────────────────────────────────────
+function BigNameCard({ card, accent, bg }: { card: AnyCard; accent: string; bg: string }) {
+  const serif = "var(--font-noto-serif-kr,'Noto Serif KR',serif)";
+
+  let name = "", hanja = "", meaning = "", story = "", badge = "";
+  if (card.type === "korean-name") {
+    const c = card as KoreanNameCard;
+    name = c.koreanName; hanja = c.hanja; meaning = c.meaning; story = c.story; badge = `${c.flag} ${c.nationality}`;
+  } else if (card.type === "child") {
+    const c = card as ChildCard;
+    name = `${c.surname}${c.name}`; hanja = c.fullHanja; meaning = c.meaning; story = c.story; badge = c.roman;
+  } else if (card.type === "pet") {
+    const c = card as PetCard;
+    name = c.name; hanja = c.english; meaning = c.meaning; story = c.story; badge = c.animal;
+  } else if (card.type === "foreign") {
+    const c = card as ForeignCard;
+    name = c.foreignName; hanja = c.koreanName; meaning = c.meaning; story = c.story; badge = c.foreignLang;
+  } else if (card.type === "goods") {
+    const c = card as GoodsCard;
+    name = c.engravedName; hanja = c.productName; meaning = c.tagline; story = c.desc; badge = c.material;
+  }
+
+  return (
+    <div
+      className="lg-big-name-card"
+      style={{ background: `linear-gradient(135deg, ${bg} 0%, #1B2A5E 100%)`, border: `1px solid ${accent}22` }}
+    >
+      {/* 상단 그라디언트 바 */}
+      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, #1B2A5E 0%, ${accent} 100%)`, zIndex: 2 }} />
+      {/* 단청 문양 오버레이 */}
+      <div style={{ position: "absolute", inset: 0, opacity: 0.04 }} aria-hidden="true">
+        <DanchingBg />
+      </div>
+      <div className="lg-big-name-card-inner">
+        {/* 왼쪽: 큰 이름 */}
+        <div className="lg-big-name-left">
+          <div style={{ fontSize: 10, color: accent, letterSpacing: "0.16em", textTransform: "uppercase", marginBottom: 14, fontWeight: 700 }}>
+            {badge}
+          </div>
+          <div style={{ fontSize: "clamp(36px,6vw,72px)", fontWeight: 900, color: "#FFFFFF", fontFamily: serif, letterSpacing: "0.12em", lineHeight: 1 }}>
+            {name}
+          </div>
+        </div>
+        {/* 오른쪽: 한자 + 의미 + 설명 */}
+        <div className="lg-big-name-right" style={{ borderLeft: `1px solid ${accent}33` }}>
+          <div style={{ fontSize: "clamp(16px,2vw,26px)", color: accent, fontFamily: "serif", letterSpacing: 4, marginBottom: 10, fontWeight: 600, lineHeight: 1.3 }}>
+            {hanja}
+          </div>
+          <div style={{ fontSize: "clamp(12px,1.2vw,16px)", color: "#FFFFFF", fontWeight: 700, marginBottom: 8, lineHeight: 1.5 }}>
+            {meaning}
+          </div>
+          <div style={{ fontSize: "clamp(11px,0.95vw,13px)", color: "rgba(255,255,255,0.58)", lineHeight: 1.85 }}>
+            {story}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── 고객 후기 데이터 (카테고리별) ────────────────────────
+type ReviewEntry = { name: string; flag: string; content: string };
+
+const REVIEWS_BY_CAT: Record<CatId, ReviewEntry[]> = {
+  "korean-name": [
+    { name: "Emma", flag: "🇺🇸", content: "2026년 이하늘이라는 한국이름이 생겼어요. 고마워요 윙크네이밍!" },
+    { name: "Yuki", flag: "🇯🇵", content: "2026년 박서연이라는 한국이름이 생겼어요. 한국 친구들이 너무 좋아해요!" },
+    { name: "Lucas", flag: "🇧🇷", content: "2026년 강도윤이 되었습니다. 나의 부캐릭터는 이제 한국인이에요!" },
+    { name: "Jake", flag: "🇺🇸", content: "태권도 사범님께서 승급 기념으로 한국이름을 만들어 주셨다. 그렇게 알게 된 윙크 네이밍. 난 정말 운이 좋다!" },
+    { name: "Anna", flag: "🇩🇪", content: "한국에 도착해서 가장 먼저 한 것이 한국 이름 만들기였다. 덕분에 즐겁고 의미있는 여행을 했다. 친구들에게 윙크네이밍을 추천하고 있다!" },
+  ],
+  "child": [
+    { name: "김지현", flag: "🇰🇷", content: "2026년 딸 이름 서윤이로 지었어요. 음양오행까지 고려해줘서 믿음이 갔어요!" },
+    { name: "박민준", flag: "🇰🇷", content: "2026년 아들 도현이 이름 여기서 결정했어요. 사주까지 맞춰줘서 감사해요!" },
+  ],
+  "pet": [
+    { name: "Sophie", flag: "🇫🇷", content: "2026년 반려견에게 사랑이라는 이름을 지어줬어요. 너무 예쁜 이름이에요!" },
+    { name: "Wang Lei", flag: "🇨🇳", content: "2026년 고양이 이름을 하늘이로 지었어요. 한국어로 sky라는 뜻이래요!" },
+  ],
+  "foreign": [
+    { name: "이서연", flag: "🇰🇷", content: "2026년 활동명으로 Luna라는 이름을 받았어요. 해외 SNS에서 반응이 좋아요!" },
+    { name: "최도윤", flag: "🇰🇷", content: "2026년 영어이름 Ethan을 만들었어요. 발음도 좋고 의미도 마음에 들어요!" },
+  ],
+  "goods": [
+    { name: "Maria", flag: "🇪🇸", content: "2026년 도장까지 주문했어요. 한국 전통 매듭 목걸이 너무 예뻐요!" },
+    { name: "Tanaka", flag: "🇯🇵", content: "2026년 이름카드 QR코드 보여줬더니 친구들이 신기해했어요!" },
+  ],
+};
+
+// ── 고객 후기 섹션 (카테고리 탭) ────────────────────────
+function ReviewsSection({ copy }: { copy: HomeCopy }) {
+  const [activeTab, setActiveTab] = useState<CatId>("korean-name");
+  const [fadeKey, setFadeKey] = useState(0);
+  const serif = "var(--font-noto-serif-kr,'Noto Serif KR',serif)";
+
+  const CAT_TAB_LABELS: Record<CatId, string> = {
+    "korean-name": "나의 한국이름",
+    "child":        "아이이름",
+    "pet":          "반려동물",
+    "foreign":      "외국이름",
+    "goods":        "도장·굿즈",
+  };
+
+  const reviews = REVIEWS_BY_CAT[activeTab];
+
+  return (
+    <section style={{ background: "#FAFAF8", padding: "72px 0" }}>
+      <div className="lg-section">
+        <div style={{ textAlign: "center", marginBottom: 36 }}>
+          <div style={{ fontSize: 11, color: "#C9A84C", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", marginBottom: 10 }}>
+            REVIEWS · 고객 후기
+          </div>
+          <h2 style={{ margin: 0, fontSize: "clamp(22px,2.6vw,34px)", fontWeight: 900, color: "#111111", fontFamily: serif, letterSpacing: "-0.02em", lineHeight: 1.2 }}>
+            {copy.reviewsTitle}
+          </h2>
+        </div>
+
+        {/* 카테고리 탭 */}
+        <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap", marginBottom: 36 }}>
+          {CATS.map(c => (
+            <button
+              key={c.id}
+              className={`lg-reviews-tab${activeTab === c.id ? " active" : ""}`}
+              onClick={() => { setActiveTab(c.id as CatId); setFadeKey(k => k + 1); }}
+            >
+              {c.emoji} {CAT_TAB_LABELS[c.id as CatId]}
+            </button>
+          ))}
+        </div>
+
+        {/* 후기 카드 그리드 */}
+        <div key={fadeKey} className="lg-reviews-grid" style={{ animation: "lgFadeIn 0.35s ease" }}>
+          {reviews.map((r, i) => (
+            <div key={i} className="lg-review-grid-card">
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+                <span style={{ fontSize: 28, lineHeight: 1 }}>{r.flag}</span>
+                <span style={{ fontSize: 15, fontWeight: 700, color: "#1B2A5E" }}>{r.name}</span>
+              </div>
+              <div style={{ flex: 1, fontSize: 18, color: "#333333", lineHeight: 1.8, fontStyle: "italic", marginBottom: 18 }}>
+                &ldquo;{r.content}&rdquo;
+              </div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <div style={{ fontSize: 16, color: "#C9A84C", letterSpacing: 2 }}>★★★★★</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: "#FFF", background: "#1B2A5E", borderRadius: 20, padding: "3px 10px" }}>2026</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // ── 마퀴 자막 (56px 네이비) ──────────────────────────────
-function MarqueeBand({ catId }: { catId: CatId }) {
-  const text = MARQUEE_TEXT[catId];
+function MarqueeBand() {
   return (
     <div style={{ overflow: "hidden", background: "#1B2A5E", height: 56, display: "flex", alignItems: "center" }}>
-      <div className="marquee-track" key={catId} style={{ display: "flex", whiteSpace: "nowrap" }}>
+      <div className="marquee-track" style={{ display: "flex", whiteSpace: "nowrap" }}>
         {[0, 1, 2].map(i => (
-          <span key={i} style={{ fontSize: 17, fontWeight: 700, color: "#C9A84C", letterSpacing: "0.05em", padding: "0 48px", flexShrink: 0 }}>
-            {text}
+          <span key={i} style={{ fontSize: 20, fontWeight: 700, letterSpacing: "0.05em", padding: "0 48px", flexShrink: 0 }}>
+            {MARQUEE_SEGMENTS.map((seg, j) => (
+              <span key={j} style={{ color: seg.color }}>{seg.text}</span>
+            ))}
           </span>
         ))}
       </div>
@@ -856,7 +1019,7 @@ export default function HomePage() {
   const sans = "var(--font-noto-sans-kr,'Noto Sans KR',-apple-system,BlinkMacSystemFont,sans-serif)";
 
   return (
-    <div style={{ minHeight: "100dvh", background: "#FAFAF8", fontFamily: sans, color: "#111111", overflowX: "hidden" }}>
+    <div style={{ minHeight: "100dvh", background: "#FAFAF8", fontFamily: sans, color: "#111111", overflowX: "hidden", paddingBottom: 68 }}>
 
       {/* ── 헤더 ── */}
       <header className="lg-header">
@@ -923,65 +1086,36 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* 오른쪽: 영상 플레이어 */}
+        {/* 오른쪽: 빅 네임카드 */}
         <div className="lg-hero-right">
           <div style={{ fontSize: 11, color: "#AAAAAA", letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: 12 }}>
             {cat.emoji} {catCopy.label} · 이름 설계 프리뷰
           </div>
-
-          {/* ── 영상 플레이어 컨테이너 (PC 16:9 / 모바일 9:16) ──
-              나중에 이 자리를 <video> 또는 <iframe>으로 교체하세요.
-              예) <video src="/videos/naming-intro.mp4" controls className="lg-video-player" />
-                  <iframe src="https://youtube.com/embed/..." className="lg-video-player" />
-          */}
-          <div className="lg-video-player">
-            {/* 배경 그라디언트 */}
-            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(145deg, #060e22 0%, #1B2A5E 55%, #0c1830 100%)" }} aria-hidden="true" />
-
-            {/* 단청 문양 오버레이 */}
-            <div style={{ position: "absolute", inset: 0, opacity: 0.055 }} aria-hidden="true">
-              <DanchingBg />
-            </div>
-
-            {/* 중앙: 재생 버튼 + Coming Soon 오버레이 */}
-            <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14, zIndex: 2 }}>
-              <div style={{ width: 64, height: 64, borderRadius: "50%", background: "rgba(255,255,255,0.10)", border: "1.5px solid rgba(255,255,255,0.22)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" aria-label="재생" role="img">
-                  <path d="M8 5v14l11-7z" fill="rgba(255,255,255,0.65)" />
-                </svg>
-              </div>
-              <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: "#C9A84C", letterSpacing: "0.16em", textTransform: "uppercase", marginBottom: 6 }}>Coming Soon</div>
-                <div style={{ fontSize: 13, color: "rgba(255,255,255,0.50)", letterSpacing: "0.04em" }}>이름 설계 영상</div>
-              </div>
-            </div>
-
-            {/* PIP 네임카드 (우하단) */}
-            <div
-              className="lg-pip-wrapper"
-              key={`${selectedId}-${animKey}`}
-              style={{ animation: "lgFadeIn 0.4s ease" }}
-            >
-              <div className="lg-pip-card">
-                <NameCard card={card} accent={theme.accent} />
-              </div>
-              <div style={{ display: "flex", gap: 5, marginTop: 8, justifyContent: "center" }}>
-                {cards.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => { setCardIdx(i); setAnimKey(k => k + 1); }}
-                    aria-label={`예시 ${i + 1}`}
-                    style={{ height: 4, borderRadius: 2, border: "none", cursor: "pointer", padding: 0, background: i === cardIdx ? "#C9A84C" : "rgba(255,255,255,0.35)", width: i === cardIdx ? 14 : 5, transition: "all 0.3s" }}
-                  />
-                ))}
-              </div>
-            </div>
+          <div key={`${selectedId}-${animKey}`} style={{ animation: "lgFadeIn 0.4s ease", width: "100%" }}>
+            <BigNameCard card={card} accent={theme.accent} bg={theme.bg} />
           </div>
+          {/* 슬라이드 도트 */}
+          <div style={{ display: "flex", gap: 5, marginTop: 14, justifyContent: "center" }}>
+            {cards.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => { setCardIdx(i); setAnimKey(k => k + 1); }}
+                aria-label={`예시 ${i + 1}`}
+                style={{ height: 4, borderRadius: 2, border: "none", cursor: "pointer", padding: 0, background: i === cardIdx ? "#C9A84C" : "rgba(0,0,0,0.14)", width: i === cardIdx ? 14 : 5, transition: "all 0.3s" }}
+              />
+            ))}
+          </div>
+          {selectedId === "korean-name" && (
+            <div style={{ marginTop: 12, textAlign: "center", lineHeight: 2 }}>
+              <div style={{ fontSize: 11, color: "#999999" }}><span style={{ color: "#C9A84C" }}>✦</span> 성씨 포함 또는 이름만도 설계 가능합니다</div>
+              <div style={{ fontSize: 11, color: "#999999" }}><span style={{ color: "#C9A84C" }}>✦</span> 스승님·가족의 성씨를 이어받아 지을 수도 있어요</div>
+            </div>
+          )}
         </div>
       </section>
 
       {/* ── 마퀴 자막 ── */}
-      <MarqueeBand catId={selectedId} />
+      <MarqueeBand />
 
       {/* ── 카테고리 아이콘 바 ── */}
       <div className="lg-cat-bar">
@@ -1089,6 +1223,9 @@ export default function HomePage() {
 
       {/* ── 참고 정보 섹션 ── */}
       <InfoSection copy={copy} />
+
+      {/* ── 고객 후기 섹션 ── */}
+      <ReviewsSection copy={copy} />
 
       {/* ── 모바일 하단 탭바 ── */}
       <div className="lg-mobile-tabs" role="tablist">
