@@ -158,6 +158,289 @@ const ALL_CARDS: Record<CatId, AnyCard[]> = {
   ],
 };
 
+// ── 카드 텍스트 번역 오버레이 (meaning/story/tagline/desc만 언어별로) ──
+type KNTrans = { meaning: string; story: string };
+type GoodsTrans = { tagline: string; desc: string };
+type CardTransByCat = { "korean-name": KNTrans[]; "child": KNTrans[]; "pet": KNTrans[]; "foreign": KNTrans[]; "goods": GoodsTrans[] };
+const CARD_TRANS_BY_LANG: Record<Lang, CardTransByCat> = {
+  ko: {
+    "korean-name": [
+      { meaning: "하늘처럼 넓고 자유로운 영혼", story: "Emma의 부드럽고 밝은 음감을 살려 '하늘'로 연결했습니다. 여름 하늘처럼 넓고 자유로운 삶을 바라는 이름입니다." },
+      { meaning: "바른 길로 윤택하게", story: "Michael의 '신의 뜻을 따르는' 의미에서 '도윤(道潤)' — 바른 길을 따라 풍요롭게 — 로 설계했습니다." },
+      { meaning: "상서로운 연꽃처럼 아름답게", story: "雪(유키·눈)의 순수함을 '서연(瑞蓮)' — 상서로운 연꽃 — 으로 승화시켰습니다. 한국적 감성을 가득 담은 이름입니다." },
+      { meaning: "빼어난 뜻을 품은 이름", story: "Jake의 명확하고 힘있는 음감에서 '수지(秀志)' — 빼어난 뜻 — 로 설계했습니다. 성씨 없이 이름만으로도 완성되는 한국 이름입니다." },
+      { meaning: "선하고 밝게 빛나는 존재", story: "Anna의 우아하고 따뜻한 음감을 살려 '선희(善熙)' — 선하고 빛나는 — 으로 설계했습니다. 스승님·가족의 성씨를 이어받아 지을 수도 있어요." },
+    ],
+    "child": [
+      { meaning: "상서로운 빛으로 곱게 피어남", story: "金(김) 성씨와 瑞(상서)·姸(곱다)의 조합. 오행 수·금의 조화가 고르고, 음운이 부드럽게 이어집니다." },
+      { meaning: "넓고 깊은 바다처럼 준수하게", story: "朴(박) 성씨에 俊(준수)·浩(넓은 물)의 조합. 남성적 기운이 넘치면서도 음절 균형이 자연스럽습니다." },
+      { meaning: "드넓은 하늘처럼 높고 자유롭게", story: "순우리말 이름 '하늘'. 性(이) 성씨와 두 음절의 경쾌한 조화. 어디서든 기억되는 맑고 밝은 이름입니다." },
+    ],
+    "pet": [
+      { meaning: "빛나는 진주처럼 귀하고 소중한", story: "하얀 털이 진주처럼 빛나는 말티즈에게 딱 맞는 이름. 짧고 부르기 좋으며, 품격과 사랑스러움을 동시에 담았습니다." },
+      { meaning: "포근하고 순수한 흰 솜뭉치", story: "하얗고 보들보들한 두부처럼 부드러운 아이. 한국의 대표 음식에서 따온 이름으로 친근하고 따뜻한 느낌을 줍니다." },
+      { meaning: "아침이슬처럼 맑고 영롱한 존재", story: "이슬처럼 반짝이는 눈을 가진 아이에게 어울리는 이름. '이슬이'라는 호칭이 자연스럽고 애정이 담겨있습니다." },
+    ],
+    "foreign": [
+      { meaning: "국제 무대에서도 품격 있는 이름", story: "이민준의 '민(民)'의 영어 감성 'James' — 고전적이고 신뢰감 있는 이름으로 자연스러운 변환입니다." },
+      { meaning: "우아하고 섬세한 프랑스 감성", story: "소연의 부드러운 음감과 우아한 느낌이 프랑스 이름 'Céline'과 완벽하게 어울립니다." },
+      { meaning: "한중 이중 정체성을 담은 이름", story: "서준(徐俊)의 한자에서 중국어 발음 'Hàojùn'을 그대로 살렸습니다. 한국인이면서도 중국에서 자연스럽게 불릴 수 있습니다." },
+    ],
+    "goods": [
+      { tagline: "설계한 이름을 모자에 새기다", desc: "전통 단청 문양과 함께 이름을 자수로 새긴 프리미엄 버킷햇. 한국의 멋을 일상에서." },
+      { tagline: "매일 쓰는 물건에 이름의 의미를", desc: "청화백자 문양 밴드와 함께 이름을 레이저로 각인합니다. 보온·보냉 이중 진공 구조." },
+      { tagline: "이름의 의미를 매일 마주하다", desc: "한국 전통 운문(雲紋) 위에 이름과 한자를 담은 냉장고 자석. 기념품·선물로 인기." },
+      { tagline: "이름을 전각으로 새기다", desc: "설계한 이름을 전통 전각체 글씨로 새깁니다. 일상 날인부터 작품 낙관까지." },
+    ],
+  },
+  en: {
+    "korean-name": [
+      { meaning: "A soul as vast and free as the sky", story: "Emma's soft and bright sound led us to '하늘 (sky)'. A name wishing for a life as wide and free as a summer sky." },
+      { meaning: "Flourishing on the righteous path", story: "From Michael's meaning of 'following God's will', we designed '도윤 (道潤)' — thriving along the right path." },
+      { meaning: "Beautiful as an auspicious lotus", story: "The purity of 雪 (Yuki·snow) was elevated to '서연 (瑞蓮)' — an auspicious lotus. A name full of Korean sensibility." },
+      { meaning: "A name carrying outstanding aspirations", story: "From Jake's clear and strong sound, we designed '수지 (秀志)' — outstanding will. A complete Korean name even without a family name." },
+      { meaning: "A bright and virtuous existence", story: "Anna's elegant and warm sound became '선희 (善熙)' — virtuous and radiant. You can also adopt a mentor's or family surname." },
+    ],
+    "child": [
+      { meaning: "Blooming beautifully in auspicious light", story: "Kim (金) surname with 瑞 (auspicious) · 姸 (beautiful). Balanced ohaeng of water and metal, with smooth phonetic flow." },
+      { meaning: "Handsome as a wide and deep sea", story: "Park (朴) surname with 俊 (handsome) · 浩 (vast water). Masculine energy with naturally balanced syllables." },
+      { meaning: "High and free as the vast sky", story: "'하늘 (sky)' — a pure Korean name. Lee surname with two crisp syllables. Clear and bright, memorable everywhere." },
+    ],
+    "pet": [
+      { meaning: "Precious and dear as a shining pearl", story: "Perfect for a Maltese whose white fur shines like a pearl. Short, easy to call, full of elegance and adorableness." },
+      { meaning: "A soft and pure white fluff", story: "Gentle as white tofu. A name from Korea's iconic food — friendly and warm, just like your pet." },
+      { meaning: "Clear and sparkling as morning dew", story: "Perfect for a pup with eyes that sparkle like dewdrops. '이슬이' sounds natural as a nickname, full of affection." },
+    ],
+    "foreign": [
+      { meaning: "A dignified name on the international stage", story: "The English spirit of '민 (民)' in Lee Minjun became 'James' — a classic, trustworthy name. A natural transformation." },
+      { meaning: "Elegant and delicate French sensibility", story: "Soyeon's soft sound and graceful feel match perfectly with the French name 'Céline'." },
+      { meaning: "A name carrying dual Korean-Chinese identity", story: "The Chinese pronunciation 'Hàojùn' was directly drawn from the hanja of 서준 (徐俊). Natural in both Korea and China." },
+    ],
+    "goods": [
+      { tagline: "Engrave your designed name on a hat", desc: "Premium bucket hat with your name embroidered alongside traditional dancheong patterns. Korean aesthetics in everyday life." },
+      { tagline: "Bring your name's meaning to daily objects", desc: "Laser-engraved with a blue-white porcelain pattern band. Double vacuum insulation for hot & cold." },
+      { tagline: "Face the meaning of your name every day", desc: "Fridge magnet featuring your name and hanja on a traditional Korean cloud pattern. Popular as a gift or souvenir." },
+      { tagline: "Engrave your name in traditional seal script", desc: "Your designed name carved in traditional Korean seal calligraphy. From daily stamping to artwork seals." },
+    ],
+  },
+  ja: {
+    "korean-name": [
+      { meaning: "空のように広く自由な魂", story: "Emmaの柔らかく明るい音感から「하늘（空）」へ。夏空のように広く自由な人生を願う名前です。" },
+      { meaning: "正しい道を歩み、豊かに栄える", story: "Michaelの「神の意志に従う」意味から「도윤（道潤）」を設計。正しい道を歩み豊かに栄えるという願いを込めています。" },
+      { meaning: "めでたい蓮のように美しく", story: "雪（ゆき）の純粋さを「서연（瑞蓮）」—めでたい蓮—へ昇華。韓国の感性をたっぷり込めた名前です。" },
+      { meaning: "優れた志を抱く名前", story: "Jakeの明確で力強い音感から「수지（秀志）」—優れた志—を設計。姓なしでも完成する韓国名です。" },
+      { meaning: "善良で明るく輝く存在", story: "Annaの上品で温かな音感を活かし「선희（善熙）」—善良で輝く—を設計。恩師や家族の姓を受け継ぐことも可能です。" },
+    ],
+    "child": [
+      { meaning: "めでたい光の中で美しく咲く", story: "金（キム）姓と瑞（めでたい）・姸（美しい）の組み合わせ。水・金の五行バランスが整い、音韻も滑らかです。" },
+      { meaning: "広く深い海のように凛々しく", story: "朴（パク）姓に俊（凛々しい）・浩（広い水）の組み合わせ。男性的な力強さと自然な音節バランスを持つ名前。" },
+      { meaning: "広大な空のように高く自由に", story: "純韓国語名「하늘（空）」。李（イ）姓と二音節の爽やかな響き。どこでも覚えてもらえる明るい名前です。" },
+    ],
+    "pet": [
+      { meaning: "輝く真珠のように大切で愛しい", story: "白い毛並みが真珠のように輝くマルチーズにぴったりの名前。短くて呼びやすく、品格と可愛らしさを兼ね備えています。" },
+      { meaning: "ふんわり純白のわた雪のような子", story: "白くふんわりとした豆腐のように柔らかな子。韓国の代表的な食べ物から取った名前で、親しみやすく温かみがあります。" },
+      { meaning: "朝露のように澄んで煌めく存在", story: "露のようにキラキラした目の子にぴったりの名前。「이슬이」という呼び方が自然で、愛情が込められています。" },
+    ],
+    "foreign": [
+      { meaning: "国際舞台でも品格ある名前", story: "イ・ミンジュンの「민（民）」の英語感性「James」—古典的で信頼感のある名前への自然な変換です。" },
+      { meaning: "優雅で繊細なフランスの感性", story: "ソヨンの柔らかな音感と優雅な印象がフランス名「Céline」と完璧にマッチします。" },
+      { meaning: "韓中二重アイデンティティを込めた名前", story: "서준（徐俊）の漢字から中国語発音「Hàojùn」をそのまま活かしました。韓国人でも中国で自然に呼ばれる名前です。" },
+    ],
+    "goods": [
+      { tagline: "設計した名前を帽子に刻む", desc: "伝統的な丹青文様とともに名前を刺繍したプレミアムバケットハット。日常で韓国の美を。" },
+      { tagline: "毎日使うものに名前の意味を", desc: "青花白磁文様バンドとともに名前をレーザー刻印。保温・保冷二重真空構造。" },
+      { tagline: "名前の意味を毎日見つめる", desc: "韓国伝統の雲文（雲紋）の上に名前と漢字を載せた冷蔵庫マグネット。記念品・贈り物に人気。" },
+      { tagline: "名前を篆刻で刻む", desc: "設計した名前を伝統的な篆刻書体で刻みます。日常の押印から作品の落款まで。" },
+    ],
+  },
+  zh: {
+    "korean-name": [
+      { meaning: "如天空般宽广自由的灵魂", story: "从Emma柔和明亮的音感联结到「하늘（天空）」。祝愿拥有如夏日天空般宽广自由的人生。" },
+      { meaning: "走正确之路，润泽丰盛", story: "从Michael「遵从神旨」的含义设计出「도윤（道潤）」——沿着正确的道路繁荣昌盛。" },
+      { meaning: "如吉祥莲花般美丽", story: "将雪（유키）的纯洁升华为「서연（瑞蓮）」——吉祥莲花。充满韩国美学感性的名字。" },
+      { meaning: "承载卓越志向的名字", story: "从Jake清晰有力的音感设计出「수지（秀志）」——卓越志向。即使没有姓氏也是完整的韩国名字。" },
+      { meaning: "善良明亮、光彩照人", story: "将Anna优雅温暖的音感化为「선희（善熙）」——善良光辉。也可以继承老师或家人的姓氏。" },
+    ],
+    "child": [
+      { meaning: "在吉祥的光芒中美丽绽放", story: "金（김）姓与瑞（吉祥）·姸（美丽）的组合。五行水·金的平衡协调，音韵流畅自然。" },
+      { meaning: "如宽阔深邃的大海般英俊", story: "朴（박）姓配以俊（英俊）·浩（宽广之水）的组合。充满阳刚之气，音节平衡自然。" },
+      { meaning: "如广阔天空般高远自由", story: "纯韩语名「하늘（天空）」。李（이）姓与两个轻快音节的完美融合。清亮明朗，令人难忘。" },
+    ],
+    "pet": [
+      { meaning: "如闪亮珍珠般珍贵可爱", story: "白色毛发如珍珠般闪亮的马尔济斯的完美名字。简短易叫，兼具品格与可爱。" },
+      { meaning: "柔软纯白的小棉球", story: "白嫩柔软如豆腐一般的孩子。取自韩国代表性食物的名字，亲切温暖。" },
+      { meaning: "如晨露般清澈晶莹的存在", story: "适合眼睛如露水般闪亮的孩子。「이슬이」这个称呼自然流畅，充满爱意。" },
+    ],
+    "foreign": [
+      { meaning: "在国际舞台上也有品格的名字", story: "李民俊「민（民）」的英语感性「James」——经典可信赖的名字，自然流畅的转换。" },
+      { meaning: "优雅细腻的法式感性", story: "素妍柔和的音感与优雅气质与法国名字「Céline」完美契合。" },
+      { meaning: "承载韩中双重身份的名字", story: "从서준（徐俊）的汉字直接提取中文发音「Hàojùn」。身为韩国人，在中国也能自然地被称呼。" },
+    ],
+    "goods": [
+      { tagline: "将设计好的名字刻在帽子上", desc: "搭配传统丹青纹样，将名字绣在高档渔夫帽上。在日常生活中感受韩国之美。" },
+      { tagline: "将名字的意义融入日常用品", desc: "搭配青花白瓷纹样腰带，将名字激光雕刻其上。双层真空保温保冷结构。" },
+      { tagline: "每天与名字的意义相遇", desc: "在韩国传统云纹上刻有名字和汉字的冰箱贴。深受欢迎，适合作纪念品或礼物。" },
+      { tagline: "将名字用篆刻艺术铭刻", desc: "用传统篆刻字体刻下设计好的名字。从日常盖章到作品落款皆适用。" },
+    ],
+  },
+  es: {
+    "korean-name": [
+      { meaning: "Un alma tan amplia y libre como el cielo", story: "El sonido suave y brillante de Emma nos llevó a '하늘 (cielo)'. Un nombre que desea una vida tan libre como el cielo de verano." },
+      { meaning: "Prosperando en el camino recto", story: "Del significado 'seguir la voluntad de Dios' de Michael, diseñamos '도윤 (道潤)' — prosperando en el camino correcto." },
+      { meaning: "Hermosa como un loto de buen augurio", story: "La pureza de 雪 (Yuki·nieve) fue elevada a '서연 (瑞蓮)' — un loto auspicioso. Lleno de sensibilidad coreana." },
+      { meaning: "Un nombre con aspiraciones sobresalientes", story: "Del sonido claro y fuerte de Jake, diseñamos '수지 (秀志)' — voluntad sobresaliente. Un nombre coreano completo incluso sin apellido." },
+      { meaning: "Una existencia virtuosa y radiante", story: "El sonido elegante y cálido de Anna se convirtió en '선희 (善熙)' — virtuosa y radiante. También puedes adoptar el apellido de tu maestro o familia." },
+    ],
+    "child": [
+      { meaning: "Floreciendo bellamente en luz auspiciosa", story: "Apellido Kim (金) con 瑞 (auspicioso) · 姸 (bello). Equilibrio de ohaeng agua y metal con flujo fonético suave." },
+      { meaning: "Apuesto como un mar ancho y profundo", story: "Apellido Park (朴) con 俊 (apuesto) · 浩 (agua vasta). Energía masculina con sílabas naturalmente equilibradas." },
+      { meaning: "Alto y libre como el vasto cielo", story: "'하늘 (cielo)' — nombre puramente coreano. Apellido Lee con dos sílabas nítidas. Claro y brillante, memorable en cualquier lugar." },
+    ],
+    "pet": [
+      { meaning: "Precioso como una perla brillante", story: "Perfecto para un Maltés cuyo pelo blanco brilla como una perla. Corto, fácil de llamar, lleno de elegancia y ternura." },
+      { meaning: "Un suave y puro copo de algodón blanco", story: "Suave como el tofu blanco. Un nombre del icónico alimento coreano — amigable y cálido, igual que tu mascota." },
+      { meaning: "Claro y brillante como el rocío de la mañana", story: "Perfecto para una mascota con ojos que brillan como gotas de rocío. '이슬이' suena natural como apodo, lleno de cariño." },
+    ],
+    "foreign": [
+      { meaning: "Un nombre con dignidad en el escenario internacional", story: "El espíritu inglés de '민 (民)' en Lee Minjun se convirtió en 'James' — un nombre clásico y digno de confianza." },
+      { meaning: "Sensibilidad francesa elegante y delicada", story: "El sonido suave y la elegancia de Soyeon encajan perfectamente con el nombre francés 'Céline'." },
+      { meaning: "Un nombre con identidad coreano-china dual", story: "La pronunciación china 'Hàojùn' fue extraída directamente del hanja de 서준 (徐俊). Natural tanto en Corea como en China." },
+    ],
+    "goods": [
+      { tagline: "Graba tu nombre diseñado en un sombrero", desc: "Sombrero bucket premium con tu nombre bordado junto a patrones dancheong tradicionales. Estética coreana en la vida diaria." },
+      { tagline: "Lleva el significado de tu nombre a objetos cotidianos", desc: "Grabado láser con banda de patrón de porcelana azul y blanca. Aislamiento de doble vacío para caliente y frío." },
+      { tagline: "Encuentra el significado de tu nombre cada día", desc: "Imán de nevera con tu nombre y hanja sobre un patrón de nubes coreano tradicional. Popular como regalo o recuerdo." },
+      { tagline: "Graba tu nombre en caligrafía de sello tradicional", desc: "Tu nombre diseñado tallado en caligrafía de sello coreano tradicional. Desde uso diario hasta sellos de obra de arte." },
+    ],
+  },
+  fr: {
+    "korean-name": [
+      { meaning: "Une âme aussi vaste et libre que le ciel", story: "Le son doux et lumineux d'Emma nous a conduits à '하늘 (ciel)'. Un prénom souhaitant une vie aussi libre que le ciel d'été." },
+      { meaning: "Prospérer sur le juste chemin", story: "Du sens de Michael 'suivre la volonté de Dieu', nous avons conçu '도윤 (道潤)' — prospérer sur le bon chemin." },
+      { meaning: "Belle comme un lotus de bon augure", story: "La pureté de 雪 (Yuki·neige) a été sublimée en '서연 (瑞蓮)' — un lotus auspicieux. Plein de sensibilité coréenne." },
+      { meaning: "Un prénom portant des aspirations remarquables", story: "Du son clair et fort de Jake, nous avons conçu '수지 (秀志)' — volonté remarquable. Un prénom coréen complet même sans nom de famille." },
+      { meaning: "Une existence vertueuse et rayonnante", story: "Le son élégant et chaleureux d'Anna est devenu '선희 (善熙)' — vertueuse et rayonnante. Vous pouvez aussi adopter le nom de famille d'un mentor ou de la famille." },
+    ],
+    "child": [
+      { meaning: "S'épanouissant dans une lumière auspicieuse", story: "Nom de famille Kim (金) avec 瑞 (auspicieux) · 姸 (beau). Équilibre des cinq éléments eau et métal, phonétique douce." },
+      { meaning: "Beau comme une mer large et profonde", story: "Nom de famille Park (朴) avec 俊 (beau) · 浩 (vaste eau). Énergie masculine avec des syllabes naturellement équilibrées." },
+      { meaning: "Haut et libre comme le vaste ciel", story: "'하늘 (ciel)' — prénom purement coréen. Nom de famille Lee avec deux syllabes vives. Clair et lumineux, mémorable partout." },
+    ],
+    "pet": [
+      { meaning: "Précieux comme une perle brillante", story: "Parfait pour un Maltais dont le pelage blanc brille comme une perle. Court, facile à appeler, alliant élégance et mignonnerie." },
+      { meaning: "Un doux et pur petit flocon blanc", story: "Doux comme du tofu blanc. Un prénom tiré de l'aliment iconique coréen — amical et chaleureux, tout comme votre animal." },
+      { meaning: "Clair et étincelant comme la rosée du matin", story: "Parfait pour un animal aux yeux qui brillent comme des gouttes de rosée. '이슬이' sonne naturellement, plein d'affection." },
+    ],
+    "foreign": [
+      { meaning: "Un prénom avec de la dignité sur la scène internationale", story: "L'esprit anglais de '민 (民)' chez Lee Minjun est devenu 'James' — un prénom classique et digne de confiance." },
+      { meaning: "Sensibilité française élégante et délicate", story: "Le son doux et l'élégance de Soyeon s'harmonisent parfaitement avec le prénom français 'Céline'." },
+      { meaning: "Un prénom portant une double identité coréano-chinoise", story: "La prononciation chinoise 'Hàojùn' a été directement tirée du hanja de 서준 (徐俊). Naturel en Corée comme en Chine." },
+    ],
+    "goods": [
+      { tagline: "Graver votre prénom conçu sur un chapeau", desc: "Chapeau bucket premium avec votre prénom brodé aux côtés de motifs dancheong traditionnels. L'esthétique coréenne au quotidien." },
+      { tagline: "Apporter le sens de votre prénom aux objets du quotidien", desc: "Gravure laser avec un bandeau à motif de porcelaine bleue et blanche. Double isolation sous vide pour chaud et froid." },
+      { tagline: "Rencontrer le sens de votre prénom chaque jour", desc: "Aimant de réfrigérateur avec votre prénom et hanja sur un motif de nuages coréen traditionnel. Populaire comme cadeau ou souvenir." },
+      { tagline: "Graver votre prénom en calligraphie de sceau traditionnelle", desc: "Votre prénom conçu gravé en calligraphie de sceau coréen traditionnel. De l'usage quotidien aux sceaux d'œuvres d'art." },
+    ],
+  },
+  ru: {
+    "korean-name": [
+      { meaning: "Душа, широкая и свободная, как небо", story: "Мягкий и яркий звук Emma привёл нас к «하늘 (небо)». Имя, желающее жизни такой же широкой и свободной, как летнее небо." },
+      { meaning: "Процветание на праведном пути", story: "Из значения Michael «следовать воле Бога» мы создали «도윤 (道潤)» — процветание на правильном пути." },
+      { meaning: "Прекрасная, как благостный лотос", story: "Чистота 雪 (Юки·снег) была возвышена до «서연 (瑞蓮)» — благостный лотос. Имя, наполненное корейской чувственностью." },
+      { meaning: "Имя, несущее выдающиеся стремления", story: "Из чёткого и сильного звука Jake мы создали «수지 (秀志)» — выдающаяся воля. Полноценное корейское имя даже без фамилии." },
+      { meaning: "Добродетельное и светлое существо", story: "Элегантный и тёплый звук Anna стал «선희 (善熙)» — добродетельная и сияющая. Можно также взять фамилию наставника или семьи." },
+    ],
+    "child": [
+      { meaning: "Расцветающая в благостном свете", story: "Фамилия Ким (金) с 瑞 (благостный) · 姸 (прекрасный). Сбалансированные пять элементов воды и металла с плавной фонетикой." },
+      { meaning: "Статный, как широкое и глубокое море", story: "Фамилия Пак (朴) с 俊 (статный) · 浩 (широкая вода). Мужественная энергия с естественно сбалансированными слогами." },
+      { meaning: "Высокий и свободный, как бескрайнее небо", story: "«하늘 (небо)» — чисто корейское имя. Фамилия Ли с двумя чёткими слогами. Светлое и яркое, запоминается везде." },
+    ],
+    "pet": [
+      { meaning: "Драгоценный и любимый, как сияющая жемчужина", story: "Идеальное имя для мальтийской болонки с белой шерстью, сияющей как жемчуг. Короткое, лёгкое в произношении, изящное и милое." },
+      { meaning: "Мягкий и чистый белый комочек", story: "Нежный, как белый тофу. Имя из знакового корейского блюда — дружелюбное и тёплое, как ваш питомец." },
+      { meaning: "Чистый и сверкающий, как утренняя роса", story: "Идеально для питомца с глазами, сверкающими как капли росы. «이슬이» звучит естественно как прозвище, полное ласки." },
+    ],
+    "foreign": [
+      { meaning: "Достойное имя на международной арене", story: "Английский дух «민 (民)» в имени Ли Минджун стал «James» — классическое и надёжное имя. Естественное преобразование." },
+      { meaning: "Элегантная и утончённая французская чувственность", story: "Мягкий звук и изящность Соён идеально сочетаются с французским именем «Céline»." },
+      { meaning: "Имя, несущее двойную корейско-китайскую идентичность", story: "Китайское произношение «Hàojùn» было напрямую взято из иероглифов 서준 (徐俊). Естественно звучит как в Корее, так и в Китае." },
+    ],
+    "goods": [
+      { tagline: "Выгравируйте своё имя на шляпе", desc: "Премиальная шляпа-ведро с именем, вышитым рядом с традиционными узорами данчхон. Корейская эстетика в повседневной жизни." },
+      { tagline: "Привнесите смысл своего имени в повседневные предметы", desc: "Лазерная гравировка с полосой в стиле сине-белого фарфора. Двойная вакуумная изоляция для горячего и холодного." },
+      { tagline: "Встречайте смысл своего имени каждый день", desc: "Магнит на холодильник с именем и иероглифами на традиционном корейском облачном узоре. Популярен как подарок или сувенир." },
+      { tagline: "Выгравируйте имя в традиционной каллиграфии печати", desc: "Ваше имя, вырезанное в традиционной корейской каллиграфии печати. От ежедневного использования до печатей на произведениях искусства." },
+    ],
+  },
+  ar: {
+    "korean-name": [
+      { meaning: "روح واسعة وحرة كالسماء", story: "قادنا صوت Emma الناعم والمشرق إلى «하늘 (السماء)». اسم يتمنى حياة واسعة وحرة كسماء الصيف." },
+      { meaning: "الازدهار على الطريق الصحيح", story: "من معنى Michael «اتباع إرادة الله»، صممنا «도윤 (道潤)» — الازدهار على الطريق الصحيح." },
+      { meaning: "جميلة كلوتس ميمون", story: "رُقِّيت نقاء 雪 (يوكي·الثلج) إلى «서연 (瑞蓮)» — لوتس ميمون. اسم مليء بالحساسية الكورية." },
+      { meaning: "اسم يحمل تطلعات متميزة", story: "من صوت Jake الواضح والقوي، صممنا «수지 (秀志)» — إرادة متميزة. اسم كوري مكتمل حتى بدون اسم عائلة." },
+      { meaning: "كيان فاضل ومشرق", story: "تحوّل صوت Anna الأنيق والدافئ إلى «선희 (善熙)» — فاضلة ومشرقة. يمكنك أيضاً تبني لقب معلمك أو عائلتك." },
+    ],
+    "child": [
+      { meaning: "تتفتح بجمال في ضوء ميمون", story: "اسم عائلة Kim (金) مع 瑞 (ميمون) · 姸 (جميل). توازن العناصر الخمسة للماء والمعدن مع تدفق صوتي سلس." },
+      { meaning: "وسيم كبحر واسع وعميق", story: "اسم عائلة Park (朴) مع 俊 (وسيم) · 浩 (ماء شاسع). طاقة رجولية مع مقاطع متوازنة بشكل طبيعي." },
+      { meaning: "عالٍ وحر كالسماء الشاسعة", story: "«하늘 (السماء)» — اسم كوري خالص. اسم عائلة Lee مع مقطعين نضيرين. صافٍ ومشرق، لا يُنسى في أي مكان." },
+    ],
+    "pet": [
+      { meaning: "ثمين وعزيز كلؤلؤة لامعة", story: "مثالي لكلب مالطي يتلألأ فراؤه الأبيض كاللؤلؤ. قصير وسهل النداء، يجمع الأناقة والحلاوة." },
+      { meaning: "قطعة قطن ناعمة وبيضاء نقية", story: "ناعم كالتوفو الأبيض. اسم مأخوذ من الطعام الكوري الشهير — ودود ودافئ مثل حيوانك الأليف." },
+      { meaning: "صافٍ ولامع كندى الصباح", story: "مثالي لحيوان أليف بعيون تلمع كقطرات الندى. «이슬이» يبدو طبيعياً كلقب، مليء بالمحبة." },
+    ],
+    "foreign": [
+      { meaning: "اسم ذو مكانة على المسرح الدولي", story: "تحوّلت روح «민 (民)» الإنجليزية في Lee Minjun إلى «James» — اسم كلاسيكي وجدير بالثقة." },
+      { meaning: "حساسية فرنسية أنيقة ورقيقة", story: "يتناسب الصوت الناعم وأناقة Soyeon تماماً مع الاسم الفرنسي «Céline»." },
+      { meaning: "اسم يحمل هوية كورية-صينية مزدوجة", story: "استُخرج النطق الصيني «Hàojùn» مباشرة من هانجا 서준 (徐俊). طبيعي في كوريا والصين على حد سواء." },
+    ],
+    "goods": [
+      { tagline: "نقش اسمك المصمم على قبعة", desc: "قبعة دلو فاخرة مع اسمك المطرز جانباً لأنماط الدانتشيونج التقليدية. الجماليات الكورية في الحياة اليومية." },
+      { tagline: "أضف معنى اسمك إلى الأشياء اليومية", desc: "نقش بالليزر مع شريط بنمط الخزف الأزرق والأبيض. عزل مزدوج بالتفريغ للساخن والبارد." },
+      { tagline: "التقِ بمعنى اسمك كل يوم", desc: "مغناطيس ثلاجة يضم اسمك وهانجا على نمط السحاب الكوري التقليدي. شائع كهدية أو تذكار." },
+      { tagline: "نقش اسمك بخط الختم التقليدي", desc: "اسمك المصمم منقوش بخط الختم الكوري التقليدي. من الاستخدام اليومي إلى ختم الأعمال الفنية." },
+    ],
+  },
+  hi: {
+    "korean-name": [
+      { meaning: "आकाश जैसी विशाल और स्वतंत्र आत्मा", story: "Emma की कोमल और उज्ज्वल ध्वनि ने हमें '하늘 (आकाश)' तक पहुँचाया। ग्रीष्म के आकाश जैसी विशाल और स्वतंत्र जीवन की कामना।" },
+      { meaning: "सही राह पर चलकर समृद्ध होना", story: "Michael के 'ईश्वर की इच्छा का पालन करना' अर्थ से '도윤 (道潤)' — सही राह पर समृद्धि — डिज़ाइन किया।" },
+      { meaning: "शुभ कमल की तरह सुंदर", story: "雪 (युकि·बर्फ) की शुद्धता को '서연 (瑞蓮)' — शुभ कमल — में उन्नत किया। कोरियाई संवेदनशीलता से भरपूर नाम।" },
+      { meaning: "उत्कृष्ट आकांक्षाएं समेटा नाम", story: "Jake की स्पष्ट और शक्तिशाली ध्वनि से '수지 (秀志)' — उत्कृष्ट संकल्प — डिज़ाइन किया। बिना उपनाम के भी पूर्ण कोरियाई नाम।" },
+      { meaning: "सदाचारी और उज्ज्वल अस्तित्व", story: "Anna की सुरुचिपूर्ण और गर्म ध्वनि '선희 (善熙)' — सदाचारी और दीप्तिमान — बन गई। गुरु या परिवार का उपनाम भी अपना सकते हैं।" },
+    ],
+    "child": [
+      { meaning: "शुभ प्रकाश में सुंदर खिलना", story: "Kim (金) उपनाम के साथ 瑞 (शुभ) · 姸 (सुंदर) का संयोजन। जल और धातु के पाँच तत्वों का संतुलन, सुचारु ध्वन्यात्मक प्रवाह।" },
+      { meaning: "विशाल और गहरे समुद्र जैसा सुन्दर", story: "Park (朴) उपनाम के साथ 俊 (सुन्दर) · 浩 (विशाल जल) का संयोजन। पौरुष ऊर्जा और प्राकृतिक संतुलित अक्षर।" },
+      { meaning: "विशाल आकाश जैसा ऊँचा और स्वतंत्र", story: "'하늘 (आकाश)' — शुद्ध कोरियाई नाम। Lee उपनाम के साथ दो स्पष्ट अक्षर। स्वच्छ और उज्ज्वल, हर जगह यादगार।" },
+    ],
+    "pet": [
+      { meaning: "चमकते मोती जैसा अनमोल और प्रिय", story: "माल्टीज़ के लिए उत्तम नाम जिसका सफेद फर मोती जैसा चमकता है। छोटा, पुकारने में आसान, सुरुचिपूर्ण और प्यारा।" },
+      { meaning: "मुलायम और शुद्ध सफेद रुई का गोला", story: "सफेद टोफू जैसा कोमल। कोरिया के प्रतिष्ठित भोजन से लिया गया नाम — मित्रवत और गर्म।" },
+      { meaning: "सुबह की ओस जैसा स्वच्छ और चमकदार", story: "उस जानवर के लिए उत्तम जिसकी आँखें ओस की बूंदों जैसी चमकती हैं। '이슬이' उपनाम के रूप में स्वाभाविक लगता है।" },
+    ],
+    "foreign": [
+      { meaning: "अंतर्राष्ट्रीय मंच पर भी गरिमामय नाम", story: "Lee Minjun में '민 (民)' की अंग्रेज़ी भावना 'James' बन गई — एक क्लासिक और विश्वसनीय नाम।" },
+      { meaning: "सुरुचिपूर्ण और繊細 फ्रांसीसी संवेदनशीलता", story: "Soyeon की कोमल ध्वनि और सुरुचिपूर्णता फ्रांसीसी नाम 'Céline' के साथ परिपूर्ण मेल खाती है।" },
+      { meaning: "कोरियाई-चीनी दोहरी पहचान समेटा नाम", story: "서준 (徐俊) के हानजा से चीनी उच्चारण 'Hàojùn' सीधे लिया गया। कोरिया और चीन दोनों में स्वाभाविक।" },
+    ],
+    "goods": [
+      { tagline: "अपना डिज़ाइन किया नाम टोपी पर उकेरें", desc: "पारंपरिक दानचेओंग पैटर्न के साथ आपका नाम कढ़ाई किया हुआ प्रीमियम बकेट हैट।" },
+      { tagline: "रोज़मर्रा की वस्तुओं में अपने नाम का अर्थ लाएं", desc: "नीले-सफेद चीनी मिट्टी के पैटर्न बैंड के साथ लेज़र उत्कीर्णन। दोहरा वैक्यूम इन्सुलेशन।" },
+      { tagline: "हर दिन अपने नाम के अर्थ से मिलें", desc: "पारंपरिक कोरियाई बादल पैटर्न पर आपका नाम और हानजा के साथ फ्रिज मैग्नेट।" },
+      { tagline: "परंपरागत मुहर लिपि में नाम उकेरें", desc: "आपका डिज़ाइन किया नाम पारंपरिक कोरियाई मुहर सुलेख में उकेरा गया।" },
+    ],
+  },
+};
+
+function getCards(lang: Lang, catId: CatId): AnyCard[] {
+  const base = ALL_CARDS[catId];
+  const trans = (CARD_TRANS_BY_LANG[lang] ?? CARD_TRANS_BY_LANG.ko)[catId] as (KNTrans | GoodsTrans)[];
+  return base.map((card, i) => ({ ...card, ...(trans[i] ?? {}) }));
+}
+
 const HOME_COPY = {
   ko: {
     headline1: "한국적인 이름을", headline2: "설계합니다",
@@ -409,11 +692,53 @@ const PRICE_MAP: Record<Lang, { symbol: string; amount: string }> = {
   hi: { symbol: "₹", amount: "660" },
 };
 
-const MARQUEE_SEGMENTS: { text: string; color: string }[] = [
-  { text: "🏆 2026 남자이름 1위 도윤 ✦ 2위 도현 ✦ 3위 하준 ✦ 4위 서준 ✦ 5위 이준 ✦ 6위 시우 ✦ 7위 주원 ✦ 8위 지호 ✦ 9위 준서 ✦ 10위 윤우 ✦ 🌸 여자이름 1위 서윤 ✦ 2위 하린 ✦ 3위 하윤 ✦ 4위 아린 ✦ 5위 서아 ✦ 6위 지아 ✦ 7위 서하 ✦ 8위 아윤 ✦ 9위 윤서 ✦ 10위 설아 ✦ ", color: "#C9A84C" },
-  { text: "💬 Jake(미국) 태권도 사범님 덕분에 알게 된 윙크네이밍, 난 운이 좋다! ✦ ", color: "#FFFFFF" },
-  { text: "💬 Anna(독일) 한국 도착 후 가장 먼저 한국 이름 만들기. 친구들에게 윙크네이밍 추천 중! ✦ ", color: "#FFFFFF" },
-];
+const MARQUEE_BY_LANG: Record<Lang, { text: string; color: string }[]> = {
+  ko: [
+    { text: "🏆 2026 남자이름 1위 도윤 ✦ 2위 도현 ✦ 3위 하준 ✦ 4위 서준 ✦ 5위 이준 ✦ 6위 시우 ✦ 7위 주원 ✦ 8위 지호 ✦ 9위 준서 ✦ 10위 윤우 ✦ 🌸 여자이름 1위 서윤 ✦ 2위 하린 ✦ 3위 하윤 ✦ 4위 아린 ✦ 5위 서아 ✦ 6위 지아 ✦ 7위 서하 ✦ 8위 아윤 ✦ 9위 윤서 ✦ 10위 설아 ✦ ", color: "#C9A84C" },
+    { text: "💬 Jake(미국) 태권도 사범님 덕분에 알게 된 윙크네이밍, 난 운이 좋다! ✦ ", color: "#FFFFFF" },
+    { text: "💬 Anna(독일) 한국 도착 후 가장 먼저 한국 이름 만들기. 친구들에게 윙크네이밍 추천 중! ✦ ", color: "#FFFFFF" },
+  ],
+  en: [
+    { text: "🏆 2026 남자이름 1위 도윤 ✦ 2위 도현 ✦ 3위 하준 ✦ 4위 서준 ✦ 5위 이준 ✦ 6위 시우 ✦ 7위 주원 ✦ 8위 지호 ✦ 9위 준서 ✦ 10위 윤우 ✦ 🌸 여자이름 1위 서윤 ✦ 2위 하린 ✦ 3위 하윤 ✦ 4위 아린 ✦ 5위 서아 ✦ 6위 지아 ✦ 7위 서하 ✦ 8위 아윤 ✦ 9위 윤서 ✦ 10위 설아 ✦ ", color: "#C9A84C" },
+    { text: "💬 Jake (USA) My taekwondo master introduced me to Wink Naming — I'm so lucky! ✦ ", color: "#FFFFFF" },
+    { text: "💬 Anna (Germany) First thing in Korea: getting a Korean name. Recommending Wink Naming to everyone! ✦ ", color: "#FFFFFF" },
+  ],
+  ja: [
+    { text: "🏆 2026 남자이름 1위 도윤 ✦ 2위 도현 ✦ 3위 하준 ✦ 4위 서준 ✦ 5위 이준 ✦ 6위 시우 ✦ 7위 주원 ✦ 8위 지호 ✦ 9위 준서 ✦ 10위 윤우 ✦ 🌸 여자이름 1위 서윤 ✦ 2위 하린 ✦ 3위 하윤 ✦ 4위 아린 ✦ 5위 서아 ✦ 6위 지아 ✦ 7위 서하 ✦ 8위 아윤 ✦ 9위 윤서 ✦ 10위 설아 ✦ ", color: "#C9A84C" },
+    { text: "💬 Jake（アメリカ）テコンドーの師範のおかげでWinkNamingと出会いました。本当にラッキー！ ✦ ", color: "#FFFFFF" },
+    { text: "💬 Anna（ドイツ）韓国到着後まず最初に韓国名を作りました。友達みんなにWinkNamingを勧めています！ ✦ ", color: "#FFFFFF" },
+  ],
+  zh: [
+    { text: "🏆 2026 남자이름 1위 도윤 ✦ 2위 도현 ✦ 3위 하준 ✦ 4위 서준 ✦ 5위 이준 ✦ 6위 시우 ✦ 7위 주원 ✦ 8위 지호 ✦ 9위 준서 ✦ 10위 윤우 ✦ 🌸 여자이름 1위 서윤 ✦ 2위 하린 ✦ 3위 하윤 ✦ 4위 아린 ✦ 5위 서아 ✦ 6위 지아 ✦ 7위 서하 ✦ 8위 아윤 ✦ 9위 윤서 ✦ 10위 설아 ✦ ", color: "#C9A84C" },
+    { text: "💬 Jake（美国）因跆拳道教练认识了WinkNaming，我真是太幸运了！ ✦ ", color: "#FFFFFF" },
+    { text: "💬 Anna（德国）到达韩国后第一件事就是取韩国名字，正在向朋友们推荐WinkNaming！ ✦ ", color: "#FFFFFF" },
+  ],
+  es: [
+    { text: "🏆 2026 남자이름 1위 도윤 ✦ 2위 도현 ✦ 3위 하준 ✦ 4위 서준 ✦ 5위 이준 ✦ 6위 시우 ✦ 7위 주원 ✦ 8위 지호 ✦ 9위 준서 ✦ 10위 윤우 ✦ 🌸 여자이름 1위 서윤 ✦ 2위 하린 ✦ 3위 하윤 ✦ 4위 아린 ✦ 5위 서아 ✦ 6위 지아 ✦ 7위 서하 ✦ 8위 아윤 ✦ 9위 윤서 ✦ 10위 설아 ✦ ", color: "#C9A84C" },
+    { text: "💬 Jake (EE.UU.) Mi maestro de taekwondo me presentó Wink Naming — ¡qué suerte tengo! ✦ ", color: "#FFFFFF" },
+    { text: "💬 Anna (Alemania) Lo primero en Corea: conseguir un nombre coreano. ¡Recomendando Wink Naming a todos! ✦ ", color: "#FFFFFF" },
+  ],
+  fr: [
+    { text: "🏆 2026 남자이름 1위 도윤 ✦ 2위 도현 ✦ 3위 하준 ✦ 4위 서준 ✦ 5위 이준 ✦ 6위 시우 ✦ 7위 주원 ✦ 8위 지호 ✦ 9위 준서 ✦ 10위 윤우 ✦ 🌸 여자이름 1위 서윤 ✦ 2위 하린 ✦ 3위 하윤 ✦ 4위 아린 ✦ 5위 서아 ✦ 6위 지아 ✦ 7위 서하 ✦ 8위 아윤 ✦ 9위 윤서 ✦ 10위 설아 ✦ ", color: "#C9A84C" },
+    { text: "💬 Jake (États-Unis) Mon maître de taekwondo m'a fait découvrir Wink Naming — quelle chance ! ✦ ", color: "#FFFFFF" },
+    { text: "💬 Anna (Allemagne) Première chose en Corée : créer un prénom coréen. Je recommande Wink Naming à tous ! ✦ ", color: "#FFFFFF" },
+  ],
+  ru: [
+    { text: "🏆 2026 남자이름 1위 도윤 ✦ 2위 도현 ✦ 3위 하준 ✦ 4위 서준 ✦ 5위 이준 ✦ 6위 시우 ✦ 7위 주원 ✦ 8위 지호 ✦ 9위 준서 ✦ 10위 윤우 ✦ 🌸 여자이름 1위 서윤 ✦ 2위 하린 ✦ 3위 하윤 ✦ 4위 아린 ✦ 5위 서아 ✦ 6위 지아 ✦ 7위 서하 ✦ 8위 아윤 ✦ 9위 윤서 ✦ 10위 설아 ✦ ", color: "#C9A84C" },
+    { text: "💬 Jake (США) Тренер по тхэквондо познакомил меня с Wink Naming — мне так повезло! ✦ ", color: "#FFFFFF" },
+    { text: "💬 Anna (Германия) Первое в Корее: создать корейское имя. Рекомендую Wink Naming всем! ✦ ", color: "#FFFFFF" },
+  ],
+  ar: [
+    { text: "🏆 2026 남자이름 1위 도윤 ✦ 2위 도현 ✦ 3위 하준 ✦ 4위 서준 ✦ 5위 이준 ✦ 6위 시우 ✦ 7위 주원 ✦ 8위 지호 ✦ 9위 준서 ✦ 10위 윤우 ✦ 🌸 여자이름 1위 서윤 ✦ 2위 하린 ✦ 3위 하윤 ✦ 4위 아린 ✦ 5위 서아 ✦ 6위 지아 ✦ 7위 서하 ✦ 8위 아윤 ✦ 9위 윤서 ✦ 10위 설아 ✦ ", color: "#C9A84C" },
+    { text: "💬 Jake (أمريكا) أستاذ التايكوندو عرّفني بـ Wink Naming — ما أحظاني! ✦ ", color: "#FFFFFF" },
+    { text: "💬 Anna (ألمانيا) أول ما فعلته في كوريا: الحصول على اسم كوري. أنصح الجميع بـ Wink Naming! ✦ ", color: "#FFFFFF" },
+  ],
+  hi: [
+    { text: "🏆 2026 남자이름 1위 도윤 ✦ 2위 도현 ✦ 3위 하준 ✦ 4위 서준 ✦ 5위 이준 ✦ 6위 시우 ✦ 7위 주원 ✦ 8위 지호 ✦ 9위 준서 ✦ 10위 윤우 ✦ 🌸 여자이름 1위 서윤 ✦ 2위 하린 ✦ 3위 하윤 ✦ 4위 아린 ✦ 5위 서아 ✦ 6위 지아 ✦ 7위 서하 ✦ 8위 아윤 ✦ 9위 윤서 ✦ 10위 설아 ✦ ", color: "#C9A84C" },
+    { text: "💬 Jake (अमेरिका) ताइक्वांडो गुरु की वजह से Wink Naming से परिचय हुआ — मैं कितना भाग्यशाली हूँ! ✦ ", color: "#FFFFFF" },
+    { text: "💬 Anna (जर्मनी) कोरिया में पहला काम: कोरियाई नाम बनवाना। सभी को Wink Naming की सिफ़ारिश! ✦ ", color: "#FFFFFF" },
+  ],
+};
 
 const INFO_TABS = [
   { id: "rank",    label: "📊 인기순위" },
@@ -751,21 +1076,93 @@ const REVIEWS_BY_CAT: Record<CatId, ReviewEntry[]> = {
   ],
 };
 
+const REVIEW_CONTENT_BY_LANG: Record<Lang, Record<CatId, string[]>> = {
+  ko: {
+    "korean-name": ["2026년 이하늘이라는 한국이름이 생겼어요. 고마워요 윙크네이밍!", "2026년 박서연이라는 한국이름이 생겼어요. 한국 친구들이 너무 좋아해요!", "2026년 강도윤이 되었습니다. 나의 부캐릭터는 이제 한국인이에요!", "태권도 사범님께서 승급 기념으로 한국이름을 만들어 주셨다. 그렇게 알게 된 윙크 네이밍. 난 정말 운이 좋다!", "한국에 도착해서 가장 먼저 한 것이 한국 이름 만들기였다. 덕분에 즐겁고 의미있는 여행을 했다. 친구들에게 윙크네이밍을 추천하고 있다!"],
+    "child": ["2026년 딸 이름 서윤이로 지었어요. 음양오행까지 고려해줘서 믿음이 갔어요!", "2026년 아들 도현이 이름 여기서 결정했어요. 사주까지 맞춰줘서 감사해요!"],
+    "pet": ["2026년 반려견에게 사랑이라는 이름을 지어줬어요. 너무 예쁜 이름이에요!", "2026년 고양이 이름을 하늘이로 지었어요. 한국어로 sky라는 뜻이래요!"],
+    "foreign": ["2026년 활동명으로 Luna라는 이름을 받았어요. 해외 SNS에서 반응이 좋아요!", "2026년 영어이름 Ethan을 만들었어요. 발음도 좋고 의미도 마음에 들어요!"],
+    "goods": ["2026년 도장까지 주문했어요. 한국 전통 매듭 목걸이 너무 예뻐요!", "2026년 이름카드 QR코드 보여줬더니 친구들이 신기해했어요!"],
+  },
+  en: {
+    "korean-name": ["In 2026 I got my Korean name, Lee Haneul. Thank you Wink Naming!", "In 2026 I got Park Seoyeon as my Korean name. My Korean friends absolutely love it!", "In 2026 I became Kang Doyun. My alter ego is now officially Korean!", "My taekwondo master gave me a Korean name to celebrate my belt promotion. That's how I found Wink Naming. I'm so lucky!", "The first thing I did when I arrived in Korea was get a Korean name. It made my trip so joyful and meaningful. I'm recommending Wink Naming to all my friends!"],
+    "child": ["In 2026 I named my daughter Seoyun. I trusted them because they considered yin-yang and the five elements!", "In 2026 I decided on the name Dohyun for my son here. Thank you for considering his saju too!"],
+    "pet": ["In 2026 I named my dog Sarangi (Love). Such a beautiful name!", "In 2026 I named my cat Haneul. They told me it means 'sky' in Korean!"],
+    "foreign": ["In 2026 I got the stage name Luna. The response on overseas social media has been amazing!", "In 2026 I created the English name Ethan. I love both the pronunciation and the meaning!"],
+    "goods": ["In 2026 I even ordered a stamp. The Korean traditional knot necklace is so beautiful!", "In 2026 when I showed the name card QR code, my friends were so amazed!"],
+  },
+  ja: {
+    "korean-name": ["2026年に「이하늘」という韓国名ができました。ありがとうWinkNaming！", "2026年に「박서연」という韓国名をもらいました。韓国の友達に大好評です！", "2026年に「강도윤」になりました。私の副キャラはもう韓国人です！", "テコンドーの師範が昇段記念に韓国名を作ってくれました。それがWinkNamingとの出会い。本当にラッキーです！", "韓国に着いてまず最初にしたことは韓国名を作ることでした。おかげで楽しく意味ある旅ができました。友達にもWinkNamingを勧めています！"],
+    "child": ["2026年に娘の名前を서윤にしました。陰陽五行まで考えてくれて安心でした！", "2026年に息子の도현という名前をここで決めました。四柱まで合わせてくれてありがとうございます！"],
+    "pet": ["2026年に愛犬に사랑（愛）という名前をつけました。とても素敵な名前です！", "2026年に猫の名前を하늘にしました。韓国語で空という意味だそうです！"],
+    "foreign": ["2026年に芸名としてLunaという名前をもらいました。海外SNSでの反応がいいです！", "2026年に英語名Ethanを作りました。発音も意味も気に入っています！"],
+    "goods": ["2026年には印鑑まで注文しました。韓国伝統の結びのネックレスがとても素敵です！", "2026年にネームカードのQRコードを見せたら友達がびっくりしていました！"],
+  },
+  zh: {
+    "korean-name": ["2026年我有了「이하늘」这个韩国名字，谢谢WinkNaming！", "2026年我的韩国名字是「박서연」，韩国朋友们都非常喜欢！", "2026年我成了「강도윤」，我的副角色现在是韩国人了！", "跆拳道教练为了庆祝我晋级给我取了韩国名字，就这样认识了WinkNaming，我真的太幸运了！", "到达韩国后做的第一件事就是取韩国名字。因此拥有了愉快而有意义的旅行，现在正在向朋友们推荐WinkNaming！"],
+    "child": ["2026年给女儿取名서윤。连阴阳五行都考虑到了，让我非常放心！", "2026年在这里决定了儿子도현的名字。连四柱都考虑进去了，真的很感谢！"],
+    "pet": ["2026年给爱犬取了사랑（爱）这个名字，真的是个很美的名字！", "2026年给猫咪取名하늘，听说韩语里是天空的意思！"],
+    "foreign": ["2026年获得了Luna这个艺名，在海外社交媒体上反响很好！", "2026年创建了英文名Ethan，发音和含义都很喜欢！"],
+    "goods": ["2026年还订购了印章，韩国传统结绳项链太漂亮了！", "2026年展示名片QR码时，朋友们都惊叹不已！"],
+  },
+  es: {
+    "korean-name": ["¡En 2026 obtuve mi nombre coreano, Lee Haneul. Gracias Wink Naming!", "¡En 2026 obtuve Park Seoyeon como mi nombre coreano. A mis amigos coreanos les encanta!", "¡En 2026 me convertí en Kang Doyun. Mi alter ego ahora es oficialmente coreano!", "¡Mi maestro de taekwondo me hizo un nombre coreano para celebrar mi cinturón. Así conocí Wink Naming. ¡Qué suerte tengo!", "¡Lo primero que hice al llegar a Corea fue crear un nombre coreano. Gracias a eso tuve un viaje tan alegre y significativo. Estoy recomendando Wink Naming a todos mis amigos!"],
+    "child": ["¡En 2026 nombré a mi hija Seoyun. Confiaba en ellos porque consideraron el yin-yang y los cinco elementos!", "¡En 2026 decidí el nombre Dohyun para mi hijo aquí. Gracias por considerar su saju también!"],
+    "pet": ["¡En 2026 le puse a mi perro el nombre Sarangi (Amor). ¡Es un nombre tan bonito!", "¡En 2026 le puse a mi gato el nombre Haneul. Me dijeron que significa 'cielo' en coreano!"],
+    "foreign": ["¡En 2026 obtuve el nombre artístico Luna. ¡La respuesta en las redes sociales internacionales ha sido increíble!", "¡En 2026 creé el nombre inglés Ethan. Me encanta tanto la pronunciación como el significado!"],
+    "goods": ["¡En 2026 incluso pedí un sello. ¡El collar de nudo tradicional coreano es tan hermoso!", "¡En 2026 cuando mostré el código QR de la tarjeta de nombre, mis amigos quedaron asombrados!"],
+  },
+  fr: {
+    "korean-name": ["En 2026, j'ai obtenu mon prénom coréen, Lee Haneul. Merci Wink Naming !", "En 2026, j'ai obtenu Park Seoyeon comme prénom coréen. Mes amis coréens adorent !", "En 2026, je suis devenu Kang Doyun. Mon alter ego est maintenant officiellement coréen !", "Mon maître de taekwondo m'a créé un prénom coréen pour célébrer ma ceinture. C'est ainsi que j'ai découvert Wink Naming. Quelle chance !", "La première chose que j'ai faite en arrivant en Corée était de créer un prénom coréen. Cela a rendu mon voyage si joyeux et significatif. Je recommande Wink Naming à tous mes amis !"],
+    "child": ["En 2026, j'ai nommé ma fille Seoyun. J'avais confiance car ils ont considéré le yin-yang et les cinq éléments !", "En 2026, j'ai décidé du prénom Dohyun pour mon fils ici. Merci d'avoir considéré son saju aussi !"],
+    "pet": ["En 2026, j'ai donné à mon chien le prénom Sarangi (Amour). C'est un si beau prénom !", "En 2026, j'ai nommé mon chat Haneul. On m'a dit que ça signifie 'ciel' en coréen !"],
+    "foreign": ["En 2026, j'ai obtenu le nom de scène Luna. La réponse sur les réseaux sociaux internationaux a été incroyable !", "En 2026, j'ai créé le prénom anglais Ethan. J'adore la prononciation et la signification !"],
+    "goods": ["En 2026, j'ai même commandé un sceau. Le collier de nœud traditionnel coréen est si beau !", "En 2026, quand j'ai montré le code QR de la carte de nom, mes amis étaient stupéfaits !"],
+  },
+  ru: {
+    "korean-name": ["В 2026 году у меня появилось корейское имя Lee Haneul. Спасибо Wink Naming!", "В 2026 году моим корейским именем стало Park Seoyeon. Мои корейские друзья в восторге!", "В 2026 году я стал Kang Doyun. Теперь мой альтер эго официально кореец!", "Мой тренер по тхэквондо создал мне корейское имя в честь повышения пояса. Так я узнал о Wink Naming. Мне так повезло!", "Первое, что я сделала в Корее — создала корейское имя. Это сделало поездку такой радостной и значимой. Рекомендую Wink Naming всем друзьям!"],
+    "child": ["В 2026 году я назвала дочь Сеюн. Я доверяла им, потому что они учли инь-ян и пять элементов!", "В 2026 году я выбрала здесь имя Духён для сына. Спасибо, что учли его саджу!"],
+    "pet": ["В 2026 году я дала собаке имя Саранги (Любовь). Такое красивое имя!", "В 2026 году я назвала кошку Ханыль. Говорят, это значит 'небо' по-корейски!"],
+    "foreign": ["В 2026 году я получила сценическое имя Luna. Реакция в международных социальных сетях потрясающая!", "В 2026 году я создала английское имя Ethan. Мне нравится и произношение, и значение!"],
+    "goods": ["В 2026 году я даже заказала печать. Корейское традиционное ожерелье с узлом такое красивое!", "В 2026 году, когда я показала QR-код именной карточки, друзья были поражены!"],
+  },
+  ar: {
+    "korean-name": ["في عام 2026 حصلت على اسمي الكوري Lee Haneul. شكراً Wink Naming!", "في عام 2026 أصبح اسمي الكوري Park Seoyeon. أصدقائي الكوريون يحبونه كثيراً!", "في عام 2026 أصبحت Kang Doyun. شخصيتي البديلة الآن رسمياً كورية!", "أعطاني أستاذ التايكوندو اسماً كورياً احتفالاً بترقيتي. هكذا عرفت Wink Naming. ما أحظاني!", "أول ما فعلته عند وصولي لكوريا كان الحصول على اسم كوري. جعل ذلك رحلتي ممتعة وذات معنى. أنصح الجميع بـ Wink Naming!"],
+    "child": ["في عام 2026 سميت ابنتي Seoyun. وثقت بهم لأنهم أخذوا في الاعتبار اليين واليانغ والعناصر الخمسة!", "في عام 2026 اخترت هنا اسم Dohyun لابني. شكراً لمراعاة ساجو ابني أيضاً!"],
+    "pet": ["في عام 2026 أعطيت كلبي اسم Sarangi (حب). اسم جميل جداً!", "في عام 2026 سميت قطتي Haneul. قالوا لي إنها تعني 'السماء' بالكورية!"],
+    "foreign": ["في عام 2026 حصلت على اسم فني Luna. الاستجابة على وسائل التواصل الاجتماعي الدولية رائعة!", "في عام 2026 أنشأت الاسم الإنجليزي Ethan. أحب النطق والمعنى!"],
+    "goods": ["في عام 2026 طلبت حتى ختماً. عقد العقدة الكورية التقليدية جميل جداً!", "في عام 2026 عندما أريت رمز QR لبطاقة الاسم، أُذهل أصدقائي!"],
+  },
+  hi: {
+    "korean-name": ["2026 में मुझे Lee Haneul कोरियाई नाम मिला। धन्यवाद Wink Naming!", "2026 में Park Seoyeon मेरा कोरियाई नाम बना। मेरे कोरियाई दोस्तों को बहुत पसंद है!", "2026 में मैं Kang Doyun बन गया। मेरा अल्टर ईगो अब आधिकारिक रूप से कोरियाई है!", "मेरे ताइक्वांडो गुरु ने बेल्ट प्रमोशन के उपलक्ष्य में कोरियाई नाम बनाया। इस तरह Wink Naming से परिचय हुआ। मैं कितना भाग्यशाली हूँ!", "कोरिया पहुँचकर सबसे पहला काम था कोरियाई नाम बनवाना। इससे यात्रा बहुत आनंदमय और अर्थपूर्ण बनी। सभी मित्रों को Wink Naming की सिफारिश कर रही हूँ!"],
+    "child": ["2026 में बेटी का नाम Seoyun रखा। यिन-यांग और पाँच तत्वों पर विचार करने से विश्वास हुआ!", "2026 में यहाँ बेटे के लिए Dohyun नाम तय किया। साजू का भी ध्यान रखने के लिए शुक्रिया!"],
+    "pet": ["2026 में कुत्ते को Sarangi (प्यार) नाम दिया। कितना सुंदर नाम है!", "2026 में बिल्ली का नाम Haneul रखा। बताया कि कोरियाई में 'आकाश' का अर्थ है!"],
+    "foreign": ["2026 में स्टेज नाम Luna मिला। अंतर्राष्ट्रीय सोशल मीडिया पर बहुत अच्छी प्रतिक्रिया है!", "2026 में अंग्रेज़ी नाम Ethan बनाया। उच्चारण और अर्थ दोनों पसंद हैं!"],
+    "goods": ["2026 में मुहर भी मँगवाई। कोरियाई पारंपरिक गाँठ का हार इतना सुंदर है!", "2026 में नाम कार्ड QR कोड दिखाया तो दोस्त हैरान रह गए!"],
+  },
+};
+
+function getReviews(lang: Lang, catId: CatId): ReviewEntry[] {
+  const base = REVIEWS_BY_CAT[catId];
+  const contents = (REVIEW_CONTENT_BY_LANG[lang] ?? REVIEW_CONTENT_BY_LANG.ko)[catId] ?? [];
+  return base.map((r, i) => ({ ...r, content: contents[i] ?? r.content }));
+}
+
 // ── 고객 후기 섹션 (카테고리 탭) ────────────────────────
-function ReviewsSection({ copy }: { copy: HomeCopy }) {
+function ReviewsSection({ copy, lang }: { copy: HomeCopy; lang: Lang }) {
   const [activeTab, setActiveTab] = useState<CatId>("korean-name");
   const [fadeKey, setFadeKey] = useState(0);
   const serif = "var(--font-noto-serif-kr,'Noto Serif KR',serif)";
 
   const CAT_TAB_LABELS: Record<CatId, string> = {
-    "korean-name": "나의 한국이름",
-    "child":        "아이이름",
-    "pet":          "반려동물",
-    "foreign":      "외국이름",
-    "goods":        "도장·굿즈",
+    "korean-name": copy.cats["korean-name"].label,
+    "child":        copy.cats["child"].label,
+    "pet":          copy.cats["pet"].label,
+    "foreign":      copy.cats["foreign"].label,
+    "goods":        copy.cats["goods"].label,
   };
 
-  const reviews = REVIEWS_BY_CAT[activeTab];
+  const reviews = getReviews(lang, activeTab);
 
   return (
     <section style={{ background: "#FAFAF8", padding: "72px 0" }}>
@@ -816,13 +1213,14 @@ function ReviewsSection({ copy }: { copy: HomeCopy }) {
 }
 
 // ── 마퀴 자막 (56px 네이비) ──────────────────────────────
-function MarqueeBand() {
+function MarqueeBand({ lang }: { lang: Lang }) {
+  const segments = MARQUEE_BY_LANG[lang] ?? MARQUEE_BY_LANG.ko;
   return (
     <div style={{ overflow: "hidden", background: "#1B2A5E", height: 56, display: "flex", alignItems: "center" }}>
       <div className="marquee-track" style={{ display: "flex", whiteSpace: "nowrap" }}>
         {[0, 1, 2].map(i => (
           <span key={i} style={{ fontSize: 20, fontWeight: 700, letterSpacing: "0.05em", padding: "0 48px", flexShrink: 0 }}>
-            {MARQUEE_SEGMENTS.map((seg, j) => (
+            {segments.map((seg, j) => (
               <span key={j} style={{ color: seg.color }}>{seg.text}</span>
             ))}
           </span>
@@ -989,7 +1387,7 @@ export default function HomePage() {
       setAnimKey(k => k + 1);
     }, 4000);
     return () => clearInterval(t);
-  }, [selectedId]);
+  }, [selectedId, lang]);
 
   const handleCatSelect = (id: CatId) => {
     setSelectedId(id);
@@ -1009,7 +1407,7 @@ export default function HomePage() {
   };
 
   const cat = CATS.find(c => c.id === selectedId) ?? CATS[0];
-  const cards = ALL_CARDS[selectedId];
+  const cards = getCards(lang, selectedId);
   const card = cards[cardIdx];
   const theme = THEME[selectedId];
   const copy = (HOME_COPY[lang] ?? HOME_COPY.ko) as HomeCopy;
@@ -1115,7 +1513,7 @@ export default function HomePage() {
       </section>
 
       {/* ── 마퀴 자막 ── */}
-      <MarqueeBand />
+      <MarqueeBand lang={lang} />
 
       {/* ── 카테고리 아이콘 바 ── */}
       <div className="lg-cat-bar">
@@ -1225,7 +1623,7 @@ export default function HomePage() {
       <InfoSection copy={copy} />
 
       {/* ── 고객 후기 섹션 ── */}
-      <ReviewsSection copy={copy} />
+      <ReviewsSection copy={copy} lang={lang} />
 
       {/* ── 모바일 하단 탭바 ── */}
       <div className="lg-mobile-tabs" role="tablist">
