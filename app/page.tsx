@@ -79,6 +79,85 @@ const CATS = [
 
 type CatId = typeof CATS[number]["id"];
 
+// ── 카테고리 설명 + 포인트 다국어 ───────────────────────────
+const CAT_DESC_BY_LANG = {
+  ko: {
+    "korean-name": { desc: "한국을 사랑하는 당신에게\n특별한 한국 이름을 드립니다.\n발음·의미·느낌 모두 고려한 설계.", points: ["국적·이름의 음운 기반 변환", "의미와 감성까지 담은 설계", "한자·한글 병기 제공", "영어·일본어·중국어 원명 반영"] },
+    "child":        { desc: "세상에 하나뿐인 이름을 설계합니다.\n성씨 음운 조화, 한자 오행 획수,\n놀림감 필터까지 모두 반영합니다.", points: ["성씨와 이름의 음운 조화", "한자 오행·획수 분석", "놀림감·유사 이름 필터", "다국어 발음 동시 설계"] },
+    "pet":          { desc: "소중한 가족의 이름을 설계합니다.\n한국 고유의 감성을 담은\n기억하기 좋은 이름으로.", points: ["성격·외모 기반 설계", "한국 고유어·음식·자연에서 영감", "부르기 좋은 음절 고려", "귀여움·위엄·개성 반영"] },
+    "foreign":      { desc: "발음과 의미를 함께 살려\n국경을 넘는 이름을 만듭니다.\n글로벌 무대를 위한 설계.", points: ["발음 기반 자연스러운 변환", "의미·분위기 기반 새 이름", "영어·중국어·프랑스어 등 지원", "국제 무대에서 쓰기 좋은 이름"] },
+    "goods":        { desc: "설계한 이름을 실물로 만듭니다.\n목인·흑단·수우각 도장과\n이름 새긴 문패·선물 세트.", points: ["목인·흑단·자수정 도장 제작", "이름 새긴 문패 제작", "네임카드·선물 패키지", "이름 설계와 연계 구성"] },
+  },
+  en: {
+    "korean-name": { desc: "For those who love Korea,\nwe design your special Korean name.\nPhonetics · Meaning · Feel — all crafted.", points: ["Phonetic conversion by nationality & name", "Design with meaning and emotion", "Hanja & Hangul both provided", "Transcribed in English · Japanese · Chinese"] },
+    "child":        { desc: "We design a one-of-a-kind name\nfor your precious child.\nSurname harmony, hanja ohaeng, teasing filter — all included.", points: ["Surname-name phonetic harmony", "Hanja ohaeng & stroke analysis", "Teasing & duplicate name filter", "Multi-language pronunciation design"] },
+    "pet":          { desc: "We design a name for your precious family.\nUnique Korean sensibility\nin an easy-to-remember name.", points: ["Based on personality & appearance", "Inspired by Korean words, food & nature", "Easy-to-call syllables", "Cuteness · dignity · personality"] },
+    "foreign":      { desc: "Preserving both sound and meaning,\nwe create names that cross borders.\nDesigned for the global stage.", points: ["Natural phonetic conversion", "New name from meaning & atmosphere", "English · Chinese · French & more", "International-stage ready names"] },
+    "goods":        { desc: "Bring your designed name to life.\nStamps in wood, ebony & horn,\nnameplates & gift sets engraved.", points: ["Wood · ebony · amethyst stamps", "Nameplate with engraved name", "Name card & gift package", "Linked with name design"] },
+  },
+  zh: {
+    "korean-name": { desc: "为热爱韩国的您\n设计独特的韩国名字。\n发音·意义·感觉 — 全面考量。", points: ["基于国籍·姓名的音韵转换", "融入意义与情感的设计", "同时提供汉字与韩字", "翻译为英语·日语·中文"] },
+    "child":        { desc: "为您的宝贝设计\n世界上独一无二的名字。\n姓氏音韵、汉字五行、绰号过滤全面考量。", points: ["姓名音韵和谐", "汉字五行·笔画分析", "绰号·相似名字过滤", "多语言发音同步设计"] },
+    "pet":          { desc: "为您珍贵的家人设计名字。\n融入韩国独特感性\n易于记忆的名字。", points: ["基于性格·外貌的设计", "从韩国固有词·食物·自然中汲取灵感", "考虑易于呼唤的音节", "可爱·威严·个性反映"] },
+    "foreign":      { desc: "兼顾发音与意义\n打造跨越国界的名字。\n为全球舞台而设计。", points: ["基于发音的自然转换", "基于意义·氛围的新名字", "支持英语·中文·法语等", "适合国际舞台的名字"] },
+    "goods":        { desc: "将设计好的名字变为实物。\n木质·乌木·水牛角印章\n刻有名字的门牌·礼品套装。", points: ["木质·乌木·紫水晶印章制作", "刻有名字的门牌制作", "名片·礼品套餐", "与名字设计联动方案"] },
+  },
+  ja: {
+    "korean-name": { desc: "韓国を愛するあなたへ\n特別な韓国名を設計します。\n音韻·意味·感覚 — すべて考慮。", points: ["国籍·名前に基づく音韻変換", "意味と感性を込めた設計", "漢字とハングルを併記提供", "英語·日本語·中国語に翻訳"] },
+    "child":        { desc: "世界に一つだけの名前を設計します。\n姓の音韻調和、漢字五行画数、\nあだ名フィルターも反映。", points: ["姓と名の音韻調和", "漢字五行·画数分析", "あだ名·類似名フィルター", "多言語発音同時設計"] },
+    "pet":          { desc: "大切な家族の名前を設計します。\n韓国固有の感性を込めた\n覚えやすい名前で。", points: ["性格·外見に基づく設計", "韓国固有語·食べ物·自然からインスピレーション", "呼びやすい音節を考慮", "かわいさ·威厳·個性を反映"] },
+    "foreign":      { desc: "発音と意味を活かして\n国境を越える名前を作ります。\nグローバルステージのための設計。", points: ["発音に基づく自然な変換", "意味·雰囲気に基づく新名前", "英語·中国語·フランス語など対応", "国際舞台で使いやすい名前"] },
+    "goods":        { desc: "設計した名前を実物に。\n木製·黒壇·水牛角の印鑑と\n名前を刻んだ表札·ギフトセット。", points: ["木製·黒壇·アメジスト印鑑制作", "名前を刻んだ表札制作", "名刺·ギフトパッケージ", "名前設計との連携構成"] },
+  },
+  es: {
+    "korean-name": { desc: "Para los que aman Corea,\ndiseñamos tu nombre coreano especial.\nFonética · Significado · Sensación — todo considerado.", points: ["Conversión fonética por nacionalidad y nombre", "Diseño con significado y emoción", "Hanja y Hangul provistos", "Traducido al inglés · japonés · chino"] },
+    "child":        { desc: "Diseñamos el nombre único\npara tu precioso hijo.\nArmonía de apellido, hanja ohaeng, filtro de burlas — todo.", points: ["Armonía fonética apellido-nombre", "Análisis de hanja ohaeng y trazos", "Filtro de apodos y nombres similares", "Diseño de pronunciación multilingüe"] },
+    "pet":          { desc: "Diseñamos el nombre para tu familia.\nSensibilidad coreana única\nen un nombre fácil de recordar.", points: ["Basado en personalidad y apariencia", "Inspirado en palabras, comida y naturaleza coreana", "Sílabas fáciles de pronunciar", "Ternura · dignidad · personalidad"] },
+    "foreign":      { desc: "Preservando sonido y significado,\ncreamos nombres que cruzan fronteras.\nDiseñado para el escenario global.", points: ["Conversión fonética natural", "Nuevo nombre por significado y atmósfera", "Inglés · chino · francés y más", "Nombres listos para el escenario internacional"] },
+    "goods":        { desc: "Convierte tu nombre en realidad.\nSellos en madera, ébano y cuerno,\nplacas y sets de regalo grabados.", points: ["Sellos de madera · ébano · amatista", "Placa con nombre grabado", "Tarjeta de nombre y paquete de regalo", "Integrado con diseño de nombre"] },
+  },
+  fr: {
+    "korean-name": { desc: "Pour ceux qui aiment la Corée,\nnous concevons votre prénom coréen spécial.\nPhonétique · Sens · Sensation — tout considéré.", points: ["Conversion phonétique par nationalité et prénom", "Conception avec sens et émotion", "Hanja et Hangul fournis", "Traduit en anglais · japonais · chinois"] },
+    "child":        { desc: "Nous concevons le prénom unique\npour votre précieux enfant.\nHarmonie, hanja ohaeng, filtre de moquerie — tout inclus.", points: ["Harmonie phonétique nom-prénom", "Analyse hanja ohaeng et traits", "Filtre de surnoms et prénoms similaires", "Conception de prononciation multilingue"] },
+    "pet":          { desc: "Nous concevons un prénom pour votre famille.\nSensibilité coréenne unique\ndans un prénom facile à retenir.", points: ["Basé sur la personnalité et l'apparence", "Inspiré des mots, aliments et nature coréens", "Syllabes faciles à prononcer", "Mignonnerie · dignité · personnalité"] },
+    "foreign":      { desc: "Préservant son et signification,\nnous créons des prénoms qui franchissent les frontières.\nConçu pour la scène mondiale.", points: ["Conversion phonétique naturelle", "Nouveau prénom par sens et atmosphère", "Anglais · chinois · français et plus", "Prénoms prêts pour la scène internationale"] },
+    "goods":        { desc: "Donnez vie à votre prénom conçu.\nSceaux en bois, ébène et corne,\nplaques et coffrets cadeaux gravés.", points: ["Sceaux bois · ébène · améthyste", "Plaque avec prénom gravé", "Carte de visite et coffret cadeau", "Intégré avec la conception du prénom"] },
+  },
+  ru: {
+    "korean-name": { desc: "Для тех, кто любит Корею,\nмы создаём ваше особое корейское имя.\nФонетика · Значение · Ощущение — всё учтено.", points: ["Фонетическая конверсия по национальности и имени", "Дизайн со смыслом и эмоцией", "Ханджа и хангыль — оба варианта", "Переведено на английский · японский · китайский"] },
+    "child":        { desc: "Мы создаём уникальное имя\nдля вашего драгоценного ребёнка.\nГармония фамилии, ханджа охэн, фильтр — всё включено.", points: ["Фонетическая гармония фамилии и имени", "Анализ ханджа охэн и черт", "Фильтр прозвищ и похожих имён", "Многоязычный дизайн произношения"] },
+    "pet":          { desc: "Мы создаём имя для вашей дорогой семьи.\nУникальная корейская чувственность\nв запоминающемся имени.", points: ["На основе характера и внешности", "Вдохновлено корейскими словами, едой и природой", "Удобные для произношения слоги", "Милота · достоинство · индивидуальность"] },
+    "foreign":      { desc: "Сохраняя звук и смысл,\nмы создаём имена, пересекающие границы.\nДля мировой сцены.", points: ["Естественная фонетическая конверсия", "Новое имя по смыслу и атмосфере", "Английский · китайский · французский и др.", "Имена для международной сцены"] },
+    "goods":        { desc: "Воплотите ваше имя в жизнь.\nПечати из дерева, эбонита и рога,\nтаблички и подарочные наборы с гравировкой.", points: ["Печати дерево · эбонит · аметист", "Табличка с гравировкой имени", "Визитная карточка и подарочный набор", "Интегрировано с дизайном имени"] },
+  },
+  ar: {
+    "korean-name": { desc: "لمحبي كوريا،\nنصمم اسمك الكوري الخاص.\nالصوتيات · المعنى · الشعور — كل شيء مدروس.", points: ["تحويل صوتي بحسب الجنسية والاسم", "تصميم يجمع المعنى والعاطفة", "الهانجا والهانغول معاً", "مترجم للإنجليزية · اليابانية · الصينية"] },
+    "child":        { desc: "نصمم اسماً فريداً\nلطفلك العزيز.\nتناسق اللقب، هانجا أوهيج، فلتر — كل شيء.", points: ["تناسق صوتي للقب والاسم", "تحليل هانجا أوهيج والخطوط", "فلتر الألقاب والأسماء المشابهة", "تصميم نطق متعدد اللغات"] },
+    "pet":          { desc: "نصمم اسماً لعائلتك الثمينة.\nالحساسية الكورية الفريدة\nفي اسم سهل التذكر.", points: ["مبني على الشخصية والمظهر", "مستلهم من الكلمات والطعام والطبيعة الكورية", "مقاطع سهلة النطق", "رقة · وقار · شخصية"] },
+    "foreign":      { desc: "مع الحفاظ على الصوت والمعنى،\nنخلق أسماء تعبر الحدود.\nمصمم للمسرح العالمي.", points: ["تحويل صوتي طبيعي", "اسم جديد من المعنى والجو", "الإنجليزية · الصينية · الفرنسية وأكثر", "أسماء جاهزة للمسرح الدولي"] },
+    "goods":        { desc: "أحضر اسمك إلى الواقع.\nأختام خشب وأبنوس وقرن،\nألواح وطقم هدايا منقوشة.", points: ["أختام خشب · أبنوس · أميثيست", "لافتة منقوش عليها الاسم", "بطاقة اسم وحزمة هدايا", "متكاملة مع تصميم الاسم"] },
+  },
+  hi: {
+    "korean-name": { desc: "कोरिया से प्यार करने वालों के लिए,\nहम आपका विशेष कोरियाई नाम डिज़ाइन करते हैं।\nध्वनि · अर्थ · अनुभव — सब कुछ ध्यान में।", points: ["राष्ट्रीयता और नाम के आधार पर ध्वनि रूपांतरण", "अर्थ और भावना के साथ डिज़ाइन", "हांजा और हांगुल दोनों प्रदान", "अंग्रेजी · जापानी · चीनी में अनुवाद"] },
+    "child":        { desc: "हम आपके प्यारे बच्चे के लिए\nएक अनोखा नाम डिज़ाइन करते हैं।\nउपनाम सामंजस्य, हांजा ओहेंग, उपहास फ़िल्टर।", points: ["उपनाम-नाम ध्वन्यात्मक सामंजस्य", "हांजा ओहेंग और स्ट्रोक विश्लेषण", "उपहास और समान नाम फ़िल्टर", "बहुभाषी उच्चारण डिज़ाइन"] },
+    "pet":          { desc: "हम आपके प्यारे परिवार के लिए नाम डिज़ाइन करते हैं।\nकोरियाई अनूठी संवेदनशीलता\nयाद रखने में आसान नाम।", points: ["व्यक्तित्व और रूप पर आधारित", "कोरियाई शब्दों, खाना और प्रकृति से प्रेरित", "बुलाने में आसान अक्षर", "प्यारापन · गरिमा · व्यक्तित्व"] },
+    "foreign":      { desc: "ध्वनि और अर्थ दोनों को संजोते हुए,\nहम सीमाओं को पार करने वाले नाम बनाते हैं।\nवैश्विक मंच के लिए डिज़ाइन।", points: ["प्राकृतिक ध्वन्यात्मक रूपांतरण", "अर्थ और माहौल से नया नाम", "अंग्रेजी · चीनी · फ्रेंच और अधिक", "अंतर्राष्ट्रीय मंच के लिए तैयार नाम"] },
+    "goods":        { desc: "अपने डिज़ाइन किए नाम को जीवंत करें।\nलकड़ी, आबनूस और सींग की मुहरें,\nनाम उकेरी नेमप्लेट और उपहार सेट।", points: ["लकड़ी · आबनूस · नीलम मुहरें", "नाम उकेरी नेमप्लेट", "नेम कार्ड और उपहार पैकेज", "नाम डिज़ाइन से जुड़ी"] },
+  },
+} satisfies Record<string, Record<CatId, { desc: string; points: string[] }>>;
+
+const GOODS_DISCOUNT_BY_LANG: Record<string, string> = {
+  ko: "이름 설계 후 연계 주문 시 10% 할인",
+  en: "10% off when ordering after name design",
+  zh: "名字设计后联动订购享10%折扣",
+  ja: "名前設計後の連携注文で10%割引",
+  es: "10% de descuento al pedir después del diseño",
+  fr: "10% de réduction lors d'une commande après conception",
+  ru: "10% скидка при заказе после дизайна имени",
+  ar: "خصم 10% عند الطلب بعد تصميم الاسم",
+  hi: "नाम डिज़ाइन के बाद ऑर्डर पर 10% छूट",
+};
+
 type BaseCard = { cat: CatId; type: string };
 type KoreanNameCard = BaseCard & {
   type: "korean-name";
@@ -1735,6 +1814,7 @@ export default function HomePage() {
   const theme = THEME[selectedId];
   const copy = (HOME_COPY[lang] ?? HOME_COPY.ko) as HomeCopy;
   const catCopy = copy.cats[selectedId as CatId];
+  const catExtra = (CAT_DESC_BY_LANG[lang] ?? CAT_DESC_BY_LANG.ko)[selectedId as CatId];
   const price = PRICE_MAP[lang];
   const serif = "var(--font-noto-serif-kr,'Noto Serif KR',serif)";
   const sans = "var(--font-noto-sans-kr,'Noto Sans KR',-apple-system,BlinkMacSystemFont,sans-serif)";
@@ -1870,10 +1950,10 @@ export default function HomePage() {
               {catCopy.label}
             </h2>
             <p style={{ margin: "0 0 24px", fontSize: 16, color: "#555555", lineHeight: 1.9, whiteSpace: "pre-line", maxWidth: 460 }}>
-              {cat.desc}
+              {catExtra.desc}
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 32 }}>
-              {cat.points.map(p => (
+              {catExtra.points.map(p => (
                 <div key={p} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
                   <div style={{ width: 6, height: 6, borderRadius: "50%", marginTop: 7, background: theme.accent, flexShrink: 0, boxShadow: `0 0 6px ${theme.accent}55` }} />
                   <span style={{ fontSize: 15, color: "#444", lineHeight: 1.7 }}>{p}</span>
@@ -1887,7 +1967,7 @@ export default function HomePage() {
               <div style={{ fontSize: 13, color: "#888" }}>
                 {selectedId !== "goods"
                   ? `${copy.noLogin} · ${copy.later} ${price.symbol}${price.amount}`
-                  : <span>이름 설계 후 연계 주문 시 <strong style={{ color: theme.accent }}>10% 할인</strong></span>
+                  : <span style={{ color: theme.accent, fontWeight: 700 }}>{GOODS_DISCOUNT_BY_LANG[lang] ?? GOODS_DISCOUNT_BY_LANG.ko}</span>
                 }
               </div>
             </div>
