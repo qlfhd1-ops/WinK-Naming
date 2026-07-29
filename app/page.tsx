@@ -1390,13 +1390,14 @@ function NameCard({ card, accent }: { card: AnyCard; accent: string }) {
 }
 
 // ── 빅 네임카드 (16:9) ────────────────────────────────────
-function BigNameCard({ card, accent, bg }: { card: AnyCard; accent: string; bg: string }) {
+function BigNameCard({ card, accent, bg, lang }: { card: AnyCard; accent: string; bg: string; lang: Lang }) {
   const serif = "var(--font-noto-serif-kr,'Noto Serif KR',serif)";
 
-  let name = "", hanja = "", meaning = "", story = "", badge = "";
+  let name = "", hanja = "", meaning = "", story = "", badge = "", roman = "";
   if (card.type === "korean-name") {
     const c = card as KoreanNameCard;
-    name = c.koreanName; hanja = c.hanja; meaning = c.meaning; story = c.story; badge = `${c.flag} ${c.nationality}`;
+    name = c.koreanName; hanja = c.hanja; meaning = c.meaning; story = c.story;
+    badge = `${c.flag} ${c.nationality}`; roman = c.roman ?? "";
   } else if (card.type === "child") {
     const c = card as ChildCard;
     name = `${c.surname}${c.name}`; hanja = c.fullHanja; meaning = c.meaning; story = c.story; badge = c.roman;
@@ -1410,6 +1411,27 @@ function BigNameCard({ card, accent, bg }: { card: AnyCard; accent: string; bg: 
     const c = card as GoodsCard;
     name = c.engravedName; hanja = c.productName; meaning = c.tagline; story = c.desc; badge = c.material;
   }
+
+  const handleSpeak = () => {
+    if (typeof window === "undefined" || !window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const speak = (text: string, lg: string, onEnd?: () => void) => {
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = lg; u.rate = 0.82;
+      if (onEnd) u.onend = onEnd;
+      window.speechSynthesis.speak(u);
+    };
+    // 이름 2번(ko-KR) → 뜻 현지 언어
+    const meaningLang: Record<Lang, string> = {
+      ko:"ko-KR", en:"en-US", ja:"ja-JP", zh:"zh-CN",
+      es:"es-ES", fr:"fr-FR", ru:"ru-RU", ar:"ar-SA", hi:"hi-IN",
+    };
+    speak(name, "ko-KR", () =>
+      speak(name, "ko-KR", () =>
+        speak(meaning, meaningLang[lang] ?? "ko-KR")
+      )
+    );
+  };
 
   return (
     <div
@@ -1431,6 +1453,31 @@ function BigNameCard({ card, accent, bg }: { card: AnyCard; accent: string; bg: 
           <div style={{ fontSize: "clamp(36px,6vw,72px)", fontWeight: 900, color: "#FFFFFF", fontFamily: serif, letterSpacing: "0.12em", lineHeight: 1 }}>
             {name}
           </div>
+          {roman && (
+            <div style={{ fontSize: 13, color: `${accent}CC`, fontWeight: 600, letterSpacing: "0.1em", marginTop: 10 }}>
+              {roman}
+            </div>
+          )}
+          {(roman || card.type === "korean-name") && (
+            <button
+              type="button"
+              onClick={handleSpeak}
+              style={{
+                marginTop: 14,
+                display: "inline-flex", alignItems: "center", gap: 7,
+                background: `${accent}22`, border: `1px solid ${accent}55`,
+                borderRadius: 20, padding: "6px 14px",
+                color: accent, fontSize: 12, fontWeight: 700,
+                cursor: "pointer", letterSpacing: "0.04em",
+              }}
+              aria-label="이름 읽어주기"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+              </svg>
+              듣기
+            </button>
+          )}
         </div>
         {/* 오른쪽: 한자 + 의미 + 설명 */}
         <div className="lg-big-name-right" style={{ borderLeft: `1px solid ${accent}33` }}>
@@ -1450,15 +1497,15 @@ function BigNameCard({ card, accent, bg }: { card: AnyCard; accent: string; bg: 
 }
 
 // ── 고객 후기 데이터 (카테고리별) ────────────────────────
-type ReviewEntry = { name: string; flag: string; content: string };
+type ReviewEntry = { name: string; flag: string; content: string; koreanName?: string };
 
 const REVIEWS_BY_CAT: Record<CatId, ReviewEntry[]> = {
   "korean-name": [
-    { name: "Emma", flag: "🇺🇸", content: "2026년 이하늘이라는 한국이름이 생겼어요. 고마워요 윙크네이밍!" },
-    { name: "Yuki", flag: "🇯🇵", content: "2026년 박서연이라는 한국이름이 생겼어요. 한국 친구들이 너무 좋아해요!" },
-    { name: "Lucas", flag: "🇧🇷", content: "2026년 강도윤이 되었습니다. 나의 부캐릭터는 이제 한국인이에요!" },
-    { name: "Jake", flag: "🇺🇸", content: "태권도 사범님께서 승급 기념으로 한국이름을 만들어 주셨다. 그렇게 알게 된 윙크 네이밍. 난 정말 운이 좋다!" },
-    { name: "Anna", flag: "🇩🇪", content: "한국에 도착해서 가장 먼저 한 것이 한국 이름 만들기였다. 덕분에 즐겁고 의미있는 여행을 했다. 친구들에게 윙크네이밍을 추천하고 있다!" },
+    { name: "Emma", flag: "🇺🇸", koreanName: "이하늘", content: "2026년 이하늘이라는 한국이름이 생겼어요. 고마워요 윙크네이밍!" },
+    { name: "Yuki", flag: "🇯🇵", koreanName: "박서연", content: "2026년 박서연이라는 한국이름이 생겼어요. 한국 친구들이 너무 좋아해요!" },
+    { name: "Lucas", flag: "🇧🇷", koreanName: "강도윤", content: "2026년 강도윤이 되었습니다. 나의 부캐릭터는 이제 한국인이에요!" },
+    { name: "Jake", flag: "🇺🇸", koreanName: "수지", content: "태권도 사범님께서 승급 기념으로 한국이름을 만들어 주셨다. 그렇게 알게 된 윙크 네이밍. 난 정말 운이 좋다!" },
+    { name: "Anna", flag: "🇩🇪", koreanName: "선희", content: "한국에 도착해서 가장 먼저 한 것이 한국 이름 만들기였다. 덕분에 즐겁고 의미있는 여행을 했다. 친구들에게 윙크네이밍을 추천하고 있다!" },
   ],
   "child": [
     { name: "김지현", flag: "🇰🇷", content: "2026년 딸 이름 서윤이로 지었어요. 음양오행까지 고려해줘서 믿음이 갔어요!" },
@@ -1593,21 +1640,29 @@ function ReviewsSection({ copy, lang }: { copy: HomeCopy; lang: Lang }) {
 
         {/* 후기 카드 그리드 */}
         <div key={fadeKey} className="lg-reviews-grid" style={{ animation: "lgFadeIn 0.35s ease" }}>
-          {reviews.map((r, i) => (
+          {reviews.map((r, i) => {
+            // 본문 속 한국 이름 골드 강조
+            const highlightContent = (text: string, kname?: string) => {
+              if (!kname) return <>{text}</>;
+              const parts = text.split(kname);
+              return <>{parts.map((p, j) => j < parts.length - 1 ? <>{p}<strong style={{ color: "#C9A84C", fontStyle: "normal", fontWeight: 800 }}>{kname}</strong></> : p)}</>;
+            };
+            return (
             <div key={i} className="lg-review-grid-card">
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
                 <span style={{ fontSize: 28, lineHeight: 1 }}>{r.flag}</span>
-                <span style={{ fontSize: 15, fontWeight: 800, color: "#C9A84C", letterSpacing: "0.02em" }}>{r.name}</span>
+                <span style={{ fontSize: 15, fontWeight: 700, color: "#1B2A5E" }}>{r.name}</span>
               </div>
               <div style={{ flex: 1, fontSize: 18, color: "#333333", lineHeight: 1.8, fontStyle: "italic", marginBottom: 18 }}>
-                &ldquo;{r.content}&rdquo;
+                &ldquo;{highlightContent(r.content, r.koreanName)}&rdquo;
               </div>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <div style={{ fontSize: 16, color: "#C9A84C", letterSpacing: 2 }}>★★★★★</div>
                 <div style={{ fontSize: 11, fontWeight: 700, color: "#FFF", background: "#1B2A5E", borderRadius: 20, padding: "3px 10px" }}>2026</div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>
@@ -1675,6 +1730,7 @@ function InfoSection({ copy, lang }: { copy: HomeCopy; lang: Lang }) {
             </div>
           ))}
         </div>
+
       </div>
     </section>
   );
@@ -1894,7 +1950,7 @@ export default function HomePage() {
             {cat.emoji} {catCopy.label} · 이름 설계 프리뷰
           </div>
           <div key={`${selectedId}-${animKey}`} style={{ animation: "lgFadeIn 0.4s ease", width: "100%" }}>
-            <BigNameCard card={card} accent={theme.accent} bg={theme.bg} />
+            <BigNameCard card={card} accent={theme.accent} bg={theme.bg} lang={lang} />
           </div>
           {/* 슬라이드 도트 */}
           <div style={{ display: "flex", gap: 5, marginTop: 14, justifyContent: "center" }}>
