@@ -168,6 +168,7 @@ type KoreanNameCard = BaseCard & {
   hanja: string;
   meaning: string;
   story: string;
+  roman?: string;
 };
 type ChildCard = BaseCard & {
   type: "child";
@@ -208,11 +209,11 @@ type AnyCard = KoreanNameCard | ChildCard | PetCard | ForeignCard | GoodsCard;
 
 const ALL_CARDS: Record<CatId, AnyCard[]> = {
   "korean-name": [
-    { cat: "korean-name", type: "korean-name", originalName: "Emma", nationality: "미국 · USA", flag: "🇺🇸", koreanName: "이하늘", hanja: "李夏訥", meaning: "하늘처럼 넓고 자유로운 영혼", story: "Emma의 부드럽고 밝은 음감을 살려 '하늘'로 연결했습니다. 여름 하늘처럼 넓고 자유로운 삶을 바라는 이름입니다." },
-    { cat: "korean-name", type: "korean-name", originalName: "Michael", nationality: "영국 · UK", flag: "🇬🇧", koreanName: "강도윤", hanja: "姜道潤", meaning: "바른 길로 윤택하게", story: "Michael의 '신의 뜻을 따르는' 의미에서 '도윤(道潤)' — 바른 길을 따라 풍요롭게 — 로 설계했습니다." },
-    { cat: "korean-name", type: "korean-name", originalName: "Yuki", nationality: "일본 · Japan", flag: "🇯🇵", koreanName: "박서연", hanja: "朴瑞蓮", meaning: "상서로운 연꽃처럼 아름답게", story: "雪(유키·눈)의 순수함을 '서연(瑞蓮)' — 상서로운 연꽃 — 으로 승화시켰습니다. 한국적 감성을 가득 담은 이름입니다." },
-    { cat: "korean-name", type: "korean-name", originalName: "Jake", nationality: "미국 · USA", flag: "🇺🇸", koreanName: "수지", hanja: "秀志", meaning: "빼어난 뜻을 품은 이름", story: "Jake의 명확하고 힘있는 음감에서 '수지(秀志)' — 빼어난 뜻 — 로 설계했습니다. 성씨 없이 이름만으로도 완성되는 한국 이름입니다." },
-    { cat: "korean-name", type: "korean-name", originalName: "Anna", nationality: "독일 · Germany", flag: "🇩🇪", koreanName: "선희", hanja: "善熙", meaning: "선하고 밝게 빛나는 존재", story: "Anna의 우아하고 따뜻한 음감을 살려 '선희(善熙)' — 선하고 빛나는 — 으로 설계했습니다. 스승님·가족의 성씨를 이어받아 지을 수도 있어요." },
+    { cat: "korean-name", type: "korean-name", originalName: "Emma", nationality: "미국 · USA", flag: "🇺🇸", koreanName: "이하늘", hanja: "李夏訥", roman: "Lee Ha-neul", meaning: "하늘처럼 넓고 자유로운 영혼", story: "Emma의 부드럽고 밝은 음감을 살려 '하늘'로 연결했습니다. 여름 하늘처럼 넓고 자유로운 삶을 바라는 이름입니다." },
+    { cat: "korean-name", type: "korean-name", originalName: "Michael", nationality: "영국 · UK", flag: "🇬🇧", koreanName: "강도윤", hanja: "姜道潤", roman: "Kang Do-yun", meaning: "바른 길로 윤택하게", story: "Michael의 '신의 뜻을 따르는' 의미에서 '도윤(道潤)' — 바른 길을 따라 풍요롭게 — 로 설계했습니다." },
+    { cat: "korean-name", type: "korean-name", originalName: "Yuki", nationality: "일본 · Japan", flag: "🇯🇵", koreanName: "박서연", hanja: "朴瑞蓮", roman: "Park Seo-yeon", meaning: "상서로운 연꽃처럼 아름답게", story: "雪(유키·눈)의 순수함을 '서연(瑞蓮)' — 상서로운 연꽃 — 으로 승화시켰습니다. 한국적 감성을 가득 담은 이름입니다." },
+    { cat: "korean-name", type: "korean-name", originalName: "Jake", nationality: "미국 · USA", flag: "🇺🇸", koreanName: "수지", hanja: "秀志", roman: "Su-ji", meaning: "빼어난 뜻을 품은 이름", story: "Jake의 명확하고 힘있는 음감에서 '수지(秀志)' — 빼어난 뜻 — 로 설계했습니다. 성씨 없이 이름만으로도 완성되는 한국 이름입니다." },
+    { cat: "korean-name", type: "korean-name", originalName: "Anna", nationality: "독일 · Germany", flag: "🇩🇪", koreanName: "선희", hanja: "善熙", roman: "Seon-hee", meaning: "선하고 밝게 빛나는 존재", story: "Anna의 우아하고 따뜻한 음감을 살려 '선희(善熙)' — 선하고 빛나는 — 으로 설계했습니다. 스승님·가족의 성씨를 이어받아 지을 수도 있어요." },
   ],
   "child": [
     { cat: "child", type: "child", surname: "김", name: "서연", fullHanja: "金瑞姸", roman: "Kim Seoyeon", meaning: "상서로운 빛으로 곱게 피어남", story: "金(김) 성씨와 瑞(상서)·姸(곱다)의 조합. 오행 수·금의 조화가 고르고, 음운이 부드럽게 이어집니다." },
@@ -1596,7 +1597,7 @@ function ReviewsSection({ copy, lang }: { copy: HomeCopy; lang: Lang }) {
             <div key={i} className="lg-review-grid-card">
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
                 <span style={{ fontSize: 28, lineHeight: 1 }}>{r.flag}</span>
-                <span style={{ fontSize: 15, fontWeight: 700, color: "#1B2A5E" }}>{r.name}</span>
+                <span style={{ fontSize: 15, fontWeight: 800, color: "#C9A84C", letterSpacing: "0.02em" }}>{r.name}</span>
               </div>
               <div style={{ flex: 1, fontSize: 18, color: "#333333", lineHeight: 1.8, fontStyle: "italic", marginBottom: 18 }}>
                 &ldquo;{r.content}&rdquo;
@@ -1993,7 +1994,40 @@ export default function HomePage() {
                   {c.type === "korean-name" && (
                     <>
                       <div style={{ fontSize: 12, color: "#AAA", marginBottom: 3 }}>{(c as KoreanNameCard).originalName} →</div>
-                      <div style={{ fontSize: 18, fontWeight: 900, color: "#1B2A5E", fontFamily: serif, letterSpacing: 2 }}>{(c as KoreanNameCard).koreanName}</div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <div style={{ fontSize: 18, fontWeight: 900, color: "#1B2A5E", fontFamily: serif, letterSpacing: 2 }}>{(c as KoreanNameCard).koreanName}</div>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const card = c as KoreanNameCard;
+                            if (!window.speechSynthesis) return;
+                            window.speechSynthesis.cancel();
+                            const speak = (text: string, lang: string, onEnd?: () => void) => {
+                              const u = new SpeechSynthesisUtterance(text);
+                              u.lang = lang;
+                              u.rate = 0.85;
+                              if (onEnd) u.onend = onEnd;
+                              window.speechSynthesis.speak(u);
+                            };
+                            speak(card.koreanName, "ko-KR", () =>
+                              speak(card.koreanName, "ko-KR", () =>
+                                speak(card.meaning, "ko-KR")
+                              )
+                            );
+                          }}
+                          style={{ background: "none", border: "1.5px solid #C9A84C55", borderRadius: "50%", width: 26, height: 26, padding: 0, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: "#C9A84C" }}
+                          title="이름 듣기"
+                          aria-label="이름 읽어주기"
+                        >
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
+                          </svg>
+                        </button>
+                      </div>
+                      {(c as KoreanNameCard).roman && (
+                        <div style={{ fontSize: 11, color: "#C9A84C", fontWeight: 600, marginTop: 2, letterSpacing: "0.05em" }}>{(c as KoreanNameCard).roman}</div>
+                      )}
                     </>
                   )}
                   {c.type === "child" && (
