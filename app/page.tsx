@@ -1645,7 +1645,7 @@ function ReviewsSection({ copy, lang }: { copy: HomeCopy; lang: Lang }) {
             const highlightContent = (text: string, kname?: string) => {
               if (!kname) return <>{text}</>;
               const parts = text.split(kname);
-              return <>{parts.map((p, j) => j < parts.length - 1 ? <>{p}<strong style={{ color: "#C9A84C", fontStyle: "normal", fontWeight: 800 }}>{kname}</strong></> : p)}</>;
+              return <>{parts.map((p, j) => j < parts.length - 1 ? <span key={j}>{p}<strong style={{ color: "#C9A84C", fontStyle: "normal", fontWeight: 800 }}>{kname}</strong></span> : <span key={j}>{p}</span>)}</>;
             };
             return (
             <div key={i} className="lg-review-grid-card">
@@ -2052,8 +2052,9 @@ export default function HomePage() {
                       <div style={{ fontSize: 12, color: "#AAA", marginBottom: 3 }}>{(c as KoreanNameCard).originalName} →</div>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <div style={{ fontSize: 18, fontWeight: 900, color: "#1B2A5E", fontFamily: serif, letterSpacing: 2 }}>{(c as KoreanNameCard).koreanName}</div>
-                        <button
-                          type="button"
+                        <div
+                          role="button"
+                          tabIndex={0}
                           onClick={(e) => {
                             e.stopPropagation();
                             const card = c as KoreanNameCard;
@@ -2072,6 +2073,7 @@ export default function HomePage() {
                               )
                             );
                           }}
+                          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") e.currentTarget.click(); }}
                           style={{ background: "none", border: "1.5px solid #C9A84C55", borderRadius: "50%", width: 26, height: 26, padding: 0, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: "#C9A84C" }}
                           title="이름 듣기"
                           aria-label="이름 읽어주기"
@@ -2079,7 +2081,7 @@ export default function HomePage() {
                           <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
                             <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
                           </svg>
-                        </button>
+                        </div>
                       </div>
                       {(c as KoreanNameCard).roman && (
                         <div style={{ fontSize: 11, color: "#C9A84C", fontWeight: 600, marginTop: 2, letterSpacing: "0.05em" }}>{(c as KoreanNameCard).roman}</div>
