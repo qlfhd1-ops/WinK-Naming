@@ -2,7 +2,6 @@
 
 import { FormEvent, useState } from "react";
 import { useParams } from "next/navigation";
-import { createClient } from "@/lib/supabase/browser";
 import { AppLang, isSupportedLang } from "@/lib/lang-config";
 
 const COPY = {
@@ -145,17 +144,19 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const supabase   = createClient();
       const origin     = window.location.origin;
       const next       = new URLSearchParams(window.location.search).get("next");
-      const redirectTo = next && next.startsWith("/") ? next : `/${lang}/category`;
+      const redirectTo = `${origin}${next && next.startsWith("/") ? next : `/${lang}/category`}`;
 
-      const { error: signInError } = await supabase.auth.signInWithOtp({
-        email: email.trim(),
-        options: { emailRedirectTo: `${origin}${redirectTo}` },
+      const res = await fetch("/api/auth/magic-link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim(), redirectTo, lang }),
       });
 
-      if (signInError) throw signInError;
+      const data = await res.json() as { ok: boolean; error?: string };
+      if (!data.ok) throw new Error(data.error ?? ui.errorDefault);
+
       setMessage(ui.success);
     } catch (err) {
       setError(err instanceof Error ? err.message : ui.errorDefault);
