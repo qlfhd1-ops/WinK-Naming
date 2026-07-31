@@ -121,8 +121,8 @@ export async function POST(req: NextRequest) {
     });
 
     if (linkError || !linkData?.properties?.action_link) {
-      console.error("[magic-link] generateLink failed:", linkError?.message);
-      return NextResponse.json({ ok: false, error: linkError?.message ?? "link generation failed" }, { status: 500 });
+      console.error("[magic-link] generateLink failed:", linkError?.message, linkError?.status);
+      return NextResponse.json({ ok: false, error: `supabase: ${linkError?.message ?? "link generation failed"}` }, { status: 500 });
     }
 
     const actionLink = linkData.properties.action_link;
@@ -130,6 +130,8 @@ export async function POST(req: NextRequest) {
     const html = buildEmailHtml(actionLink, lang);
 
     // Resend로 발송
+    // from: 도메인 검증 없이 사용 가능한 Resend 기본 발신자 사용
+    const fromAddress = "Wink Naming <onboarding@resend.dev>";
     const sendRes = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -137,7 +139,7 @@ export async function POST(req: NextRequest) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "Wink Naming <noreply@wink-naming.com>",
+        from: fromAddress,
         to: [email.trim()],
         subject,
         html,
@@ -145,9 +147,10 @@ export async function POST(req: NextRequest) {
     });
 
     if (!sendRes.ok) {
-      const errText = await sendRes.text();
-      console.error("[magic-link] Resend error:", errText);
-      return NextResponse.json({ ok: false, error: "email send failed" }, { status: 500 });
+      const errBody = await sendRes.json().catch(() => ({})) as { name?: string; message?: string };
+      const errMsg = errBody?.message ?? "email send failed";
+      console.error("[magic-link] Resend error:", JSON.stringify(errBody));
+      return NextResponse.json({ ok: false, error: errMsg }, { status: 500 });
     }
 
     console.log("[magic-link] sent to", email.trim());
