@@ -111,12 +111,19 @@ export async function POST(req: NextRequest) {
     }
 
     // 매직링크 생성
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://wink-naming.vercel.app";
+    // redirectTo: Supabase가 토큰 교환 후 리다이렉트할 URL
+    // /auth/callback 라우트가 code를 세션으로 교환한 뒤 next로 이동
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://wink-naming.com";
+    const destination = redirectTo ?? `${baseUrl}/${lang}/category`;
+    const callbackUrl = `${baseUrl}/auth/callback?next=${encodeURIComponent(
+      destination.replace(baseUrl, "") || `/${lang}/category`
+    )}`;
+
     const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
       type: "magiclink",
       email: email.trim(),
       options: {
-        redirectTo: redirectTo ?? `${baseUrl}/${lang}/category`,
+        redirectTo: callbackUrl,
       },
     });
 
