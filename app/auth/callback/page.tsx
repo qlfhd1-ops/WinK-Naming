@@ -1,51 +1,65 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/browser";
 
 export default function AuthCallbackPage() {
   const router = useRouter();
-  const supabase = createClient();
-  const [message, setMessage] = useState("로그인 처리 중입니다...");
+  const handled = useRef(false);
 
   useEffect(() => {
-    const run = async () => {
-      const url = new URL(window.location.href);
-      const code = url.searchParams.get("code");
+    if (handled.current) return;
+    handled.current = true;
 
-      if (!code) {
-        router.replace("/login?message=" + encodeURIComponent("로그인 코드가 없습니다."));
-        return;
+    const supabase = createClient();
+    const params = new URLSearchParams(window.location.search);
+    const next = params.get("next") ?? "/ko/category";
+    const code = params.get("code");
+
+    // PKCE flow: ?code= 처리
+    if (code) {
+      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
+        router.replace(error ? "/ko/login?error=auth_failed" : next);
+      });
+      return;
+    }
+
+    // Implicit flow: #access_token= 처리
+    // Supabase 클라이언트가 해시를 자동 감지해 세션 설정
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session) {
+        subscription.unsubscribe();
+        router.replace(next);
       }
+    });
 
-      const { error } = await supabase.auth.exchangeCodeForSession(code);
+    // 6초 타임아웃
+    const timeout = setTimeout(() => {
+      subscription.unsubscribe();
+      router.replace("/ko/login?error=timeout");
+    }, 6000);
 
-      if (error) {
-        router.replace(
-          "/login?message=" + encodeURIComponent(error.message)
-        );
-        return;
-      }
-
-      router.replace("/");
+    return () => {
+      clearTimeout(timeout);
+      subscription.unsubscribe();
     };
-
-    run();
-  }, [router, supabase]);
+  }, [router]);
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        background: "#0b0f14",
-        color: "white",
-      }}
-    >
-      <p>{message}</p>
+    <main style={{
+      minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
+      background: "#F8F6F1",
+    }}>
+      <div style={{ textAlign: "center" }}>
+        <div style={{
+          width: 40, height: 40, border: "3px solid #E8E8E8",
+          borderTop: "3px solid #C9A84C", borderRadius: "50%",
+          animation: "spin 0.8s linear infinite", margin: "0 auto 16px",
+        }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        <p style={{ color: "#1B2A5E", fontWeight: 700, fontSize: 15, fontFamily: "sans-serif" }}>로그인 중...</p>
+      </div>
     </main>
   );
 }
