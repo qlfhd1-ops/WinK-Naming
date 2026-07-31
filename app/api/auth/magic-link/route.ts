@@ -113,7 +113,8 @@ export async function POST(req: NextRequest) {
     // 매직링크 생성
     // redirectTo: Supabase가 토큰 교환 후 리다이렉트할 URL
     // /auth/callback 라우트가 code를 세션으로 교환한 뒤 next로 이동
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://wink-naming.com";
+    // 환경변수 무관하게 프로덕션 도메인 고정
+    const baseUrl = "https://wink-naming.com";
     const destination = redirectTo ?? `${baseUrl}/${lang}/category`;
     const callbackUrl = `${baseUrl}/auth/callback?next=${encodeURIComponent(
       destination.replace(baseUrl, "") || `/${lang}/category`
