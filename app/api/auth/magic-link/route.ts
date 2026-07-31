@@ -4,8 +4,17 @@ import { createClient } from "@supabase/supabase-js";
 /**
  * POST /api/auth/magic-link
  * signInWithOtp으로 매직링크 요청 — service_role 키 불필요
- * Supabase가 직접 이메일 발송 (무료 플랜: 시간당 3건)
+ * anon 키는 NEXT_PUBLIC_ (공개키) — 코드에 폴백 내장
  */
+
+// anon 키는 공개 키 (클라이언트 번들에 노출됨) — 환경변수 누락 시 폴백
+const SUPABASE_URL =
+  process.env.NEXT_PUBLIC_SUPABASE_URL ??
+  "https://cyntpbjhpklgzkiwbmph.supabase.co";
+const SUPABASE_ANON_KEY =
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5bnRwYmpocGtsZ3praXdibXBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5MzAzOTYsImV4cCI6MjA4NzUwNjM5Nn0.-821zOmHC7v3y8NzC1FJ1yc92Q5l1E77K3jDzp6P9fE";
+
 export async function POST(req: NextRequest) {
   try {
     const { email, redirectTo, lang = "ko" } = await req.json() as {
@@ -18,13 +27,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: "invalid email" }, { status: 400 });
     }
 
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    if (!url || !key) {
-      return NextResponse.json({ ok: false, error: "auth service not configured" }, { status: 503 });
-    }
-
-    const supabase = createClient(url, key, { auth: { persistSession: false } });
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: { persistSession: false },
+    });
 
     const baseUrl = "https://wink-naming.com";
     const destination = redirectTo ?? `${baseUrl}/${lang}/category`;
