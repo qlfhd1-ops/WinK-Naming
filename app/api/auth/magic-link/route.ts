@@ -7,12 +7,10 @@ import { createClient } from "@supabase/supabase-js";
  * anon 키는 NEXT_PUBLIC_ (공개키) — 코드에 폴백 내장
  */
 
-// anon 키는 공개 키 (클라이언트 번들에 노출됨) — 환경변수 누락 시 폴백
-const SUPABASE_URL =
-  process.env.NEXT_PUBLIC_SUPABASE_URL ??
-  "https://cyntpbjhpklgzkiwbmph.supabase.co";
+// anon 키는 공개 키 (NEXT_PUBLIC_ — 클라이언트 번들에 노출됨)
+// Vercel 환경변수 불일치 문제로 직접 고정
+const SUPABASE_URL = "https://cyntpbjhpklgzkiwbmph.supabase.co";
 const SUPABASE_ANON_KEY =
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5bnRwYmpocGtsZ3praXdibXBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5MzAzOTYsImV4cCI6MjA4NzUwNjM5Nn0.-821zOmHC7v3y8NzC1FJ1yc92Q5l1E77K3jDzp6P9fE";
 
 export async function POST(req: NextRequest) {
