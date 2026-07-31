@@ -37,9 +37,13 @@ export async function GET(req: NextRequest) {
     });
 
     if (!error) {
-      const dest = redirectTo.startsWith("http")
-        ? redirectTo
-        : `${origin}${redirectTo}`;
+      // redirect_to가 /auth/callback?next=... 형태면 next 값만 추출해 바로 이동
+      let dest = redirectTo.startsWith("http") ? redirectTo : `${origin}${redirectTo}`;
+      try {
+        const url = new URL(dest);
+        const next = url.searchParams.get("next");
+        if (next) dest = `${origin}${next}`;
+      } catch { /* dest 그대로 사용 */ }
       return NextResponse.redirect(dest);
     }
     console.error("[auth/confirm] verifyOtp error:", error.message);
