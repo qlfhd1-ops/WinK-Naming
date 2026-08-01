@@ -4,14 +4,11 @@ import { createClient } from "@supabase/supabase-js";
 /**
  * POST /api/auth/magic-link
  * signInWithOtp으로 매직링크 요청 — service_role 키 불필요
- * anon 키는 NEXT_PUBLIC_ (공개키) — 코드에 폴백 내장
+ * 이메일 링크는 /auth/confirm(서버, token_hash 검증)으로 도착함
  */
 
-// anon 키는 공개 키 (NEXT_PUBLIC_ — 클라이언트 번들에 노출됨)
-// Vercel 환경변수 불일치 문제로 직접 고정
-const SUPABASE_URL = "https://cyntpbjhpklgzkiwbmph.supabase.co";
-const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5bnRwYmpocGtsZ3praXdibXBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5MzAzOTYsImV4cCI6MjA4NzUwNjM5Nn0.-821zOmHC7v3y8NzC1FJ1yc92Q5l1E77K3jDzp6P9fE";
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export async function POST(req: NextRequest) {
   try {
@@ -31,9 +28,9 @@ export async function POST(req: NextRequest) {
 
     const baseUrl = "https://wink-naming.com";
     const destination = redirectTo ?? `${baseUrl}/${lang}/category`;
-    const emailRedirectTo = `${baseUrl}/auth/callback?next=${encodeURIComponent(
-      destination.replace(baseUrl, "") || `/${lang}/category`
-    )}`;
+    const emailRedirectTo = destination.startsWith("http")
+      ? destination
+      : `${baseUrl}${destination}`;
 
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim(),

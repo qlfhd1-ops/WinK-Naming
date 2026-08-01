@@ -16,8 +16,8 @@ export async function GET(req: NextRequest) {
   if (token_hash) {
     const cookieStore = await cookies();
     const supabase = createServerClient(
-      "https://cyntpbjhpklgzkiwbmph.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5bnRwYmpocGtsZ3praXdibXBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5MzAzOTYsImV4cCI6MjA4NzUwNjM5Nn0.-821zOmHC7v3y8NzC1FJ1yc92Q5l1E77K3jDzp6P9fE",
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookies: {
           getAll() { return cookieStore.getAll(); },
@@ -37,13 +37,7 @@ export async function GET(req: NextRequest) {
     });
 
     if (!error) {
-      // redirect_to가 /auth/callback?next=... 형태면 next 값만 추출해 바로 이동
-      let dest = redirectTo.startsWith("http") ? redirectTo : `${origin}${redirectTo}`;
-      try {
-        const url = new URL(dest);
-        const next = url.searchParams.get("next");
-        if (next) dest = `${origin}${next}`;
-      } catch { /* dest 그대로 사용 */ }
+      const dest = redirectTo.startsWith("http") ? redirectTo : `${origin}${redirectTo}`;
       return NextResponse.redirect(dest);
     }
     console.error("[auth/confirm] verifyOtp error:", error.message);
