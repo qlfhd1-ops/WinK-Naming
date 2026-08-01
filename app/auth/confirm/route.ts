@@ -16,8 +16,9 @@ export async function GET(req: NextRequest) {
   if (token_hash) {
     const cookieStore = await cookies();
     const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      // Vercel Production 환경변수 불일치로 "Invalid API key" 발생 — 확인될 때까지 직접 고정.
+      "https://cyntpbjhpklgzkiwbmph.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5bnRwYmpocGtsZ3praXdibXBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5MzAzOTYsImV4cCI6MjA4NzUwNjM5Nn0.-821zOmHC7v3y8NzC1FJ1yc92Q5l1E77K3jDzp6P9fE",
       {
         cookies: {
           getAll() { return cookieStore.getAll(); },
