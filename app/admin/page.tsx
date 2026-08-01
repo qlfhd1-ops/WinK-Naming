@@ -242,10 +242,6 @@ export default function AdminPage() {
             style={{ padding: "7px 16px", borderRadius: 8, border: "1px solid rgba(200,218,248,0.15)", background: "transparent", color: "rgba(200,218,248,0.65)", fontSize: 12, cursor: "pointer", fontWeight: 600 }}>
             {loading ? "새로고침 중..." : "↻ 새로고침"}
           </button>
-          <a href="/admin/property"
-            style={{ padding: "7px 16px", borderRadius: 8, border: "1px solid rgba(100,200,150,0.3)", background: "transparent", color: "rgba(100,220,160,0.85)", fontSize: 12, cursor: "pointer", fontWeight: 600, textDecoration: "none" }}>
-            🏠 매물 관리
-          </a>
           <button type="button" onClick={handleSignOut}
             style={{ padding: "7px 16px", borderRadius: 8, border: "1px solid rgba(255,100,100,0.25)", background: "transparent", color: "rgba(255,120,120,0.75)", fontSize: 12, cursor: "pointer", fontWeight: 600 }}>
             로그아웃
