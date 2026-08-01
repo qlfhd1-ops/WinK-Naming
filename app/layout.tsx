@@ -22,11 +22,12 @@ const notoSansKR = Noto_Sans_KR({
 
 export const metadata: Metadata = {
   title: {
-    default: "윙크 네이밍 - AI 작명 서비스",
+    default: "윙크 네이밍 - 한국식 작명 서비스 | Wink Naming",
     template: "%s | 윙크 네이밍",
   },
-  description: "자녀, 브랜드, 반려동물 이름을 AI가 설계합니다. 성씨 음운 조화, 한자 오행 획수, 놀림감 필터까지 반영한 프리미엄 네이밍 서비스.",
-  keywords: ["작명", "AI 작명", "이름 짓기", "아이 이름", "브랜드명", "반려동물 이름", "윙크 네이밍", "네이밍 서비스"],
+  description:
+    "나의 한국이름 개명, 활동명, 아이 이름, 반려동물 이름을 설계해보세요. Design your Korean name — renaming, stage names, baby names, and pet names.",
+  keywords: ["작명", "AI 작명", "이름 짓기", "아이 이름", "브랜드명", "반려동물 이름", "윙크 네이밍", "네이밍 서비스", "Korean name", "Korean naming service"],
   authors: [{ name: "윙크 네이밍" }],
   creator: "윙크 네이밍",
   metadataBase: new URL("https://wink-naming.com"),
@@ -35,21 +36,23 @@ export const metadata: Metadata = {
     locale: "ko_KR",
     url: "https://wink-naming.com",
     siteName: "윙크 네이밍",
-    title: "윙크 네이밍 - AI 작명 서비스",
-    description: "자녀, 브랜드, 반려동물 이름을 AI가 설계합니다",
+    title: "윙크 네이밍 - 한국식 작명 서비스 | Wink Naming",
+    description:
+      "나의 한국이름 개명, 활동명, 아이 이름, 반려동물 이름을 설계해보세요. Design your Korean name — renaming, stage names, baby names, and pet names.",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "윙크 네이밍 - AI 작명 서비스",
+        alt: "윙크 네이밍 - 한국식 작명 서비스",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "윙크 네이밍 - AI 작명 서비스",
-    description: "자녀, 브랜드, 반려동물 이름을 AI가 설계합니다",
+    title: "윙크 네이밍 - 한국식 작명 서비스 | Wink Naming",
+    description:
+      "나의 한국이름 개명, 활동명, 아이 이름, 반려동물 이름을 설계해보세요. Design your Korean name — renaming, stage names, baby names, and pet names.",
     images: ["/og-image.png"],
   },
   robots: {
