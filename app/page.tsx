@@ -1401,6 +1401,41 @@ function KnotDivider() {
   );
 }
 
+// ── 미니 발음 듣기 버튼 (선택 카드 목록용) ─────────────────
+function MiniSpeakButton({ name, meaning, nameLang = "ko-KR" }: { name: string; meaning: string; nameLang?: string }) {
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={(e) => {
+        e.stopPropagation();
+        if (typeof window === "undefined" || !window.speechSynthesis) return;
+        window.speechSynthesis.cancel();
+        const speak = (text: string, lg: string, onEnd?: () => void) => {
+          const u = new SpeechSynthesisUtterance(text);
+          u.lang = lg;
+          u.rate = 0.85;
+          if (onEnd) u.onend = onEnd;
+          window.speechSynthesis.speak(u);
+        };
+        speak(name, nameLang, () =>
+          speak(name, nameLang, () =>
+            speak(meaning, nameLang)
+          )
+        );
+      }}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") e.currentTarget.click(); }}
+      style={{ background: "none", border: "1.5px solid #C9A84C55", borderRadius: "50%", width: 26, height: 26, padding: 0, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: "#C9A84C" }}
+      title="이름 듣기"
+      aria-label="이름 읽어주기"
+    >
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+        <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
+      </svg>
+    </div>
+  );
+}
+
 // ── 이름 카드 (라이트 테마) ───────────────────────────────
 function NameCard({ card, accent }: { card: AnyCard; accent: string }) {
   const base: React.CSSProperties = {
@@ -1634,6 +1669,12 @@ function BigNameCard({ card, accent, bg, lang }: { card: AnyCard; accent: string
     name = c.engravedName; hanja = c.productName; meaning = c.tagline; story = c.desc; badge = c.material;
   }
 
+  // 발음 듣기 버튼 — 이름을 새로 설계하는 카테고리(굿즈 제외)에 모두 노출
+  const SPEAKABLE_TYPES: CatId[] = ["korean-name", "child", "self", "stage", "pet", "foreign"];
+  const canSpeak = SPEAKABLE_TYPES.includes(card.type);
+  // "foreign" 카테고리는 이름이 외국어 표기이므로 영어 음성으로, 그 외는 한국어 음성으로 읽음
+  const nameSpeakLang = card.type === "foreign" ? "en-US" : "ko-KR";
+
   const handleSpeak = () => {
     if (typeof window === "undefined" || !window.speechSynthesis) return;
     window.speechSynthesis.cancel();
@@ -1643,13 +1684,13 @@ function BigNameCard({ card, accent, bg, lang }: { card: AnyCard; accent: string
       if (onEnd) u.onend = onEnd;
       window.speechSynthesis.speak(u);
     };
-    // 이름 2번(ko-KR) → 뜻 현지 언어
+    // 이름 2번 → 뜻 현지 언어
     const meaningLang: Record<Lang, string> = {
       ko:"ko-KR", en:"en-US", ja:"ja-JP", zh:"zh-CN",
       es:"es-ES", fr:"fr-FR", ru:"ru-RU", ar:"ar-SA", hi:"hi-IN",
     };
-    speak(name, "ko-KR", () =>
-      speak(name, "ko-KR", () =>
+    speak(name, nameSpeakLang, () =>
+      speak(name, nameSpeakLang, () =>
         speak(meaning, meaningLang[lang] ?? "ko-KR")
       )
     );
@@ -1680,7 +1721,7 @@ function BigNameCard({ card, accent, bg, lang }: { card: AnyCard; accent: string
               {roman}
             </div>
           )}
-          {(roman || card.type === "korean-name") && (
+          {canSpeak && (
             <button
               type="button"
               onClick={handleSpeak}
@@ -2302,36 +2343,7 @@ export default function HomePage() {
                       <div style={{ fontSize: 12, color: "#AAA", marginBottom: 3 }}>{(c as KoreanNameCard).originalName} →</div>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <div style={{ fontSize: 18, fontWeight: 900, color: "#1B2A5E", fontFamily: serif, letterSpacing: 2 }}>{(c as KoreanNameCard).koreanName}</div>
-                        <div
-                          role="button"
-                          tabIndex={0}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            const card = c as KoreanNameCard;
-                            if (!window.speechSynthesis) return;
-                            window.speechSynthesis.cancel();
-                            const speak = (text: string, lang: string, onEnd?: () => void) => {
-                              const u = new SpeechSynthesisUtterance(text);
-                              u.lang = lang;
-                              u.rate = 0.85;
-                              if (onEnd) u.onend = onEnd;
-                              window.speechSynthesis.speak(u);
-                            };
-                            speak(card.koreanName, "ko-KR", () =>
-                              speak(card.koreanName, "ko-KR", () =>
-                                speak(card.meaning, "ko-KR")
-                              )
-                            );
-                          }}
-                          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") e.currentTarget.click(); }}
-                          style={{ background: "none", border: "1.5px solid #C9A84C55", borderRadius: "50%", width: 26, height: 26, padding: 0, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: "#C9A84C" }}
-                          title="이름 듣기"
-                          aria-label="이름 읽어주기"
-                        >
-                          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
-                          </svg>
-                        </div>
+                        <MiniSpeakButton name={(c as KoreanNameCard).koreanName} meaning={(c as KoreanNameCard).meaning} />
                       </div>
                       {(c as KoreanNameCard).roman && (
                         <div style={{ fontSize: 11, color: "#C9A84C", fontWeight: 600, marginTop: 2, letterSpacing: "0.05em" }}>{(c as KoreanNameCard).roman}</div>
@@ -2339,21 +2351,36 @@ export default function HomePage() {
                     </>
                   )}
                   {c.type === "child" && (
-                    <div style={{ fontSize: 18, fontWeight: 900, color: "#1B2A5E", fontFamily: serif, letterSpacing: 2 }}>{(c as ChildCard).surname}{(c as ChildCard).name}</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <div style={{ fontSize: 18, fontWeight: 900, color: "#1B2A5E", fontFamily: serif, letterSpacing: 2 }}>{(c as ChildCard).surname}{(c as ChildCard).name}</div>
+                      <MiniSpeakButton name={`${(c as ChildCard).surname}${(c as ChildCard).name}`} meaning={(c as ChildCard).meaning} />
+                    </div>
                   )}
                   {c.type === "self" && (
-                    <div style={{ fontSize: 18, fontWeight: 900, color: "#1B2A5E", fontFamily: serif, letterSpacing: 2 }}>{(c as SelfCard).surname}{(c as SelfCard).name}</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <div style={{ fontSize: 18, fontWeight: 900, color: "#1B2A5E", fontFamily: serif, letterSpacing: 2 }}>{(c as SelfCard).surname}{(c as SelfCard).name}</div>
+                      <MiniSpeakButton name={`${(c as SelfCard).surname}${(c as SelfCard).name}`} meaning={(c as SelfCard).meaning} />
+                    </div>
                   )}
                   {c.type === "stage" && (
-                    <div style={{ fontSize: 18, fontWeight: 900, color: "#1B2A5E", fontFamily: serif, letterSpacing: 2 }}>{(c as StageCard).stageName}</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <div style={{ fontSize: 18, fontWeight: 900, color: "#1B2A5E", fontFamily: serif, letterSpacing: 2 }}>{(c as StageCard).stageName}</div>
+                      <MiniSpeakButton name={(c as StageCard).stageName} meaning={(c as StageCard).meaning} />
+                    </div>
                   )}
                   {c.type === "pet" && (
-                    <div style={{ fontSize: 18, fontWeight: 900, color: "#1B2A5E", fontFamily: serif, letterSpacing: 2 }}>{(c as PetCard).name}</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <div style={{ fontSize: 18, fontWeight: 900, color: "#1B2A5E", fontFamily: serif, letterSpacing: 2 }}>{(c as PetCard).name}</div>
+                      <MiniSpeakButton name={(c as PetCard).name} meaning={(c as PetCard).meaning} />
+                    </div>
                   )}
                   {c.type === "foreign" && (
                     <>
                       <div style={{ fontSize: 12, color: "#AAA", marginBottom: 3 }}>{(c as ForeignCard).koreanName} →</div>
-                      <div style={{ fontSize: 16, fontWeight: 800, color: "#1B2A5E" }}>{(c as ForeignCard).foreignName}</div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <div style={{ fontSize: 16, fontWeight: 800, color: "#1B2A5E" }}>{(c as ForeignCard).foreignName}</div>
+                        <MiniSpeakButton name={(c as ForeignCard).foreignName} meaning={(c as ForeignCard).meaning} nameLang="en-US" />
+                      </div>
                     </>
                   )}
                   {c.type === "goods" && (
