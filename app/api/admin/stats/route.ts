@@ -236,9 +236,39 @@ export async function GET(req: Request) {
     debug: {
       keyCheck: diagnoseKey(),
       rawCounts: {
-        naming_briefs: { count: totalBriefsRes.count, error: totalBriefsRes.error?.message ?? null },
-        naming_orders: { count: totalOrdersRes.count, error: totalOrdersRes.error?.message ?? null },
-        user_plans: { count: totalUsersRes.count, error: totalUsersRes.error?.message ?? null },
+        naming_briefs: {
+          count: totalBriefsRes.count,
+          error: totalBriefsRes.error
+            ? {
+                message: totalBriefsRes.error.message,
+                code: totalBriefsRes.error.code,
+                details: totalBriefsRes.error.details,
+                hint: totalBriefsRes.error.hint,
+              }
+            : null,
+        },
+        naming_orders: {
+          count: totalOrdersRes.count,
+          error: totalOrdersRes.error
+            ? {
+                message: totalOrdersRes.error.message,
+                code: totalOrdersRes.error.code,
+                details: totalOrdersRes.error.details,
+                hint: totalOrdersRes.error.hint,
+              }
+            : null,
+        },
+        user_plans: {
+          count: totalUsersRes.count,
+          error: totalUsersRes.error
+            ? {
+                message: totalUsersRes.error.message,
+                code: totalUsersRes.error.code,
+                details: totalUsersRes.error.details,
+                hint: totalUsersRes.error.hint,
+              }
+            : null,
+        },
       },
     },
   });
