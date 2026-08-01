@@ -43,6 +43,23 @@ const COPY = {
   },
 } as const;
 
+const CANONICAL_BASE_URL = "https://wink-naming.com";
+
+/**
+ * 로그인 세션 쿠키는 도메인마다 별도로 저장되므로, 어떤 도메인에서 로그인을
+ * 시작했든 확인 후에는 항상 CANONICAL_BASE_URL(wink-naming.com)에 머무른다.
+ * (다른 도메인으로 되돌아가면 방금 발급된 세션 쿠키를 잃어버려 로그인
+ * 무한 반복이 발생함)
+ */
+function toCanonicalDest(redirectTo: string): string {
+  try {
+    const u = new URL(redirectTo, CANONICAL_BASE_URL);
+    return `${CANONICAL_BASE_URL}${u.pathname}${u.search}${u.hash}`;
+  } catch {
+    return CANONICAL_BASE_URL;
+  }
+}
+
 function extractLang(redirectTo: string): AppLang {
   try {
     const url = new URL(redirectTo, "https://wink-naming.com");
@@ -100,10 +117,7 @@ export default function AuthConfirmPage() {
       return;
     }
 
-    const dest = params.redirect_to.startsWith("http")
-      ? params.redirect_to
-      : `${window.location.origin}${params.redirect_to}`;
-    window.location.href = dest;
+    window.location.href = toCanonicalDest(params.redirect_to);
   };
 
   const sans = "var(--font-noto-sans-kr,'Noto Sans KR',sans-serif)";
