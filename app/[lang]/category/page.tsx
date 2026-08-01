@@ -812,17 +812,17 @@ export default function CategoryPage() {
   const rawLang = String(params.lang || "ko");
   const lang: AppLang = isSupportedLang(rawLang) ? rawLang : "ko";
   const ui = getLangCopy(rawLang);
-  const [isLight, setIsLight] = useState(false);
+  // 카테고리 페이지는 항상 신규 라이트 테마로 고정 — 구버전 다크 테마 노출 방지
+  const isLight = true;
   const [userId, setUserId] = useState<string | null | undefined>(undefined);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [pendingCategory, setPendingCategory] = useState<CategoryKey | null>(null);
 
   useEffect(() => {
-    const check = () => setIsLight(document.documentElement.getAttribute("data-theme") === "light");
-    check();
-    const obs = new MutationObserver(check);
-    obs.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-    return () => obs.disconnect();
+    document.documentElement.setAttribute("data-theme", "light");
+    try {
+      localStorage.setItem("wink-theme", "light");
+    } catch { /* ignore */ }
   }, []);
 
   useEffect(() => {

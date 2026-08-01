@@ -38,7 +38,7 @@ export default function AppShell({
   const pathname = usePathname();
 
   const safeLang: AppLang = isSupportedLang(lang) ? lang : "ko";
-  const [theme, setTheme] = useState<ThemeMode>("dark");
+  const [theme, setTheme] = useState<ThemeMode>("light");
   const [mounted, setMounted] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
@@ -46,7 +46,7 @@ export default function AppShell({
   useEffect(() => {
     const saved = localStorage.getItem("wink-theme");
     const nextTheme: ThemeMode =
-      saved === "light" || saved === "dark" ? saved : "dark";
+      saved === "light" || saved === "dark" ? saved : "light";
 
     setTheme(nextTheme);
     document.documentElement.setAttribute("data-theme", nextTheme);
