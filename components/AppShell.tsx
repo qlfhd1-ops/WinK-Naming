@@ -9,22 +9,23 @@ import { createClient } from "@/lib/supabase/browser";
 type ThemeMode = "light" | "dark";
 
 function buildNextPath(pathname: string | null, nextLang: AppLang) {
-  if (!pathname) return `/${nextLang}/category`;
+  if (!pathname) return `/?lang=${nextLang}`;
 
   const segments = pathname.split("/").filter(Boolean);
-  if (segments.length === 0) return `/${nextLang}/category`;
+  if (segments.length === 0) return `/?lang=${nextLang}`;
 
   if (isSupportedLang(segments[0])) {
     segments[0] = nextLang;
     return `/${segments.join("/")}`;
   }
 
-  return `/${nextLang}/category`;
+  return `/?lang=${nextLang}`;
 }
 
 function isActivePath(pathname: string | null, target: string) {
   if (!pathname) return false;
-  return pathname === target || pathname.startsWith(`${target}/`);
+  const targetPath = target.split("?")[0];
+  return pathname === targetPath || pathname.startsWith(`${targetPath}/`);
 }
 
 export default function AppShell({
@@ -74,7 +75,7 @@ export default function AppShell({
     await supabase.auth.signOut();
     setUserEmail(null);
     showToast(safeLang === "ko" ? "로그아웃 되었습니다." : "Signed out.");
-    router.push(`/${safeLang}/category`);
+    router.push(`/?lang=${safeLang}`);
   };
 
   const toggleTheme = () => {
@@ -105,7 +106,7 @@ export default function AppShell({
     {
       key: "category",
       label: safeLang === "ko" ? "카테고리" : "Category",
-      path: `/${safeLang}/category`,
+      path: `/?lang=${safeLang}`,
       onClick: undefined as (() => void) | undefined,
     },
     {
@@ -175,7 +176,7 @@ export default function AppShell({
           <button
             type="button"
             className="wink-brand"
-            onClick={() => moveTo(`/${safeLang}/category`)}
+            onClick={() => moveTo(`/?lang=${safeLang}`)}
             style={{
               border: "none",
               background: "transparent",
