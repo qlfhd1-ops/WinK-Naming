@@ -146,7 +146,7 @@ export default function LoginPage() {
     try {
       const origin     = window.location.origin;
       const next       = new URLSearchParams(window.location.search).get("next");
-      const redirectTo = `${origin}${next && next.startsWith("/") ? next : `/${lang}/category`}`;
+      const redirectTo = `${origin}${next && next.startsWith("/") ? next : `/?lang=${lang}`}`;
 
       const res = await fetch("/api/auth/magic-link", {
         method: "POST",

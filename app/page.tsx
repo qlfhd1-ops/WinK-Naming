@@ -2101,6 +2101,13 @@ export default function HomePage() {
 
   useEffect(() => {
     try {
+      // 매직링크 로그인 등 외부에서 ?lang= 으로 넘어온 경우 최우선 적용
+      const fromQuery = new URLSearchParams(window.location.search).get("lang");
+      if (fromQuery && LANGS.includes(fromQuery as Lang)) {
+        setLang(fromQuery as Lang);
+        localStorage.setItem(LANG_KEY, fromQuery);
+        return;
+      }
       const saved = localStorage.getItem(LANG_KEY);
       if (saved && LANGS.includes(saved as Lang)) setLang(saved as Lang);
     } catch { /* ignore */ }

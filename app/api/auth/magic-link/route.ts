@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     });
 
     const baseUrl = "https://wink-naming.com";
-    const destination = redirectTo ?? `${baseUrl}/${lang}/category`;
+    const destination = redirectTo ?? `${baseUrl}/?lang=${lang}`;
     const emailRedirectTo = destination.startsWith("http")
       ? destination
       : `${baseUrl}${destination}`;

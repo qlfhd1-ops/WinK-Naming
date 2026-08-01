@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
   const { searchParams, origin } = req.nextUrl;
   const token_hash = searchParams.get("token_hash");
   const type = searchParams.get("type") ?? "magiclink";
-  const redirectTo = searchParams.get("redirect_to") ?? `${origin}/ko/category`;
+  const redirectTo = searchParams.get("redirect_to") ?? `${origin}/`;
 
   if (token_hash) {
     const cookieStore = await cookies();
