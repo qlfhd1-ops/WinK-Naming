@@ -5,6 +5,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { AppLang, isSupportedLang } from "@/lib/lang-config";
 import { createClient } from "@/lib/supabase/browser";
 import { PRICING } from "@/lib/pricing";
+import SealStamp from "@/components/SealStamp";
 
 // ─── Types ───────────────────────────────────────────────
 type ProductType = "stamp" | "doorplate";
@@ -885,25 +886,109 @@ function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-/** 카카오/Daum 우편번호 팝업 — 스크립트를 동적으로 로드 후 실행 */
-function openDaumPostcode(onComplete: (zip: string, addr: string) => void) {
-  const run = () => {
+// ─── 카카오/Daum 우편번호 오버레이 컴포넌트 ──────────────────
+// 수동 DOM 조작 없이 React 컴포넌트로 관리
+// useEffect 안에서 containerRef.current(이미 DOM에 마운트된 div)에 embed
+function PostcodeOverlay({
+  onComplete,
+  onClose,
+}: {
+  onComplete: (zip: string, addr: string) => void;
+  onClose: () => void;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const SCRIPT_ID  = "daum-postcode-sdk";
+    const SCRIPT_SRC = "https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+
+    function initEmbed() {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const DaumPostcode = (window as any).daum?.Postcode;
+      if (!DaumPostcode) return;
+
+      const W = container!.offsetWidth  || (window.innerWidth < 640 ? window.innerWidth : 560);
+      const H = container!.offsetHeight || (window.innerWidth < 640 ? Math.floor(window.innerHeight * 0.6) : 500);
+
+      new DaumPostcode({
+        width:  W,
+        height: H,
+        oncomplete: (data: { zonecode: string; roadAddress: string; jibunAddress: string }) => {
+          onComplete(data.zonecode, data.roadAddress || data.jibunAddress);
+          onClose();
+        },
+        onclose: onClose,
+      }).embed(container);
+    }
+
+    // ① 이미 로드 완료
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    new (window as any).daum.Postcode({
-      oncomplete: (data: { zonecode: string; roadAddress: string; jibunAddress: string }) => {
-        onComplete(data.zonecode, data.roadAddress || data.jibunAddress);
-      },
-    }).open();
-  };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  if ((window as any).daum?.Postcode) {
-    run();
-  } else {
+    if ((window as any).daum?.Postcode) {
+      initEmbed();
+      return;
+    }
+
+    // ② script 태그 존재 (로드 중)
+    const existing = document.getElementById(SCRIPT_ID) as HTMLScriptElement | null;
+    if (existing) {
+      existing.addEventListener("load", initEmbed, { once: true });
+      return;
+    }
+
+    // ③ 최초 로드
     const script = document.createElement("script");
-    script.src = "https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
-    script.onload = run;
+    script.id  = SCRIPT_ID;
+    script.src = SCRIPT_SRC;
+    script.addEventListener("load", initEmbed, { once: true });
     document.head.appendChild(script);
-  }
+  // onComplete/onClose는 매 렌더마다 바뀌지 않는 stable 함수이므로 deps 제외
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
+
+  return (
+    <div
+      style={{
+        position: "fixed", inset: 0, zIndex: 99999,
+        background: "rgba(0,0,0,0.60)",
+        display: "flex",
+        alignItems: isMobile ? "flex-end" : "center",
+        justifyContent: "center",
+      }}
+      onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div
+        style={{
+          position: "relative",
+          width:  isMobile ? "100%" : "560px",
+          height: isMobile ? `${Math.floor(window.innerHeight * 0.6)}px` : "500px",
+          background: "#fff",
+          borderRadius: isMobile ? "16px 16px 0 0" : "12px",
+          overflow: "hidden",
+          boxShadow: "0 24px 64px rgba(0,0,0,0.5)",
+          flexShrink: 0,
+        }}
+      >
+        <button
+          type="button"
+          onClick={onClose}
+          style={{
+            position: "absolute", top: 8, right: 10, zIndex: 10,
+            background: "rgba(0,0,0,0.10)", border: "none",
+            borderRadius: "50%", width: 28, height: 28,
+            fontSize: 13, fontWeight: 700,
+            cursor: "pointer", color: "#222", lineHeight: 1,
+          }}
+        >✕</button>
+        {/* Daum SDK가 이 div 안에 iframe을 삽입함 */}
+        <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
+      </div>
+    </div>
+  );
 }
 
 function formatKRW(n: number) {
@@ -1041,14 +1126,20 @@ export default function OrderPage() {
 
   // ── Theme detection
   const [isLight, setIsLight] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
     const check = () =>
       setIsLight(document.documentElement.getAttribute("data-theme") === "light");
     check();
     const obs = new MutationObserver(check);
     obs.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-    return () => obs.disconnect();
+
+    const checkMobile = () => setIsMobile(window.innerWidth < 600);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => { obs.disconnect(); window.removeEventListener("resize", checkMobile); };
   }, []);
+
 
 
   // ── URL params (결과 페이지 연동)
@@ -1086,6 +1177,11 @@ export default function OrderPage() {
   const [deliveryAddr, setDeliveryAddr] = useState("");
   const [deliveryAddrDetail, setDeliveryAddrDetail] = useState("");
   const [deliveryMemo, setDeliveryMemo] = useState("");
+  // 상세 주소 자동 포커스 ref (step1 / confirm step 각각)
+  const addrDetailRef1 = useRef<HTMLInputElement>(null);
+  // 우편번호 검색 오버레이 (어느 step에서 열었는지 추적)
+  const [postcodeOpen, setPostcodeOpen] = useState<"step1" | "confirm" | null>(null);
+  const addrDetailRef2 = useRef<HTMLInputElement>(null);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [orderId, setOrderId] = useState("");
@@ -1211,10 +1307,29 @@ export default function OrderPage() {
     }
   };
 
+  // ─── 우편번호 오버레이 (모든 step 공통) ───────────────────
+  const postcodeOverlay = postcodeOpen ? (
+    <PostcodeOverlay
+      onComplete={(zip, addr) => {
+        setDeliveryZip(zip);
+        setDeliveryAddr(addr);
+        setDeliveryAddrDetail("");
+        setPostcodeOpen(null);
+        setTimeout(() => {
+          if (postcodeOpen === "step1") addrDetailRef1.current?.focus();
+          else addrDetailRef2.current?.focus();
+        }, 100);
+      }}
+      onClose={() => setPostcodeOpen(null)}
+    />
+  ) : null;
+
   // ─── Render: Done ──────────────────────────────────────
   if (step === "done") {
     return (
-      <main className="wink-page">
+      <>
+        {postcodeOverlay}
+        <main className="wink-page">
         <div className="wink-container">
           <div className="wink-chip">{ui.chip}</div>
 
@@ -1274,13 +1389,16 @@ export default function OrderPage() {
           </div>
         </div>
       </main>
+      </>
     );
   }
 
   // ─── Render: Confirm (step 2) ─────────────────────────
   if (step === "confirm") {
     return (
-      <main className="wink-page">
+      <>
+        {postcodeOverlay}
+        <main className="wink-page">
         <div className="wink-container">
           <div className="wink-chip">{ui.chip}</div>
           <h1 className="wink-title">{ui.step2Title}</h1>
@@ -1423,9 +1541,7 @@ export default function OrderPage() {
                       onChange={(e) => setDeliveryZip(e.target.value)}
                       placeholder="00000" style={{ maxWidth: 140 }} readOnly />
                     <button type="button"
-                      onClick={() => openDaumPostcode((zip, addr) => {
-                        setDeliveryZip(zip); setDeliveryAddr(addr); setDeliveryAddrDetail("");
-                      })}
+                      onClick={() => setPostcodeOpen("confirm")}
                       style={{
                         padding: "0 20px", borderRadius: 10, fontSize: 13, fontWeight: 700,
                         cursor: "pointer", whiteSpace: "nowrap", transition: "all 0.15s",
@@ -1446,7 +1562,9 @@ export default function OrderPage() {
                 </div>
                 <div className="wink-field wink-field-full">
                   <label>{ui.deliveryAddrDetailLabel}</label>
-                  <input className="wink-input" value={deliveryAddrDetail}
+                  <input
+                    ref={addrDetailRef2}
+                    className="wink-input" value={deliveryAddrDetail}
                     onChange={(e) => setDeliveryAddrDetail(e.target.value)}
                     placeholder={ui.deliveryAddrDetailPh} autoComplete="address-line2" />
                 </div>
@@ -1488,16 +1606,35 @@ export default function OrderPage() {
           </form>
         </div>
       </main>
+      </>
     );
   }
 
   // ─── Render: Form (step 1) ────────────────────────────
   return (
-    <main className="wink-page">
+    <>
+      {postcodeOverlay}
+      <main className="wink-page">
       <div className="wink-container">
         <div className="wink-chip">{ui.chip}</div>
         <h1 className="wink-title">{ui.title}</h1>
         <p className="wink-sub">{ui.sub}</p>
+
+        {/* 디자이너 안내 배너 */}
+        <div style={{
+          display: "flex", alignItems: "flex-start", gap: 12,
+          padding: "14px 18px", borderRadius: 12, marginBottom: 24,
+          border: "1px solid rgba(201,168,76,0.35)",
+          background: isLight ? "rgba(201,168,76,0.07)" : "rgba(201,168,76,0.06)",
+        }}>
+          <span style={{ fontSize: 22, lineHeight: 1, flexShrink: 0 }}>✍️</span>
+          <div style={{
+            fontSize: 13, lineHeight: 1.75,
+            color: isLight ? "rgba(80,60,20,0.88)" : "rgba(210,198,160,0.88)",
+          }}>
+            {ui.designerNotice}
+          </div>
+        </div>
 
         {/* Product selection */}
         <section className="wink-panel" style={{ marginBottom: 20 }}>
@@ -1581,7 +1718,7 @@ export default function OrderPage() {
           )}
 
           {/* 두 컬럼: 왼쪽 도장 / 오른쪽 문패 */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 20 }}>
 
             {/* 왼쪽: 도장 이름 */}
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -1702,10 +1839,10 @@ export default function OrderPage() {
                 gap: 12,
               }}>
                 {([
-                  { n: 1 as const, img: "/images/stamp-ref-1.svg", label: ui.styleLabel1, desc: ui.styleDesc1 },
-                  { n: 2 as const, img: "/images/stamp-ref-2.svg", label: ui.styleLabel2, desc: ui.styleDesc2 },
-                  { n: 3 as const, img: "/images/stamp-ref-3.svg", label: ui.styleLabel3, desc: ui.styleDesc3 },
-                  { n: 4 as const, img: "/images/stamp-ref-4.svg", label: ui.styleLabel4, desc: ui.styleDesc4 },
+                  { n: 1 as const, img: "/images/stamp-ref-1.png", label: ui.styleLabel1, desc: ui.styleDesc1 },
+                  { n: 2 as const, img: "/images/stamp-ref-2.png", label: ui.styleLabel2, desc: ui.styleDesc2 },
+                  { n: 3 as const, img: "/images/stamp-ref-3.png", label: ui.styleLabel3, desc: ui.styleDesc3 },
+                  { n: 4 as const, img: "/images/stamp-ref-4.png", label: ui.styleLabel4, desc: ui.styleDesc4 },
                 ] as { n: 1|2|3|4; img: string; label: string; desc: string }[]).map((card) => (
                   <button
                     key={card.n}
@@ -1797,6 +1934,53 @@ export default function OrderPage() {
                   {ui.styleNotice}
                 </div>
               </div>
+
+              {/* 품질 안내 */}
+              <div style={{
+                marginTop: 10,
+                fontSize: 11, lineHeight: 1.7,
+                color: isLight ? "rgba(80,80,100,0.55)" : "rgba(160,175,205,0.50)",
+                textAlign: "center",
+                padding: "0 4px",
+              }}>
+                {ui.previewQualityNote}
+              </div>
+            </div>
+          )}
+
+          {/* ── 실시간 인장 미리보기 ── */}
+          {products.has("stamp") && name.trim() && (
+            <div style={{
+              marginTop: 24,
+              padding: "24px 20px",
+              borderRadius: 16,
+              border: `1px solid ${isLight ? "rgba(201,168,76,0.35)" : "rgba(201,168,76,0.22)"}`,
+              background: isLight
+                ? "radial-gradient(circle at 50% 30%, rgba(201,168,76,0.10), transparent 60%), rgba(252,248,238,0.98)"
+                : "radial-gradient(circle at 50% 30%, rgba(201,168,76,0.08), transparent 60%), rgba(11,18,42,0.85)",
+              display: "flex", flexDirection: "column", alignItems: "center", gap: 8,
+            }}>
+              <div style={{
+                fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase",
+                color: "rgba(201,168,76,0.75)", marginBottom: 4,
+              }}>
+                {ui.previewTitle}
+              </div>
+              <SealStamp
+                name={stampNameLang === "hanja" && hanja.trim() ? hanja.trim() : name.trim()}
+                size={160}
+              />
+              {stampStyle && (
+                <div style={{
+                  fontSize: 12, fontWeight: 600,
+                  color: "rgba(201,168,76,0.75)",
+                  background: "rgba(201,168,76,0.10)",
+                  border: "1px solid rgba(201,168,76,0.25)",
+                  borderRadius: 99, padding: "3px 12px", marginTop: 4,
+                }}>
+                  {ui.styleSelected}: {stampStyle === 1 ? ui.styleLabel1 : stampStyle === 2 ? ui.styleLabel2 : stampStyle === 3 ? ui.styleLabel3 : ui.styleLabel4}
+                </div>
+              )}
             </div>
           )}
         </section>
@@ -1956,13 +2140,7 @@ export default function OrderPage() {
                 />
                 <button
                   type="button"
-                  onClick={() =>
-                    openDaumPostcode((zip, addr) => {
-                      setDeliveryZip(zip);
-                      setDeliveryAddr(addr);
-                      setDeliveryAddrDetail("");
-                    })
-                  }
+                  onClick={() => setPostcodeOpen("step1")}
                   style={{
                     padding: "0 20px",
                     borderRadius: 10,
@@ -1998,6 +2176,7 @@ export default function OrderPage() {
             <div className="wink-field wink-field-full">
               <label>{ui.deliveryAddrDetailLabel}</label>
               <input
+                ref={addrDetailRef1}
                 className="wink-input"
                 value={deliveryAddrDetail}
                 onChange={(e) => setDeliveryAddrDetail(e.target.value)}
@@ -2038,5 +2217,6 @@ export default function OrderPage() {
         </div>
       </div>
     </main>
+    </>
   );
 }

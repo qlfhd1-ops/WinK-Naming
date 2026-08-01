@@ -116,7 +116,7 @@ const DICTIONARY: Record<Lang, Dictionary> = {
 
   en: {
     common: {
-      appName: "윙크 네이밍",
+      appName: "Wink Naming",
       welcome: "Welcome",
       next: "Next",
       back: "Back",
@@ -128,7 +128,7 @@ const DICTIONARY: Record<Lang, Dictionary> = {
       loading: "Loading",
     },
     home: {
-      chip: "윙크 네이밍",
+      chip: "Wink Naming",
       title: "We design names that elevate the value of life.",
       subtitle: "Premium naming beyond simple generation.",
       description:
@@ -162,7 +162,7 @@ const DICTIONARY: Record<Lang, Dictionary> = {
     result: {
       title: "Naming Design Report",
       subtitle: "A result reviewed with your purpose and surname harmony together.",
-      resultTitle: "윙크 네이밍 Result",
+      resultTitle: "Wink Naming Result",
       resultIntro: "We organized name options and commentary based on your design input.",
       packageTitle: "Package Selection",
       packageIntro: "Choose only if you like the result.",
@@ -171,7 +171,7 @@ const DICTIONARY: Record<Lang, Dictionary> = {
 
   ja: {
     common: {
-      appName: "윙크 네이밍",
+      appName: "ウィンクネーミング",
       welcome: "ようこそ",
       next: "次へ",
       back: "戻る",
@@ -183,7 +183,7 @@ const DICTIONARY: Record<Lang, Dictionary> = {
       loading: "読み込み中",
     },
     home: {
-      chip: "윙크 네이밍",
+      chip: "ウィンクネーミング",
       title: "人生の価値を高める名前を設計します",
       subtitle: "Premium naming beyond simple generation.",
       description:
@@ -226,7 +226,7 @@ const DICTIONARY: Record<Lang, Dictionary> = {
 
   zh: {
     common: {
-      appName: "윙크 네이밍",
+      appName: "Wink Naming",
       welcome: "欢迎",
       next: "下一步",
       back: "返回",
@@ -238,7 +238,7 @@ const DICTIONARY: Record<Lang, Dictionary> = {
       loading: "加载中",
     },
     home: {
-      chip: "윙크 네이밍",
+      chip: "Wink Naming",
       title: "我们设计能够提升人生价值的名字",
       subtitle: "Premium naming beyond simple generation.",
       description:
@@ -281,7 +281,7 @@ const DICTIONARY: Record<Lang, Dictionary> = {
 
   es: {
     common: {
-      appName: "윙크 네이밍",
+      appName: "Wink Naming",
       welcome: "Bienvenido",
       next: "Siguiente",
       back: "Atrás",
@@ -293,7 +293,7 @@ const DICTIONARY: Record<Lang, Dictionary> = {
       loading: "Cargando",
     },
     home: {
-      chip: "윙크 네이밍",
+      chip: "Wink Naming",
       title: "Diseñamos nombres que elevan el valor de la vida",
       subtitle: "Premium naming beyond simple generation.",
       description:
@@ -327,7 +327,7 @@ const DICTIONARY: Record<Lang, Dictionary> = {
     result: {
       title: "Reporte de diseño del nombre",
       subtitle: "Resultado revisado junto con su propósito y armonía con el apellido.",
-      resultTitle: "Resultado de 윙크 네이밍",
+      resultTitle: "Resultado de Wink Naming",
       resultIntro: "Organizamos candidatos y explicación según su brief.",
       packageTitle: "Selección de paquetes",
       packageIntro: "Elija solo si le gusta el resultado.",

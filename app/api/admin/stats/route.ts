@@ -56,7 +56,15 @@ export async function GET(req: Request) {
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
 
-  const supabase = getAdminClient();
+  let supabase: ReturnType<typeof getAdminClient>;
+  try {
+    supabase = getAdminClient();
+  } catch (e) {
+    return NextResponse.json(
+      { ok: false, error: e instanceof Error ? e.message : "Supabase 환경변수 미설정 — SUPABASE_SERVICE_ROLE_KEY를 Vercel에 추가해주세요." },
+      { status: 503 }
+    );
+  }
   const now = new Date();
 
   // 날짜 경계

@@ -4,10 +4,20 @@ import { getFreeLimiter } from "@/lib/upstash";
 import { rateLimit } from "@/lib/rate-limiter";
 import { calcSaju, sajuToPromptText } from "@/lib/saju";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+// OpenAI 클라이언트 — 요청 시점에 초기화 (env var 누락 시 모듈 크래시 방지)
+let _openai: OpenAI | null = null;
+function getOpenAI(): OpenAI {
+  if (!_openai) {
+    const key = process.env.OPENAI_API_KEY;
+    if (!key) throw new Error("OPENAI_API_KEY is not set");
+    _openai = new OpenAI({ apiKey: key });
+  }
+  return _openai;
+}
 
 const CATEGORY_LABEL: Record<string, string> = {
   child: "태어날 아이·자녀 이름",
+  self: "나 자신의 이름·개명",
   brand: "브랜드·상호·서비스명",
   pet: "반려동물 이름",
   stage: "활동명·예명·닉네임",
@@ -80,13 +90,24 @@ export async function POST(req: Request) {
     if (!paid) {
       const upstash = getFreeLimiter();
       if (upstash) {
-        // Upstash 슬라이딩 윈도우: 시간당 5회
-        const { success, remaining } = await upstash.limit(`naming:${ip}`);
-        if (!success) {
-          return new Response(
-            `data: ${JSON.stringify({ error: "rate_limit", message: "시간당 5회 한도 초과. 잠시 후 다시 시도해 주세요." })}\n\n`,
-            { status: 429, headers: { "Content-Type": "text/event-stream", "X-RateLimit-Remaining": String(remaining) } }
-          );
+        // Upstash 슬라이딩 윈도우: 시간당 5회 (연결 실패 시 in-memory 폴백)
+        try {
+          const { success, remaining } = await upstash.limit(`naming:${ip}`);
+          if (!success) {
+            return new Response(
+              `data: ${JSON.stringify({ error: "rate_limit", message: "시간당 5회 한도 초과. 잠시 후 다시 시도해 주세요." })}\n\n`,
+              { status: 429, headers: { "Content-Type": "text/event-stream", "X-RateLimit-Remaining": String(remaining) } }
+            );
+          }
+        } catch {
+          // Upstash 연결 실패 → in-memory 폴백으로 계속 진행
+          const { allowed } = rateLimit(`naming:${ip}`, 5, 3600);
+          if (!allowed) {
+            return new Response(
+              `data: ${JSON.stringify({ error: "rate_limit", message: "시간당 5회 한도 초과. 잠시 후 다시 시도해 주세요." })}\n\n`,
+              { status: 429, headers: { "Content-Type": "text/event-stream" } }
+            );
+          }
         }
       } else {
         // Upstash 미설정 → in-memory 폴백: 시간당 5회
@@ -119,7 +140,9 @@ export async function POST(req: Request) {
     } = brief;
 
     // ─── 카테고리별 프롬프트 분기 ────────────────────────────
-    const isKTF = category === "korean_to_foreign";
+    const isKTF   = category === "korean_to_foreign";
+    const isFTK   = category === "foreign_to_korean";
+    const isBrand = category === "brand";
 
     // ─── 사주 오행 계산 (child 카테고리, birthDate 있을 때) ───
     const sajuText = (category === "child" && birthDate)
@@ -129,7 +152,166 @@ export async function POST(req: Request) {
         })()
       : "";
 
-    const systemPrompt = isKTF
+    const brandSystemPrompt = `당신은 글로벌 브랜드 네이밍 전문가이자 상표 전략가입니다.
+
+[브랜드 네이밍 철학]
+이름은 브랜드의 첫 번째 마케팅입니다. 기억에 남고, 발음하기 쉽고, 트레이드마크로 보호받을 수 있어야 합니다.
+
+[핵심 설계 원칙]
+1. 글로벌 발음 가능성 — 한국어·영어·중국어·일본어 화자 모두 쉽게 발음 가능한 이름 우선
+2. 상표 차별성 — 기존 유명 브랜드와 유사하거나 충돌 가능성이 있는 이름 회피
+3. 도메인 가용성 — .com 도메인 확보 가능성 고려 (짧고 독특한 이름 선호)
+4. 기억 용이성 — 2음절 또는 3음절, 반복 패턴, 강한 모음 조합 선호
+5. 확장 가능성 — 브랜드가 성장해도 카테고리를 제한하지 않는 이름
+6. 의미 안전성 — 세계 주요 언어에서 부정적·저속한 의미 없음 확인
+7. 3방향 트랙: rank_order 1=안정형(safe·검증된 스타일), 2=세련형(refined·세련되고 현대적), 3=창의형(creative·독창적·미래지향적)
+
+[3개 후보 다양성 원칙 — 필수]
+3개 브랜드명은 반드시 서로 다른 방향성을 가져야 합니다:
+- 음절 수가 달라야 함 (예: 2음절·3음절·4음절 혼합)
+- 어원 계열이 달라야 함 (한국어 고유어 / 영어·라틴어계 / 조어 등)
+- 감성 톤이 달라야 함 (친근함 / 세련됨 / 혁신적)
+- 3개 중 2개가 동일하거나 유사한 음절·느낌이면 절대 안 됨
+
+[브랜드명 유형 예시]
+- 조어형(invented): Kodak, Häagen-Dazs, Xerox
+- 의미형(meaningful): Apple, Amazon, Nest
+- 축약형(abbreviated): IBM, BMW, KFC
+- 감성형(evocative): Dove, Kindle, Slack
+- 고유명(proper noun): Tesla, Nike, Adidas
+
+반드시 유효한 JSON 배열만 반환하세요. 마크다운 코드블록, 주석, 다른 텍스트는 절대 포함하지 마세요.`;
+
+    const brandUserPrompt = `아래 조건으로 브랜드명 후보 3개를 설계해주세요.
+
+[입력 조건]
+- 브랜드/서비스 성격: ${purpose}
+- 원하는 분위기·키워드: ${styleKeywords || "없음"}
+- 피하고 싶은 느낌·단어: ${avoidKeywords || "없음"}
+- 주 타깃 국가/언어권: ${targetCountry || "글로벌"}
+- 표기 방향: ${preferredScript || "한글+영문 병행"}
+- 추가 요청: ${memo || "없음"}
+- UI 언어: ${lang}
+${excludeNames.length > 0 ? `- 제외할 이름 (이미 제안한 이름, 반드시 다른 이름 설계): ${excludeNames.join(", ")}` : ""}
+
+[출력 형식 — JSON 배열만, 순수 텍스트로]
+[
+  {
+    "rank_order": 1,
+    "track": "safe",
+    "name": "브랜드명 (메인 표기)",
+    "hanja": "",
+    "hanja_meaning": "",
+    "hanja_strokes": "",
+    "five_elements": "",
+    "yinyang": "",
+    "english": "영문 표기",
+    "chinese": "중문 표기 (음차)",
+    "chinese_pinyin": "병음",
+    "japanese_kana": "가나 표기",
+    "japanese_reading": "로마자 읽기",
+    "meaning": "브랜드명의 의미·어원·유래 (2-3문장)",
+    "story": "이 이름이 브랜드 정체성을 어떻게 담는지: 발음·기억·확장성·차별성 관점 (3-4문장)",
+    "fit_reason": "안정형 트랙으로 선정한 이유 — 시장 내 포지셔닝 관점 (1-2문장)",
+    "phonetic_harmony": "글로벌 발음 용이성 분석 — 주요 언어권별 발음 평가 (1-2문장)",
+    "teasing_risk": "low",
+    "similarity_risk": "low",
+    "pronunciation_risk": "low",
+    "caution": "상표 등록 또는 도메인 확보 시 주의사항 (1문장)",
+    "connection_analysis": "입력하신 브랜드 성격·분위기·타깃 조건이 이 이름에 구체적으로 어떻게 반영되었는지 2-3문장",
+    "score": 95
+  },
+  { "rank_order": 2, "track": "refined", ... },
+  { "rank_order": 3, "track": "creative", ... }
+]`;
+
+    const ftkSystemPrompt = `당신은 외국 이름의 문화·어원·발음을 깊이 분석하여 한국어로 아름답게 재탄생시키는 전문가입니다.
+성명학·한자학·명리학 기반의 한국 작명 원칙과 원본 이름의 문화적 정체성을 동시에 살립니다.
+
+[작명 철학]
+이름의 발음과 의미를 한국어 안에서 재해석합니다.
+단순 음차(音借)가 아닌, 원본 이름이 담은 문화·가치관·어원이 한국 이름으로 자연스럽게 이어지도록 설계합니다.
+
+[핵심 설계 원칙]
+1. 원본 이름 분석 (필수) — 원본 이름의 언어권·어원·의미·문화적 맥락을 먼저 파악
+   예) Emma(독일어 Ermen=전체, 강인함), Liam(아일랜드어, 강한 의지·보호자), Sakura(일본어, 벚꽃)
+2. 발음 기반 한국어 표기 — 원본 발음에 가장 가까운 한글 음절을 선택하되, 발음이 자연스러운 이름 우선
+3. 의미 기반 한국 이름 재설계 — 원본 이름의 뜻을 한자로 재해석하여 새 이름 설계
+4. 한자 오행·획수 분석 (필수) — 각 한자의 오행(木火土金水)·획수·음양 반드시 명시
+   - 오행 상생: 木→火→土→金→水→木 (권장) / 오행 상극: 가능하면 회피
+5. 성씨 음운 조화 — 성씨가 있을 경우 성씨와의 발음·리듬 조화 최우선
+6. 놀림감·부정적 연상 필터 — 한국어에서 이상하거나 웃음거리가 될 수 있는 조합 완전 배제
+7. 흔한 이름 배제 — 도윤·서준·하준·지우 등 출생 빈출 이름 사용 금지
+8. 3방향 트랙 분리 — rank_order 1=발음 중심(safe), 2=의미 중심(refined), 3=창의 재해석(creative)
+
+[트랙별 설계 방향]
+- safe(발음 중심): 원본 이름 발음에 최대한 가까운 한글 이름 (음차 기반, 성씨 조화 포함)
+- refined(의미 중심): 원본 이름의 뜻을 한자로 재해석한 완전한 한국 이름 (발음 유사성 불필요)
+- creative(창의 재해석): 원본 이름의 문화·정서를 한국적 감성으로 새롭게 변환 (발음·의미 모두 자유롭게)
+
+[언어권별 문화 분석 가이드]
+- 영어권: 성경 어원(히브리어), 라틴어, 게르만어 계열 구분하여 어원 의미 파악
+- 일본어: 한자 이름이면 해당 한자 의미 직접 활용 가능, 가나 이름은 발음·계절·자연 연상 반영
+- 중국어: 한자 이름이면 해당 한자를 한국 한자음으로 변환 후 새 이름 설계
+- 유럽어(프랑스·스페인·이탈리아 등): 라틴어 어원 추적하여 의미 반영
+- 아랍어: 의미 중심(신앙·덕목·자연) — 발음보다 뜻 중심 재해석 권장
+
+[3개 후보 다양성 원칙 — 필수]
+3개 이름 후보는 반드시 서로 뚜렷하게 달라야 합니다:
+- 음절 구성이 달라야 함 (2음절·3음절 혼합, 또는 각각 다른 받침 구조)
+- 한자 계열이 달라야 함 (천지인·자연·덕목·의지 계열 각각)
+- 감성 방향이 달라야 함 — safe=발음 친숙, refined=의미 깊음, creative=새로운 해석
+- 3개 중 2개의 이름이 같은 음절이나 비슷한 느낌이면 절대 안 됨
+
+반드시 유효한 JSON 배열만 반환하세요. 마크다운 코드블록, 주석, 다른 텍스트는 절대 포함하지 마세요.`;
+
+    const ftkUserPrompt = `아래 외국 이름을 한국 이름으로 재탄생시켜주세요. 이름 후보 3가지를 설계해주세요.
+
+[입력 조건]
+- 원본 외국 이름: ${targetName || "없음"}
+- 성씨: ${familyName || "없음"}
+- 성별: ${gender || "미지정"}
+- 변환 방향/방법: ${styleKeywords || "없음"} (발음대로 / 의미 기반 / 혼합)
+- 원하는 분위기: ${purpose || "없음"}
+- 피하고 싶은 느낌: ${avoidKeywords || "없음"}
+- 추가 메모: ${memo || "없음"}
+- UI 언어: ${lang}
+${excludeNames.length > 0 ? `- 제외할 이름 (이미 제안한 이름, 반드시 다른 이름 설계): ${excludeNames.join(", ")}` : ""}
+
+[출력 형식 — JSON 배열만, 순수 텍스트로]
+[
+  {
+    "rank_order": 1,
+    "track": "safe",
+    "name": "한글이름",
+    "hanja": "漢字 (해당 없으면 빈 문자열)",
+    "hanja_meaning": "한자 각 글자의 뜻 (예: 旻=가을하늘 민, 俊=준걸 준)",
+    "hanja_strokes": "획수 상세 (예: 旻(8획,火,陰)+俊(9획,木,陽)=17획(陽))",
+    "five_elements": "오행 분석 (예: 火木 상생 — 화생목(火生木) / 발음오행: ㅁ(水)·ㅈ(金) 상생)",
+    "yinyang": "음양 판단 (예: 陽 — 총획 17획 홀수)",
+    "english": "로마자 표기 (원본 이름 발음 기준)",
+    "chinese": "중문 표기",
+    "chinese_pinyin": "병음",
+    "japanese_kana": "가나 표기",
+    "japanese_reading": "로마자 읽기",
+    "meaning": "이름 전체 의미 + 원본 이름과의 연결 (2-3문장)",
+    "story": "원본 이름 어원 분석 → 한국 이름 설계 과정 상세 설명 (3-4문장): 원본 언어권 문화·어원 → 한자 선택 이유 → 오행·획수·성씨 조화",
+    "fit_reason": "이 트랙(발음 중심)으로 선정한 이유 (1-2문장)",
+    "phonetic_harmony": "성씨+이름 음운 조화 분석 (1문장)",
+    "teasing_risk": "low",
+    "similarity_risk": "low",
+    "pronunciation_risk": "low",
+    "caution": "주의사항 — 발음 어색함·놀림 가능성·혼동 위험 등 (1문장)",
+    "connection_analysis": "원본 이름 '${targetName || "해당 이름"}'의 문화·어원·의미가 이 한국 이름에 어떻게 담겼는지 구체적 설명 (2-3문장)",
+    "score": 95
+  },
+  { "rank_order": 2, "track": "refined", ... },
+  { "rank_order": 3, "track": "creative", ... }
+]`;
+
+    const systemPrompt = isBrand
+      ? brandSystemPrompt
+      : isKTF
       ? `당신은 한국 이름의 의미와 철학을 세계 언어로 아름답게 재탄생시키는 전문가입니다.
 
 [작명 철학]
@@ -143,7 +325,34 @@ export async function POST(req: Request) {
 5. 각 이름마다 한국 이름과의 의미적 연결고리를 구체적으로 설명한다
 6. 3방향 트랙: rank_order 1=가장 자연스러운(safe), 2=세련된(refined), 3=독특한(creative)
 
+[성별 작명 원칙 — 필수 준수]
+- 여자(female): 해당 언어권에서 명확히 여성 이름으로 인식되는 이름만 추천
+  예) 일본어: 하루카(春花), 유이(結衣), 아오이(葵) — 시즈카(静香)는 여성명이나 남성명과 혼용되므로 주의
+  예) 영어: Sophie, Emma, Claire 계열
+  예) 중국어: 怡, 雯, 婷 계열 이름
+- 남자(male): 해당 언어권에서 명확히 남성 이름으로 인식되는 이름만 추천
+- 중성(neutral): 성별 구분 없이 사용 가능한 젠더 뉴트럴 이름
+- 성별 미지정: 해당 언어권에서 가장 자연스럽고 보편적인 이름 추천
+
+성별이 지정된 경우, 해당 언어권의 문화·관습에서 그 성별로 명확히 인식되는 이름만 선정할 것.
+성별이 애매한 이름(예: 일본어의 남녀 공용명)은 caution 필드에 반드시 명시할 것.
+
+[악명 높은 인물·놀림감 이름 필터 — 필수]
+- 해당 언어권에서 범죄자·독재자·역사적 악인으로 유명한 인물과 동일하거나 매우 유사한 이름은 절대 추천 금지
+- 해당 언어권에서 놀림감이 되거나 조롱받는 이름, 부정적 연상이 강한 이름은 사용 금지
+- 지나치게 유명한 현역 연예인·스포츠 스타와 동일한 이름도 피할 것 (혼동 소지)
+- caution 필드에 주의가 필요한 경우 반드시 명시
+
+[3개 후보 다양성 원칙 — 필수]
+3개 이름 후보는 반드시 서로 뚜렷하게 달라야 합니다:
+- 음운·음절 구조가 달라야 함 (예: 짧은 2음절·길고 부드러운 3음절·독특한 이름 혼합)
+- 어원·문화권 계열이 달라야 함 (라틴계 / 게르만계 / 히브리계 / 동아시아 전통 등)
+- 감성 방향이 달라야 함 — safe=자연스럽고 통용되는, refined=세련·현대적, creative=개성·독창성
+- 3개 중 2개가 같은 어원 계열이거나 비슷한 느낌이면 절대 안 됨
+
 반드시 유효한 JSON 배열만 반환하세요. 마크다운 코드블록, 주석, 다른 텍스트는 절대 포함하지 마세요.`
+      : isFTK
+      ? ftkSystemPrompt
       : `당신은 대한민국 최고 수준의 작명 전문가이자 성명학·명리학·한자학 전문가입니다.
 
 [작명 철학]
@@ -187,6 +396,13 @@ export async function POST(req: Request) {
 성별이 다른 요청이라면 이름 구성과 한자 선택이 반드시 달라야 한다.
 성씨와의 음운 조화를 최우선으로 검토하고, 발음이 자연스럽게 이어지는 이름만 추천할 것.
 
+[3개 후보 다양성 원칙 — 필수]
+3개 이름 후보는 반드시 서로 뚜렷하게 달라야 합니다:
+- 음절 구성이 달라야 함 (예: 2음절·3음절 혼합, 또는 각각 다른 받침 구조)
+- 한자 계열이 달라야 함 (天·地·人 계열, 자연·덕목·의지 계열 등을 다양하게)
+- 감성 방향이 달라야 함 — 안정형은 전통·안정감, 세련형은 현대적·도시적, 창의형은 독창적·개성 있는 느낌
+- 3개 중 2개의 이름이 같은 음절이나 비슷한 느낌이면 절대 안 됨 (예: "민준"·"민혁" 처럼 첫 음절 반복 금지)
+
 반드시 유효한 JSON 배열만 반환하세요. 마크다운 코드블록, 주석, 다른 텍스트는 절대 포함하지 마세요.`;
 
     const ktfUserPrompt = `아래 한국 이름을 의미 중심으로 외국어 이름 후보 3개로 재탄생시켜주세요.
@@ -194,6 +410,7 @@ export async function POST(req: Request) {
 [입력 조건]
 - 한국 이름 (참고용): ${targetName || "없음"}
 - 이름의 뜻/의미 (핵심 반영 요소): ${purpose}
+- 성별: ${gender || "미지정"} ← 반드시 성별에 맞는 이름만 추천할 것 (여자=여성 이름, 남자=남성 이름, 중성=젠더 뉴트럴)
 - 원하는 언어권: ${targetCountry || styleKeywords || "영어권"}
 - 원하는 분위기: ${styleKeywords || "없음"}
 - 추가 메모: ${memo || "없음"}
@@ -281,16 +498,16 @@ ${sajuText ? `\n${sajuText}` : ""}
   { "rank_order": 3, "track": "creative", ... }
 ]`;
 
-    const userPrompt = isKTF ? ktfUserPrompt : standardUserPrompt;
+    const userPrompt = isBrand ? brandUserPrompt : isKTF ? ktfUserPrompt : isFTK ? ftkUserPrompt : standardUserPrompt;
 
-    const streamResponse = await openai.chat.completions.create({
+    const streamResponse = await getOpenAI().chat.completions.create({
       model: "gpt-4o",
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
       ],
       temperature: 0.75,
-      max_tokens: 3500,
+      max_tokens: 2800,
       stream: true,
     });
 
@@ -299,18 +516,69 @@ ${sajuText ? `\n${sajuText}` : ""}
     const readable = new ReadableStream({
       async start(controller) {
         let fullText = "";
+
+        // ── 증분 JSON 파싱 상태 ───────────────────────────────
+        let inArray = false;   // '[' 를 만났는지
+        let inString = false;  // 문자열 내부인지
+        let escape = false;    // 이스케이프 문자 다음인지
+        let braceDepth = 0;    // 현재 중괄호 깊이
+        let objectStart = 0;   // 현재 name 객체 시작 위치
+        let namesSent = 0;     // 전송한 이름 수
+
         try {
           for await (const chunk of streamResponse) {
             const delta = chunk.choices[0]?.delta?.content ?? "";
-            if (delta) {
-              fullText += delta;
-              controller.enqueue(
-                encoder.encode(`data: ${JSON.stringify({ delta })}\n\n`)
-              );
+            if (!delta) continue;
+
+            // 한 글자씩 파싱해서 완성된 이름 객체 즉시 전송
+            for (const char of delta) {
+              const pos = fullText.length;
+              fullText += char;
+
+              // 이스케이프 처리
+              if (escape) { escape = false; continue; }
+              if (char === "\\" && inString) { escape = true; continue; }
+
+              // 문자열 경계
+              if (char === '"') { inString = !inString; continue; }
+              if (inString) continue;
+
+              // 배열 시작 '[' 이전은 무시
+              if (!inArray) {
+                if (char === "[") inArray = true;
+                continue;
+              }
+
+              // 중괄호 깊이 추적
+              if (char === "{") {
+                if (braceDepth === 0) objectStart = pos; // name 객체 시작
+                braceDepth++;
+              } else if (char === "}") {
+                braceDepth--;
+                if (braceDepth === 0) {
+                  // name 객체 하나 완성 → 즉시 파싱 후 전송
+                  const objStr = fullText.slice(objectStart);
+                  try {
+                    const nameObj = JSON.parse(objStr);
+                    controller.enqueue(
+                      encoder.encode(
+                        `data: ${JSON.stringify({ name: nameObj, index: namesSent })}\n\n`
+                      )
+                    );
+                    namesSent++;
+                  } catch {
+                    // 파싱 실패 시 done 이벤트 fallback 에서 처리
+                  }
+                }
+              }
             }
           }
 
-          const cleaned = fullText.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
+          // 최종 전체 파싱 (fallback + done 신호)
+          const cleaned = fullText
+            .replace(/^```(?:json)?\s*/i, "")
+            .replace(/```\s*$/i, "")
+            .trim();
           const results = JSON.parse(cleaned);
           controller.enqueue(
             encoder.encode(`data: ${JSON.stringify({ done: true, results })}\n\n`)

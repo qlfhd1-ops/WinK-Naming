@@ -14,6 +14,35 @@ function getAdminClient() {
   });
 }
 
+/** stats/route.ts와 동일한 이중 인증 (X-Admin-Password 또는 Bearer 토큰) */
+async function checkAuth(req: Request): Promise<boolean> {
+  const adminPw = process.env.ADMIN_PASSWORD;
+  if (adminPw) {
+    const pw = req.headers.get("x-admin-password") ?? "";
+    if (pw === adminPw) return true;
+  }
+
+  const authHeader = req.headers.get("authorization") ?? "";
+  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+  if (!token) return false;
+
+  try {
+    const client = getAdminClient();
+    const { data: { user }, error } = await client.auth.getUser(token);
+    if (error || !user) return false;
+
+    const { data: profile } = await client
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    return profile?.role === "admin";
+  } catch {
+    return false;
+  }
+}
+
 const ALLOWED_STATUS = [
   "pending",
   "reviewing",
@@ -24,6 +53,10 @@ const ALLOWED_STATUS = [
 ] as const;
 
 export async function POST(req: Request) {
+  if (!(await checkAuth(req))) {
+    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const body = await req.json();
     const orderId = typeof body?.orderId === "string" ? body.orderId : "";

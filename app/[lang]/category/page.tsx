@@ -18,13 +18,12 @@ type CategoryKey =
   | "foreign_to_korean";
 
 const CATEGORY_ORDER: CategoryKey[] = [
+  "foreign_to_korean",
   "child",
   "self",
-  "brand",
-  "pet",
   "stage",
+  "pet",
   "korean_to_foreign",
-  "foreign_to_korean",
 ];
 
 const COPY = {
@@ -36,11 +35,11 @@ const COPY = {
     introBody1:
       "아이 이름, 개명, 브랜드, 반려동물, 활동명, 한국이름↔외국이름 등 모두 설계기준이 다릅니다.",
     introBody2:
-      "로그인을 하시면 월 1회 무료 작명 서비스를 이용할 수 있습니다.",
-    pill1: "월 1회 무료 설계",
-    pill2: "3개 이름 동시 추천",
-    pill3: "이름 선물카드 증정",
-    loginPrompt: "로그인하고 무료로 이름을 설계받으세요",
+      "로그인하시면 이름 설계 서비스를 이용할 수 있습니다. 베타 기간 동안 체험 이용 가능합니다.",
+    pill1: "음운·한자 전문 분석",
+    pill2: "3가지 이름 후보 설계",
+    pill3: "다국어 발음 카드 제공",
+    loginPrompt: "로그인하고 이름 설계를 시작하세요",
     loginBtn: "로그인",
     sectionTitle: "설계 대상을 선택해 주세요",
     sectionDesc: "지금 가장 필요한 이름 설계 대상을 선택해 다음 단계로 이동합니다.",
@@ -87,10 +86,10 @@ const COPY = {
         tag: "이름 변환",
       },
       foreign_to_korean: {
-        title: "외국이름 → 한국이름",
-        desc: "외국 이름을 한국어로 자연스럽게",
-        detail: "외국 이름의 발음과 뉘앙스를 살리면서 한국어로 자연스럽게 표기하거나 새 이름으로 설계합니다.",
-        tag: "이름 변환",
+        title: "나의 한국이름",
+        desc: "나만의 한국이름 만들기",
+        detail: "기존 이름의 발음과 뉘앙스를 살릴지, 완전히 새로운 의미로 지을지 선택해 나만의 한국이름을 설계합니다.",
+        tag: "나의 이름",
       },
     },
   },
@@ -102,11 +101,11 @@ const COPY = {
     introBody1:
       "Child names, brands, pets, stage names, and name translations all require different standards. Wink applies phonetic harmony, five elements stroke analysis, and teasing/pronunciation filters differently by target.",
     introBody2:
-      "Choose your target, then describe purpose and direction in the next step and review results for free.",
-    pill1: "1 free design/month",
-    pill2: "3 names at once",
-    pill3: "Name gift card included",
-    loginPrompt: "Sign in to design names for free",
+      "Sign in to access the naming design service. Available during the beta period.",
+    pill1: "Phonetic & Hanja Analysis",
+    pill2: "3 Name Candidates Designed",
+    pill3: "Multi-language Name Card",
+    loginPrompt: "Sign in to start your name design",
     loginBtn: "Sign In",
     sectionTitle: "Choose your design target",
     sectionDesc: "Select the target that best fits your current naming needs.",
@@ -153,10 +152,10 @@ const COPY = {
         tag: "Name Translation",
       },
       foreign_to_korean: {
-        title: "Foreign Name → Korean Name",
-        desc: "Make a foreign name work in Korean",
-        detail: "Preserves the nuance and sound of a foreign name while creating a natural Korean equivalent.",
-        tag: "Name Translation",
+        title: "My Korean Name",
+        desc: "Design your own Korean name",
+        detail: "Choose to keep the sound of your current name or start fresh with a new meaning — designed as your own Korean name.",
+        tag: "My Name",
       },
     },
   },
@@ -168,11 +167,11 @@ const COPY = {
     introBody1:
       "孩子名字、品牌名、宠物名、活动名以及名字转换，标准各不相同。Wink 会按对象分别应用音韵和谐、五行笔画分析及嘲笑·发音过滤。",
     introBody2:
-      "先选择设计对象，下一步再输入目的与方向，并可先免费查看结果。",
-    pill1: "每月1次免费设计",
-    pill2: "3个名字同时推荐",
-    pill3: "附赠名字礼品卡",
-    loginPrompt: "登录后免费获得名字设计",
+      "登录后即可使用命名设计服务。Beta期间可体验使用。",
+    pill1: "音韵·汉字专业分析",
+    pill2: "3个候选名字设计",
+    pill3: "多语言发音卡片提供",
+    loginPrompt: "登录开始名字设计",
     loginBtn: "登录",
     sectionTitle: "请选择设计对象",
     sectionDesc: "选择最符合您当前命名需求的对象后继续下一步。",
@@ -219,10 +218,10 @@ const COPY = {
         tag: "名字转换",
       },
       foreign_to_korean: {
-        title: "外语 → 韩语",
-        desc: "让外国名字在韩国自然流通",
-        detail: "保留外国名字的发音与韵味，转换为自然的韩语表记或重新设计。",
-        tag: "名字转换",
+        title: "我的韩语名字",
+        desc: "打造专属于我的韩语名字",
+        detail: "可以选择保留原名发音与韵味，也可以全新设计含义，为您打造专属韩语名字。",
+        tag: "我的名字",
       },
     },
   },
@@ -234,11 +233,11 @@ const COPY = {
     introBody1:
       "子どもの名前、ブランド名、ペット名、活動名、名前の変換はすべて基準が異なります。Wink は音韻調和・五行画数分析・からかい発音フィルターを対象別に適用します。",
     introBody2:
-      "まず対象を選び、次の段階で目的と方向性を入力して、結果を無料で先に確認できます。",
-    pill1: "月1回無料設計",
-    pill2: "3つの名前を同時提案",
-    pill3: "名前ギフトカード付き",
-    loginPrompt: "ログインして無料で名前をデザイン",
+      "ログインしてネーミング設計サービスをご利用ください。ベータ期間中は体験利用が可能です。",
+    pill1: "音韻・漢字の専門分析",
+    pill2: "3つの名前候補を設計",
+    pill3: "多言語発音カード提供",
+    loginPrompt: "ログインしてネーミング設計を始める",
     loginBtn: "ログイン",
     sectionTitle: "設計対象を選択してください",
     sectionDesc: "現在もっとも必要な名前設計の対象を選んで次へ進みます。",
@@ -285,10 +284,10 @@ const COPY = {
         tag: "名前の変換",
       },
       foreign_to_korean: {
-        title: "外国語 → 韓国語",
-        desc: "外国の名前を韓国語で自然に",
-        detail: "外国の名前の発音とニュアンスを活かしながら、韓国語で自然な名前に変換・設計します。",
-        tag: "名前の変換",
+        title: "私の韓国名",
+        desc: "自分だけの韓国名を作る",
+        detail: "今の名前の発音やニュアンスを活かすか、新しい意味で一から設計するかを選んで、自分だけの韓国名をデザインします。",
+        tag: "私の名前",
       },
     },
   },
@@ -300,11 +299,11 @@ const COPY = {
     introBody1:
       "Los nombres para bebés, marcas, mascotas, nombres artísticos y traducciones de nombres requieren criterios distintos. Wink aplica armonía fonética, análisis de trazos de los cinco elementos y filtros de pronunciación de forma diferente según el destinatario.",
     introBody2:
-      "Elige tu destinatario, luego describe el propósito y la dirección en el siguiente paso y revisa los resultados gratis.",
-    pill1: "1 diseño gratis/mes",
-    pill2: "3 nombres a la vez",
-    pill3: "Tarjeta regalo incluida",
-    loginPrompt: "Inicia sesión para diseñar nombres gratis",
+      "Inicia sesión para acceder al servicio de diseño de nombres. Disponible durante el período beta.",
+    pill1: "Análisis fonético y de caracteres",
+    pill2: "3 candidatos de nombre diseñados",
+    pill3: "Tarjeta de pronunciación multilingüe",
+    loginPrompt: "Inicia sesión para comenzar tu diseño",
     loginBtn: "Iniciar sesión",
     sectionTitle: "Elige tu destinatario de diseño",
     sectionDesc: "Selecciona el destinatario que mejor se adapte a tus necesidades actuales.",
@@ -351,10 +350,10 @@ const COPY = {
         tag: "Traducción de nombre",
       },
       foreign_to_korean: {
-        title: "Extranjero → Coreano",
-        desc: "Haz que un nombre extranjero funcione en coreano",
-        detail: "Preserva el matiz y sonido de un nombre extranjero creando un equivalente coreano natural.",
-        tag: "Traducción de nombre",
+        title: "Mi nombre coreano",
+        desc: "Diseña tu propio nombre coreano",
+        detail: "Elige mantener el sonido de tu nombre actual o crear uno nuevo con otro significado — diseñado como tu propio nombre coreano.",
+        tag: "Mi nombre",
       },
     },
   },
@@ -366,11 +365,11 @@ const COPY = {
     introBody1:
       "Имена для детей, брендов, питомцев, псевдонимы и перевод имён требуют разных стандартов. Wink применяет фонетическую гармонию, анализ черт пяти элементов и фильтры произношения по-разному в зависимости от объекта.",
     introBody2:
-      "Выберите объект, затем опишите цель и направление на следующем шаге и ознакомьтесь с результатами бесплатно.",
-    pill1: "1 бесплатный дизайн/мес",
-    pill2: "3 имени одновременно",
-    pill3: "Подарочная карточка включена",
-    loginPrompt: "Войдите для бесплатного дизайна",
+      "Войдите, чтобы воспользоваться сервисом именования. Доступно в бета-период.",
+    pill1: "Фонетический и иероглифический анализ",
+    pill2: "3 варианта имени",
+    pill3: "Многоязычная карточка имени",
+    loginPrompt: "Войдите, чтобы начать",
     loginBtn: "Войти",
     sectionTitle: "Выберите объект дизайна",
     sectionDesc: "Выберите объект, наиболее соответствующий вашим текущим потребностям.",
@@ -417,10 +416,10 @@ const COPY = {
         tag: "Перевод имени",
       },
       foreign_to_korean: {
-        title: "Иностранный → Корейский",
-        desc: "Иностранное имя по-корейски",
-        detail: "Сохраняет нюансы и звучание иностранного имени, создавая естественный корейский эквивалент.",
-        tag: "Перевод имени",
+        title: "Моё корейское имя",
+        desc: "Создайте своё корейское имя",
+        detail: "Сохраните звучание своего имени или создайте новое имя с иным значением — разработанное как ваше собственное корейское имя.",
+        tag: "Моё имя",
       },
     },
   },
@@ -432,11 +431,11 @@ const COPY = {
     introBody1:
       "Les prénoms d'enfants, noms de marques, noms de mascottes, noms de scène et traductions de noms requièrent des critères différents. Wink applique l'harmonie phonétique, l'analyse des traits des cinq éléments et les filtres de prononciation différemment selon le destinataire.",
     introBody2:
-      "Choisissez votre destinataire, décrivez le but et la direction à l'étape suivante, et consultez les résultats gratuitement.",
-    pill1: "1 design gratuit/mois",
-    pill2: "3 noms simultanément",
-    pill3: "Carte cadeau offerte",
-    loginPrompt: "Connectez-vous pour concevoir gratuitement",
+      "Connectez-vous pour accéder au service de conception de noms. Disponible pendant la période bêta.",
+    pill1: "Analyse phonétique et des caractères",
+    pill2: "3 candidats de nom conçus",
+    pill3: "Carte de prononciation multilingue",
+    loginPrompt: "Connectez-vous pour commencer",
     loginBtn: "Se connecter",
     sectionTitle: "Choisissez votre destinataire",
     sectionDesc: "Sélectionnez le destinataire qui correspond le mieux à vos besoins actuels.",
@@ -483,10 +482,10 @@ const COPY = {
         tag: "Traduction de nom",
       },
       foreign_to_korean: {
-        title: "Étranger → Coréen",
-        desc: "Utiliser un nom étranger en coréen",
-        detail: "Préserve la nuance et le son d'un nom étranger tout en créant un équivalent coréen naturel.",
-        tag: "Traduction de nom",
+        title: "Mon nom coréen",
+        desc: "Concevez votre propre nom coréen",
+        detail: "Gardez la sonorité de votre nom actuel ou créez-en un nouveau avec une autre signification — conçu comme votre propre nom coréen.",
+        tag: "Mon nom",
       },
     },
   },
@@ -498,11 +497,11 @@ const COPY = {
     introBody1:
       "أسماء الأطفال والعلامات التجارية والحيوانات الأليفة والأسماء الفنية وترجمة الأسماء تتطلب معايير مختلفة. تطبق Wink الانسجام الصوتي وتحليل سمات العناصر الخمسة وفلاتر النطق بشكل مختلف حسب الغرض.",
     introBody2:
-      "اختر غرضك، ثم صف الهدف والاتجاه في الخطوة التالية وراجع النتائج مجاناً.",
-    pill1: "تصميم مجاني 1/شهر",
-    pill2: "3 أسماء دفعة واحدة",
-    pill3: "بطاقة هدية مرفقة",
-    loginPrompt: "سجّل دخولك لتصميم الأسماء مجاناً",
+      "سجّل دخولك للوصول إلى خدمة تصميم الأسماء. متاح خلال فترة البيتا.",
+    pill1: "تحليل صوتي واحترافي",
+    pill2: "3 مرشحين للاسم",
+    pill3: "بطاقة نطق متعددة اللغات",
+    loginPrompt: "سجّل دخولك للبدء",
     loginBtn: "تسجيل الدخول",
     sectionTitle: "اختر غرض التصميم",
     sectionDesc: "اختر الغرض الأنسب لاحتياجاتك الحالية.",
@@ -549,10 +548,10 @@ const COPY = {
         tag: "ترجمة الاسم",
       },
       foreign_to_korean: {
-        title: "أجنبي → كوري",
-        desc: "استخدام الاسم الأجنبي بالكورية",
-        detail: "يحافظ على نغمة وظلال الاسم الأجنبي مع إنشاء مكافئ كوري طبيعي.",
-        tag: "ترجمة الاسم",
+        title: "اسمي الكوري",
+        desc: "صمّم اسمك الكوري الخاص",
+        detail: "اختر الحفاظ على نطق اسمك الحالي أو ابتكار اسم جديد بمعنى مختلف — مصمم ليكون اسمك الكوري الخاص.",
+        tag: "اسمي",
       },
     },
   },
@@ -564,11 +563,11 @@ const COPY = {
     introBody1:
       "बच्चों के नाम, ब्रांड, पालतू जानवर, स्टेज नाम और नाम अनुवाद सभी के लिए अलग मानक हैं। Wink ध्वन्यात्मक सामंजस्य, पंचतत्व विश्लेषण और उच्चारण फ़िल्टर को लक्ष्य के अनुसार अलग-अलग लागू करता है।",
     introBody2:
-      "अपना लक्ष्य चुनें, फिर अगले चरण में उद्देश्य और दिशा बताएं और परिणाम मुफ्त में देखें।",
-    pill1: "मुफ्त 1 डिज़ाइन/माह",
-    pill2: "एक साथ 3 नाम",
-    pill3: "नाम गिफ्ट कार्ड शामिल",
-    loginPrompt: "लॉगिन करें और मुफ्त नाम डिज़ाइन पाएं",
+      "नाम डिज़ाइन सेवा के लिए लॉगिन करें। बीटा अवधि के दौरान उपयोग उपलब्ध है।",
+    pill1: "ध्वन्यात्मक व विशेषज्ञ विश्लेषण",
+    pill2: "3 नाम उम्मीदवार डिज़ाइन",
+    pill3: "बहुभाषी उच्चारण कार्ड",
+    loginPrompt: "लॉगिन करें और शुरू करें",
     loginBtn: "लॉगिन",
     sectionTitle: "डिज़ाइन लक्ष्य चुनें",
     sectionDesc: "अपनी वर्तमान जरूरतों के अनुसार सबसे उपयुक्त लक्ष्य चुनें।",
@@ -615,10 +614,10 @@ const COPY = {
         tag: "नाम अनुवाद",
       },
       foreign_to_korean: {
-        title: "विदेशी → कोरियाई",
-        desc: "विदेशी नाम को कोरियाई में उपयोगी बनाएं",
-        detail: "विदेशी नाम की ध्वनि और बारीकियों को बनाए रखते हुए प्राकृतिक कोरियाई समकक्ष बनाता है।",
-        tag: "नाम अनुवाद",
+        title: "मेरा कोरियाई नाम",
+        desc: "अपना खुद का कोरियाई नाम डिज़ाइन करें",
+        detail: "अपने मौजूदा नाम की ध्वनि बनाए रखें या नए अर्थ के साथ नया नाम बनाएं — आपके अपने कोरियाई नाम के रूप में डिज़ाइन किया गया।",
+        tag: "मेरा नाम",
       },
     },
   },
@@ -856,12 +855,6 @@ export default function CategoryPage() {
     setPendingCategory(null);
   };
 
-  const proceedWithoutLogin = () => {
-    const key = pendingCategory;
-    closeModal();
-    if (key) router.push(`/${lang}/design?type=${key}`);
-  };
-
   return (
     <>
     {/* 로그인 유도 모달 */}
@@ -890,7 +883,7 @@ export default function CategoryPage() {
             로그인이 필요한 서비스입니다
           </div>
           <div style={{ fontSize: 13.5, color: "var(--text-soft)", lineHeight: 1.75 }}>
-            로그인하시면 월 1회 무료 작명 서비스를<br/>이용하실 수 있습니다.
+            로그인하시면 이름 설계 서비스를<br/>이용하실 수 있습니다.
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 4 }}>
             <button

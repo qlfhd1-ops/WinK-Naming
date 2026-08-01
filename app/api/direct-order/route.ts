@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { sendOrderEmail } from "@/lib/send-email";
 
 type ProductType = "stamp" | "doorplate";
 
@@ -135,6 +136,19 @@ export async function POST(req: Request) {
         { status: 500 }
       );
     }
+
+    // 주문 확인 이메일 발송 (비동기 — 응답 지연 없음)
+    sendOrderEmail({
+      customerEmail,
+      customerName,
+      orderId: orderRow.id,
+      name,
+      hanja,
+      items: orderItems.map((item) => ({ title: item.title, price: item.price })),
+      total,
+      memo,
+      lang,
+    }).catch((e) => console.error("[direct-order] sendOrderEmail error:", e));
 
     return NextResponse.json({ ok: true, orderId: orderRow.id, total });
   } catch (error) {

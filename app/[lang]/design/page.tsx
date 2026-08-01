@@ -1714,7 +1714,7 @@ export default function DesignPage() {
   const isBrand = category === "brand";
   const isKTF = category === "korean_to_foreign";
   const isFTK = category === "foreign_to_korean";
-  const showGender = category === "child" || category === "stage" || category === "self";
+  const showGender = category === "child" || category === "stage" || category === "self" || category === "korean_to_foreign" || category === "foreign_to_korean";
 
   const [error, setError] = useState("");
   const [isLight, setIsLight] = useState(false);
