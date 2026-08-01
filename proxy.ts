@@ -16,7 +16,15 @@ import type { NextRequest } from "next/server";
  * (Edge Runtime에서 @upstash/redis 사용 불가 — Node.js 전용 패키지)
  */
 
-const ALLOWED_ORIGIN = process.env.NEXT_PUBLIC_BASE_URL ?? "https://wink-naming.com";
+const ALLOWED_ORIGINS = new Set([
+  process.env.NEXT_PUBLIC_BASE_URL ?? "https://wink-naming.com",
+  "https://wink-naming.com",
+  "https://www.wink-naming.com",
+  "https://wink-naming.co.kr",
+  "https://www.wink-naming.co.kr",
+  "https://wink-naming.shop",
+  "https://www.wink-naming.shop",
+]);
 
 function getIp(req: NextRequest): string {
   return (
@@ -96,7 +104,7 @@ export async function proxy(req: NextRequest) {
   // ── 4. 외부 Origin에서 직접 API 호출 차단 ─────────────────
   if (pathname.startsWith("/api/") && method !== "GET") {
     const origin = req.headers.get("origin");
-    if (origin && origin !== ALLOWED_ORIGIN && !origin.endsWith(".vercel.app")) {
+    if (origin && !ALLOWED_ORIGINS.has(origin) && !origin.endsWith(".vercel.app")) {
       return NextResponse.json(
         { ok: false, error: "Forbidden" },
         { status: 403 }
