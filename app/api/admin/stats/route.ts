@@ -8,6 +8,37 @@ function getAdminClient() {
   return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
 }
 
+/**
+ * 현재 Vercel에 설정된 Supabase 키가 실제로 RLS를 우회할 수 있는
+ * service_role(또는 신형 secret) 권한인지 진단한다.
+ * 키 값 자체는 절대 응답에 포함하지 않는다 — role/형식만 노출.
+ */
+function diagnoseKey() {
+  const source = process.env.SUPABASE_SERVICE_ROLE_KEY
+    ? "SUPABASE_SERVICE_ROLE_KEY"
+    : process.env.SUPABASE_SECRET_KEY
+      ? "SUPABASE_SECRET_KEY"
+      : "none";
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SECRET_KEY ?? "";
+
+  if (!key) return { source, format: "missing", role: null };
+
+  if (key.startsWith("eyJ")) {
+    try {
+      const payloadB64 = key.split(".")[1];
+      const payload = JSON.parse(Buffer.from(payloadB64, "base64").toString("utf-8"));
+      return { source, format: "legacy-jwt", role: payload.role ?? "unknown" };
+    } catch {
+      return { source, format: "legacy-jwt", role: "decode-failed" };
+    }
+  }
+
+  if (key.startsWith("sb_secret_")) return { source, format: "new-secret-key", role: "service_role(new-format)" };
+  if (key.startsWith("sb_publishable_")) return { source, format: "new-publishable-key", role: "anon(publishable-mistakenly-used)" };
+
+  return { source, format: "unknown", role: "unknown" };
+}
+
 /** 이중 인증: 기존 x-admin-password OR Supabase Bearer 토큰 + admin role */
 async function checkAuth(req: Request): Promise<boolean> {
   // Method 1: legacy password header
@@ -201,6 +232,14 @@ export async function GET(req: Request) {
       popularFamilyNames,
       recentOrders: recentOrdersRes.data ?? [],
       monthlyRevenue,
+    },
+    debug: {
+      keyCheck: diagnoseKey(),
+      rawCounts: {
+        naming_briefs: { count: totalBriefsRes.count, error: totalBriefsRes.error?.message ?? null },
+        naming_orders: { count: totalOrdersRes.count, error: totalOrdersRes.error?.message ?? null },
+        user_plans: { count: totalUsersRes.count, error: totalUsersRes.error?.message ?? null },
+      },
     },
   });
 }
