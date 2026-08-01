@@ -238,6 +238,8 @@ export async function GET(req: Request) {
       rawCounts: {
         naming_briefs: {
           count: totalBriefsRes.count,
+          status: totalBriefsRes.status,
+          statusText: totalBriefsRes.statusText,
           error: totalBriefsRes.error
             ? {
                 message: totalBriefsRes.error.message,
@@ -249,6 +251,8 @@ export async function GET(req: Request) {
         },
         naming_orders: {
           count: totalOrdersRes.count,
+          status: totalOrdersRes.status,
+          statusText: totalOrdersRes.statusText,
           error: totalOrdersRes.error
             ? {
                 message: totalOrdersRes.error.message,
@@ -260,6 +264,8 @@ export async function GET(req: Request) {
         },
         user_plans: {
           count: totalUsersRes.count,
+          status: totalUsersRes.status,
+          statusText: totalUsersRes.statusText,
           error: totalUsersRes.error
             ? {
                 message: totalUsersRes.error.message,
