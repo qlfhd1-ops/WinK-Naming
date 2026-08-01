@@ -27,7 +27,16 @@ function diagnoseKey() {
     try {
       const payloadB64 = key.split(".")[1];
       const payload = JSON.parse(Buffer.from(payloadB64, "base64").toString("utf-8"));
-      return { source, format: "legacy-jwt", role: payload.role ?? "unknown" };
+      return {
+        source,
+        format: "legacy-jwt",
+        role: payload.role ?? "unknown",
+        ref: payload.ref ?? "unknown",
+        issuedAt: payload.iat ? new Date(payload.iat * 1000).toISOString() : "unknown",
+        expiresAt: payload.exp ? new Date(payload.exp * 1000).toISOString() : "unknown",
+        keyLength: key.length,
+        hasWhitespace: key !== key.trim() || /\s/.test(key),
+      };
     } catch {
       return { source, format: "legacy-jwt", role: "decode-failed" };
     }
@@ -235,6 +244,7 @@ export async function GET(req: Request) {
     },
     debug: {
       keyCheck: diagnoseKey(),
+      urlRef: (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").match(/https:\/\/([a-z0-9]+)\.supabase\.co/)?.[1] ?? "unknown",
       rawCounts: {
         naming_briefs: {
           count: totalBriefsRes.count,
