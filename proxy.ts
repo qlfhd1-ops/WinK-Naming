@@ -16,7 +16,7 @@ import type { NextRequest } from "next/server";
  * (Edge Runtime에서 @upstash/redis 사용 불가 — Node.js 전용 패키지)
  */
 
-const ALLOWED_ORIGIN = process.env.NEXT_PUBLIC_BASE_URL ?? "https://yoonseul-naming.vercel.app";
+const ALLOWED_ORIGIN = process.env.NEXT_PUBLIC_BASE_URL ?? "https://wink-naming.com";
 
 function getIp(req: NextRequest): string {
   return (

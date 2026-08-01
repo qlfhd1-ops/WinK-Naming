@@ -14,6 +14,8 @@ const LANG_LABELS: Record<Lang, string> = {
 const THEME = {
   "korean-name":  { accent: "#C9A84C", bg: "#0F1A3A", badge: "#1a2d5a" },
   "child":        { accent: "#5B8ED6", bg: "#0A1628", badge: "#14244a" },
+  "self":         { accent: "#5BB0A8", bg: "#0A2420", badge: "#123a32" },
+  "stage":        { accent: "#E09B4A", bg: "#241708", badge: "#3a2510" },
   "pet":          { accent: "#6AAE8F", bg: "#0C1E18", badge: "#162e24" },
   "foreign":      { accent: "#B87DBF", bg: "#1A0E2A", badge: "#2a1842" },
   "goods":        { accent: "#C4845A", bg: "#1E1208", badge: "#2e1c10" },
@@ -41,6 +43,28 @@ const CATS = [
     href: (lang: string) => `/${lang}/design?type=child`,
     secondary: null,
     cta: "이름 설계 시작하기",
+  },
+  {
+    id: "self",
+    label: "개명 · 나에게",
+    sub: "본인 개명 · 새로운 시작",
+    emoji: "🪷",
+    desc: "삶의 전환점에서 새로운 나를 위한\n이름을 설계합니다.\n성씨 조화와 원하는 인상을 함께 반영.",
+    points: ["성씨와 새 이름의 음운 조화", "인생 전환점에 맞는 의미 설계", "한자 오행·획수 분석", "새로운 인상·정체성 반영"],
+    href: (lang: string) => `/${lang}/design?type=self`,
+    secondary: null,
+    cta: "나의 새 이름 설계하기",
+  },
+  {
+    id: "stage",
+    label: "활동명 · 예명",
+    sub: "크리에이터 · 연예인 · 예명",
+    emoji: "🎭",
+    desc: "기억되고 불리기 좋은\n활동명을 설계합니다.\n개성·호감도·검색성을 함께 고려.",
+    points: ["개성과 호감도를 담은 설계", "기억하기 쉬운 음절 구성", "검색·브랜딩 친화적 이름", "한자·의미 병기 제공"],
+    href: (lang: string) => `/${lang}/design?type=stage`,
+    secondary: null,
+    cta: "활동명 설계 시작하기",
   },
   {
     id: "pet",
@@ -84,6 +108,8 @@ const CAT_DESC_BY_LANG = {
   ko: {
     "korean-name": { desc: "한국을 사랑하는 당신에게\n특별한 한국 이름을 드립니다.\n발음·의미·느낌 모두 고려한 설계.", points: ["국적·이름의 음운 기반 변환", "의미와 감성까지 담은 설계", "한자·한글 병기 제공", "영어·일본어·중국어 원명 반영"] },
     "child":        { desc: "세상에 하나뿐인 이름을 설계합니다.\n성씨 음운 조화, 한자 오행 획수,\n놀림감 필터까지 모두 반영합니다.", points: ["성씨와 이름의 음운 조화", "한자 오행·획수 분석", "놀림감·유사 이름 필터", "다국어 발음 동시 설계"] },
+    "self":         { desc: "삶의 전환점에서 새로운 나를 위한\n이름을 설계합니다.\n성씨 조화와 원하는 인상을 함께 반영.", points: ["성씨와 새 이름의 음운 조화", "인생 전환점에 맞는 의미 설계", "한자 오행·획수 분석", "새로운 인상·정체성 반영"] },
+    "stage":        { desc: "기억되고 불리기 좋은\n활동명을 설계합니다.\n개성·호감도·검색성을 함께 고려.", points: ["개성과 호감도를 담은 설계", "기억하기 쉬운 음절 구성", "검색·브랜딩 친화적 이름", "한자·의미 병기 제공"] },
     "pet":          { desc: "소중한 가족의 이름을 설계합니다.\n한국 고유의 감성을 담은\n기억하기 좋은 이름으로.", points: ["성격·외모 기반 설계", "한국 고유어·음식·자연에서 영감", "부르기 좋은 음절 고려", "귀여움·위엄·개성 반영"] },
     "foreign":      { desc: "발음과 의미를 함께 살려\n국경을 넘는 이름을 만듭니다.\n글로벌 무대를 위한 설계.", points: ["발음 기반 자연스러운 변환", "의미·분위기 기반 새 이름", "영어·중국어·프랑스어 등 지원", "국제 무대에서 쓰기 좋은 이름"] },
     "goods":        { desc: "설계한 이름을 실물로 만듭니다.\n목인·흑단·수우각 도장과\n이름 새긴 문패·선물 세트.", points: ["목인·흑단·자수정 도장 제작", "이름 새긴 문패 제작", "네임카드·선물 패키지", "이름 설계와 연계 구성"] },
@@ -91,6 +117,8 @@ const CAT_DESC_BY_LANG = {
   en: {
     "korean-name": { desc: "For those who love Korea,\nwe design your special Korean name.\nPhonetics · Meaning · Feel — all crafted.", points: ["Phonetic conversion by nationality & name", "Design with meaning and emotion", "Hanja & Hangul both provided", "Transcribed in English · Japanese · Chinese"] },
     "child":        { desc: "We design a one-of-a-kind name\nfor your precious child.\nSurname harmony, hanja ohaeng, teasing filter — all included.", points: ["Surname-name phonetic harmony", "Hanja ohaeng & stroke analysis", "Teasing & duplicate name filter", "Multi-language pronunciation design"] },
+    "self":         { desc: "For those at a turning point in life,\nwe design a name for your new self.\nBalancing surname harmony with the impression you want.", points: ["Surname-new name phonetic harmony", "Meaning tailored to life's turning points", "Hanja ohaeng & stroke analysis", "Reflects your new identity"] },
+    "stage":        { desc: "We design a stage name\nthat's memorable and easy to call.\nConsidering individuality, likability & searchability.", points: ["Design with individuality & likability", "Easy-to-remember syllable structure", "Search & branding friendly", "Hanja & meaning both provided"] },
     "pet":          { desc: "We design a name for your precious family.\nUnique Korean sensibility\nin an easy-to-remember name.", points: ["Based on personality & appearance", "Inspired by Korean words, food & nature", "Easy-to-call syllables", "Cuteness · dignity · personality"] },
     "foreign":      { desc: "Preserving both sound and meaning,\nwe create names that cross borders.\nDesigned for the global stage.", points: ["Natural phonetic conversion", "New name from meaning & atmosphere", "English · Chinese · French & more", "International-stage ready names"] },
     "goods":        { desc: "Bring your designed name to life.\nStamps in wood, ebony & horn,\nnameplates & gift sets engraved.", points: ["Wood · ebony · amethyst stamps", "Nameplate with engraved name", "Name card & gift package", "Linked with name design"] },
@@ -98,6 +126,8 @@ const CAT_DESC_BY_LANG = {
   zh: {
     "korean-name": { desc: "为热爱韩国的您\n设计独特的韩国名字。\n发音·意义·感觉 — 全面考量。", points: ["基于国籍·姓名的音韵转换", "融入意义与情感的设计", "同时提供汉字与韩字", "翻译为英语·日语·中文"] },
     "child":        { desc: "为您的宝贝设计\n世界上独一无二的名字。\n姓氏音韵、汉字五行、绰号过滤全面考量。", points: ["姓名音韵和谐", "汉字五行·笔画分析", "绰号·相似名字过滤", "多语言发音同步设计"] },
+    "self":         { desc: "为处于人生转折点的您\n设计全新的名字。\n兼顾姓氏和谐与您想要的印象。", points: ["姓氏与新名字的音韵和谐", "契合人生转折点的意义设计", "汉字五行·笔画分析", "反映全新印象与身份"] },
+    "stage":        { desc: "设计易于记住、\n便于称呼的艺名。\n兼顾个性·好感度·可搜索性。", points: ["融入个性与好感度的设计", "易记的音节结构", "利于搜索与品牌打造", "提供汉字与含义并记"] },
     "pet":          { desc: "为您珍贵的家人设计名字。\n融入韩国独特感性\n易于记忆的名字。", points: ["基于性格·外貌的设计", "从韩国固有词·食物·自然中汲取灵感", "考虑易于呼唤的音节", "可爱·威严·个性反映"] },
     "foreign":      { desc: "兼顾发音与意义\n打造跨越国界的名字。\n为全球舞台而设计。", points: ["基于发音的自然转换", "基于意义·氛围的新名字", "支持英语·中文·法语等", "适合国际舞台的名字"] },
     "goods":        { desc: "将设计好的名字变为实物。\n木质·乌木·水牛角印章\n刻有名字的门牌·礼品套装。", points: ["木质·乌木·紫水晶印章制作", "刻有名字的门牌制作", "名片·礼品套餐", "与名字设计联动方案"] },
@@ -105,6 +135,8 @@ const CAT_DESC_BY_LANG = {
   ja: {
     "korean-name": { desc: "韓国を愛するあなたへ\n特別な韓国名を設計します。\n音韻·意味·感覚 — すべて考慮。", points: ["国籍·名前に基づく音韻変換", "意味と感性を込めた設計", "漢字とハングルを併記提供", "英語·日本語·中国語に翻訳"] },
     "child":        { desc: "世界に一つだけの名前を設計します。\n姓の音韻調和、漢字五行画数、\nあだ名フィルターも反映。", points: ["姓と名の音韻調和", "漢字五行·画数分析", "あだ名·類似名フィルター", "多言語発音同時設計"] },
+    "self":         { desc: "人生の転換点にいるあなたへ\n新しい自分のための名前を設計します。\n姓との調和と望む印象を反映。", points: ["姓と新しい名前の音韻調和", "人生の転換点に合わせた意味設計", "漢字五行·画数分析", "新しい印象·アイデンティティを反映"] },
+    "stage":        { desc: "記憶され呼ばれやすい\n活動名を設計します。\n個性·好感度·検索性を考慮。", points: ["個性と好感度を込めた設計", "覚えやすい音節構成", "検索·ブランディングに適した名前", "漢字·意味を併記提供"] },
     "pet":          { desc: "大切な家族の名前を設計します。\n韓国固有の感性を込めた\n覚えやすい名前で。", points: ["性格·外見に基づく設計", "韓国固有語·食べ物·自然からインスピレーション", "呼びやすい音節を考慮", "かわいさ·威厳·個性を反映"] },
     "foreign":      { desc: "発音と意味を活かして\n国境を越える名前を作ります。\nグローバルステージのための設計。", points: ["発音に基づく自然な変換", "意味·雰囲気に基づく新名前", "英語·中国語·フランス語など対応", "国際舞台で使いやすい名前"] },
     "goods":        { desc: "設計した名前を実物に。\n木製·黒壇·水牛角の印鑑と\n名前を刻んだ表札·ギフトセット。", points: ["木製·黒壇·アメジスト印鑑制作", "名前を刻んだ表札制作", "名刺·ギフトパッケージ", "名前設計との連携構成"] },
@@ -112,6 +144,8 @@ const CAT_DESC_BY_LANG = {
   es: {
     "korean-name": { desc: "Para los que aman Corea,\ndiseñamos tu nombre coreano especial.\nFonética · Significado · Sensación — todo considerado.", points: ["Conversión fonética por nacionalidad y nombre", "Diseño con significado y emoción", "Hanja y Hangul provistos", "Traducido al inglés · japonés · chino"] },
     "child":        { desc: "Diseñamos el nombre único\npara tu precioso hijo.\nArmonía de apellido, hanja ohaeng, filtro de burlas — todo.", points: ["Armonía fonética apellido-nombre", "Análisis de hanja ohaeng y trazos", "Filtro de apodos y nombres similares", "Diseño de pronunciación multilingüe"] },
+    "self":         { desc: "Para quienes están en un punto de inflexión,\ndiseñamos un nombre para tu nuevo yo.\nEquilibrando armonía de apellido con la impresión deseada.", points: ["Armonía fonética apellido-nuevo nombre", "Significado adaptado al punto de inflexión", "Análisis de hanja ohaeng y trazos", "Refleja tu nueva identidad"] },
+    "stage":        { desc: "Diseñamos un nombre artístico\nmemorable y fácil de llamar.\nConsiderando individualidad, simpatía y búsqueda.", points: ["Diseño con individualidad y simpatía", "Sílabas fáciles de recordar", "Amigable para búsqueda y marca", "Hanja y significado incluidos"] },
     "pet":          { desc: "Diseñamos el nombre para tu familia.\nSensibilidad coreana única\nen un nombre fácil de recordar.", points: ["Basado en personalidad y apariencia", "Inspirado en palabras, comida y naturaleza coreana", "Sílabas fáciles de pronunciar", "Ternura · dignidad · personalidad"] },
     "foreign":      { desc: "Preservando sonido y significado,\ncreamos nombres que cruzan fronteras.\nDiseñado para el escenario global.", points: ["Conversión fonética natural", "Nuevo nombre por significado y atmósfera", "Inglés · chino · francés y más", "Nombres listos para el escenario internacional"] },
     "goods":        { desc: "Convierte tu nombre en realidad.\nSellos en madera, ébano y cuerno,\nplacas y sets de regalo grabados.", points: ["Sellos de madera · ébano · amatista", "Placa con nombre grabado", "Tarjeta de nombre y paquete de regalo", "Integrado con diseño de nombre"] },
@@ -119,6 +153,8 @@ const CAT_DESC_BY_LANG = {
   fr: {
     "korean-name": { desc: "Pour ceux qui aiment la Corée,\nnous concevons votre prénom coréen spécial.\nPhonétique · Sens · Sensation — tout considéré.", points: ["Conversion phonétique par nationalité et prénom", "Conception avec sens et émotion", "Hanja et Hangul fournis", "Traduit en anglais · japonais · chinois"] },
     "child":        { desc: "Nous concevons le prénom unique\npour votre précieux enfant.\nHarmonie, hanja ohaeng, filtre de moquerie — tout inclus.", points: ["Harmonie phonétique nom-prénom", "Analyse hanja ohaeng et traits", "Filtre de surnoms et prénoms similaires", "Conception de prononciation multilingue"] },
+    "self":         { desc: "Pour ceux à un tournant de la vie,\nnous concevons un nom pour votre nouveau vous.\nÉquilibrant harmonie du nom de famille et impression voulue.", points: ["Harmonie phonétique nom-nouveau prénom", "Sens adapté au tournant de vie", "Analyse hanja ohaeng et traits", "Reflète votre nouvelle identité"] },
+    "stage":        { desc: "Nous concevons un nom de scène\nmémorable et facile à appeler.\nEn tenant compte individualité, sympathie et recherche.", points: ["Conception avec individualité et sympathie", "Syllabes faciles à retenir", "Adapté à la recherche et au branding", "Hanja et sens fournis"] },
     "pet":          { desc: "Nous concevons un prénom pour votre famille.\nSensibilité coréenne unique\ndans un prénom facile à retenir.", points: ["Basé sur la personnalité et l'apparence", "Inspiré des mots, aliments et nature coréens", "Syllabes faciles à prononcer", "Mignonnerie · dignité · personnalité"] },
     "foreign":      { desc: "Préservant son et signification,\nnous créons des prénoms qui franchissent les frontières.\nConçu pour la scène mondiale.", points: ["Conversion phonétique naturelle", "Nouveau prénom par sens et atmosphère", "Anglais · chinois · français et plus", "Prénoms prêts pour la scène internationale"] },
     "goods":        { desc: "Donnez vie à votre prénom conçu.\nSceaux en bois, ébène et corne,\nplaques et coffrets cadeaux gravés.", points: ["Sceaux bois · ébène · améthyste", "Plaque avec prénom gravé", "Carte de visite et coffret cadeau", "Intégré avec la conception du prénom"] },
@@ -126,6 +162,8 @@ const CAT_DESC_BY_LANG = {
   ru: {
     "korean-name": { desc: "Для тех, кто любит Корею,\nмы создаём ваше особое корейское имя.\nФонетика · Значение · Ощущение — всё учтено.", points: ["Фонетическая конверсия по национальности и имени", "Дизайн со смыслом и эмоцией", "Ханджа и хангыль — оба варианта", "Переведено на английский · японский · китайский"] },
     "child":        { desc: "Мы создаём уникальное имя\nдля вашего драгоценного ребёнка.\nГармония фамилии, ханджа охэн, фильтр — всё включено.", points: ["Фонетическая гармония фамилии и имени", "Анализ ханджа охэн и черт", "Фильтр прозвищ и похожих имён", "Многоязычный дизайн произношения"] },
+    "self":         { desc: "Для тех, кто на переломном этапе жизни,\nмы создаём имя для нового вас.\nБаланс гармонии фамилии и желаемого впечатления.", points: ["Фонетическая гармония фамилии и нового имени", "Смысл, соответствующий переломному моменту", "Анализ ханджа охэн и черт", "Отражает новую идентичность"] },
+    "stage":        { desc: "Мы создаём сценическое имя,\nзапоминающееся и удобное для обращения.\nУчитывая индивидуальность, симпатию и поиск.", points: ["Дизайн с индивидуальностью и симпатией", "Легко запоминающиеся слоги", "Удобно для поиска и брендинга", "Ханджа и значение предоставлены"] },
     "pet":          { desc: "Мы создаём имя для вашей дорогой семьи.\nУникальная корейская чувственность\nв запоминающемся имени.", points: ["На основе характера и внешности", "Вдохновлено корейскими словами, едой и природой", "Удобные для произношения слоги", "Милота · достоинство · индивидуальность"] },
     "foreign":      { desc: "Сохраняя звук и смысл,\nмы создаём имена, пересекающие границы.\nДля мировой сцены.", points: ["Естественная фонетическая конверсия", "Новое имя по смыслу и атмосфере", "Английский · китайский · французский и др.", "Имена для международной сцены"] },
     "goods":        { desc: "Воплотите ваше имя в жизнь.\nПечати из дерева, эбонита и рога,\nтаблички и подарочные наборы с гравировкой.", points: ["Печати дерево · эбонит · аметист", "Табличка с гравировкой имени", "Визитная карточка и подарочный набор", "Интегрировано с дизайном имени"] },
@@ -133,6 +171,8 @@ const CAT_DESC_BY_LANG = {
   ar: {
     "korean-name": { desc: "لمحبي كوريا،\nنصمم اسمك الكوري الخاص.\nالصوتيات · المعنى · الشعور — كل شيء مدروس.", points: ["تحويل صوتي بحسب الجنسية والاسم", "تصميم يجمع المعنى والعاطفة", "الهانجا والهانغول معاً", "مترجم للإنجليزية · اليابانية · الصينية"] },
     "child":        { desc: "نصمم اسماً فريداً\nلطفلك العزيز.\nتناسق اللقب، هانجا أوهيج، فلتر — كل شيء.", points: ["تناسق صوتي للقب والاسم", "تحليل هانجا أوهيج والخطوط", "فلتر الألقاب والأسماء المشابهة", "تصميم نطق متعدد اللغات"] },
+    "self":         { desc: "لمن هم في نقطة تحول في الحياة،\nنصمم اسماً لذاتك الجديدة.\nموازنين انسجام اللقب مع الانطباع المطلوب.", points: ["انسجام صوتي بين اللقب والاسم الجديد", "معنى يناسب نقطة التحول في الحياة", "تحليل هانجا أوهيج والخطوط", "يعكس هويتك الجديدة"] },
+    "stage":        { desc: "نصمم اسماً فنياً\nلا يُنسى وسهل النداء.\nمع مراعاة الفردية والجاذبية وإمكانية البحث.", points: ["تصميم بفردية وجاذبية", "مقاطع سهلة التذكر", "مناسب للبحث والعلامة التجارية", "هانجا ومعنى مقدمان"] },
     "pet":          { desc: "نصمم اسماً لعائلتك الثمينة.\nالحساسية الكورية الفريدة\nفي اسم سهل التذكر.", points: ["مبني على الشخصية والمظهر", "مستلهم من الكلمات والطعام والطبيعة الكورية", "مقاطع سهلة النطق", "رقة · وقار · شخصية"] },
     "foreign":      { desc: "مع الحفاظ على الصوت والمعنى،\nنخلق أسماء تعبر الحدود.\nمصمم للمسرح العالمي.", points: ["تحويل صوتي طبيعي", "اسم جديد من المعنى والجو", "الإنجليزية · الصينية · الفرنسية وأكثر", "أسماء جاهزة للمسرح الدولي"] },
     "goods":        { desc: "أحضر اسمك إلى الواقع.\nأختام خشب وأبنوس وقرن،\nألواح وطقم هدايا منقوشة.", points: ["أختام خشب · أبنوس · أميثيست", "لافتة منقوش عليها الاسم", "بطاقة اسم وحزمة هدايا", "متكاملة مع تصميم الاسم"] },
@@ -140,6 +180,8 @@ const CAT_DESC_BY_LANG = {
   hi: {
     "korean-name": { desc: "कोरिया से प्यार करने वालों के लिए,\nहम आपका विशेष कोरियाई नाम डिज़ाइन करते हैं।\nध्वनि · अर्थ · अनुभव — सब कुछ ध्यान में।", points: ["राष्ट्रीयता और नाम के आधार पर ध्वनि रूपांतरण", "अर्थ और भावना के साथ डिज़ाइन", "हांजा और हांगुल दोनों प्रदान", "अंग्रेजी · जापानी · चीनी में अनुवाद"] },
     "child":        { desc: "हम आपके प्यारे बच्चे के लिए\nएक अनोखा नाम डिज़ाइन करते हैं।\nउपनाम सामंजस्य, हांजा ओहेंग, उपहास फ़िल्टर।", points: ["उपनाम-नाम ध्वन्यात्मक सामंजस्य", "हांजा ओहेंग और स्ट्रोक विश्लेषण", "उपहास और समान नाम फ़िल्टर", "बहुभाषी उच्चारण डिज़ाइन"] },
+    "self":         { desc: "जीवन के मोड़ पर खड़े लोगों के लिए,\nहम आपके नए स्वरूप के लिए नाम डिज़ाइन करते हैं।\nउपनाम सामंजस्य और वांछित छवि को संतुलित करते हुए।", points: ["उपनाम-नए नाम की ध्वन्यात्मक सामंजस्य", "जीवन के मोड़ के अनुरूप अर्थ डिज़ाइन", "हांजा ओहेंग और स्ट्रोक विश्लेषण", "नई पहचान को दर्शाता है"] },
+    "stage":        { desc: "हम एक स्टेज नाम डिज़ाइन करते हैं\nजो यादगार और बुलाने में आसान हो।\nव्यक्तित्व, पसंदगी और खोज क्षमता को ध्यान में रखते हुए।", points: ["व्यक्तित्व और पसंदगी के साथ डिज़ाइन", "याद रखने में आसान अक्षर संरचना", "खोज और ब्रांडिंग के अनुकूल", "हांजा और अर्थ दोनों प्रदान"] },
     "pet":          { desc: "हम आपके प्यारे परिवार के लिए नाम डिज़ाइन करते हैं।\nकोरियाई अनूठी संवेदनशीलता\nयाद रखने में आसान नाम।", points: ["व्यक्तित्व और रूप पर आधारित", "कोरियाई शब्दों, खाना और प्रकृति से प्रेरित", "बुलाने में आसान अक्षर", "प्यारापन · गरिमा · व्यक्तित्व"] },
     "foreign":      { desc: "ध्वनि और अर्थ दोनों को संजोते हुए,\nहम सीमाओं को पार करने वाले नाम बनाते हैं।\nवैश्विक मंच के लिए डिज़ाइन।", points: ["प्राकृतिक ध्वन्यात्मक रूपांतरण", "अर्थ और माहौल से नया नाम", "अंग्रेजी · चीनी · फ्रेंच और अधिक", "अंतर्राष्ट्रीय मंच के लिए तैयार नाम"] },
     "goods":        { desc: "अपने डिज़ाइन किए नाम को जीवंत करें।\nलकड़ी, आबनूस और सींग की मुहरें,\nनाम उकेरी नेमप्लेट और उपहार सेट।", points: ["लकड़ी · आबनूस · नीलम मुहरें", "नाम उकेरी नेमप्लेट", "नेम कार्ड और उपहार पैकेज", "नाम डिज़ाइन से जुड़ी"] },
@@ -179,6 +221,23 @@ type ChildCard = BaseCard & {
   meaning: string;
   story: string;
 };
+type SelfCard = BaseCard & {
+  type: "self";
+  surname: string;
+  name: string;
+  fullHanja: string;
+  roman: string;
+  meaning: string;
+  story: string;
+};
+type StageCard = BaseCard & {
+  type: "stage";
+  stageName: string;
+  roman: string;
+  field: string;
+  meaning: string;
+  story: string;
+};
 type PetCard = BaseCard & {
   type: "pet";
   name: string;
@@ -205,7 +264,7 @@ type GoodsCard = BaseCard & {
   tagline: string;
   desc: string;
 };
-type AnyCard = KoreanNameCard | ChildCard | PetCard | ForeignCard | GoodsCard;
+type AnyCard = KoreanNameCard | ChildCard | SelfCard | StageCard | PetCard | ForeignCard | GoodsCard;
 
 const ALL_CARDS: Record<CatId, AnyCard[]> = {
   "korean-name": [
@@ -219,6 +278,14 @@ const ALL_CARDS: Record<CatId, AnyCard[]> = {
     { cat: "child", type: "child", surname: "김", name: "서연", fullHanja: "金瑞姸", roman: "Kim Seoyeon", meaning: "상서로운 빛으로 곱게 피어남", story: "金(김) 성씨와 瑞(상서)·姸(곱다)의 조합. 오행 수·금의 조화가 고르고, 음운이 부드럽게 이어집니다." },
     { cat: "child", type: "child", surname: "박", name: "준호", fullHanja: "朴俊浩", roman: "Park Junho", meaning: "넓고 깊은 바다처럼 준수하게", story: "朴(박) 성씨에 俊(준수)·浩(넓은 물)의 조합. 남성적 기운이 넘치면서도 음절 균형이 자연스럽습니다." },
     { cat: "child", type: "child", surname: "이", name: "하늘", fullHanja: "李·", roman: "Lee Haneul", meaning: "드넓은 하늘처럼 높고 자유롭게", story: "순우리말 이름 '하늘'. 性(이) 성씨와 두 음절의 경쾌한 조화. 어디서든 기억되는 맑고 밝은 이름입니다." },
+  ],
+  "self": [
+    { cat: "self", type: "self", surname: "이", name: "다온", fullHanja: "李茶溫", roman: "Lee Da-on", meaning: "따뜻하고 온화한 새로운 시작", story: "개명을 원하시는 분들을 위한 예시입니다. 기존 성씨를 유지하며 '다온(茶溫)' — 따뜻하고 온화한 — 새로운 인상으로 설계했습니다." },
+    { cat: "self", type: "self", surname: "정", name: "유안", fullHanja: "鄭有安", roman: "Jeong Yu-an", meaning: "평안이 깃든 새로운 나", story: "삶의 전환점에서 평안과 안정을 바라며 '유안(有安)'으로 설계했습니다. 정(鄭) 성씨와의 음운 조화도 함께 고려했습니다." },
+  ],
+  "stage": [
+    { cat: "stage", type: "stage", stageName: "루하", roman: "Ru-ha", field: "🎤 가수 · 배우", meaning: "물 흐르듯 자유롭고 세련된 존재감", story: "부르기 쉽고 국제적으로도 발음하기 좋은 음절 조합. 개성 있는 활동명으로 SNS·검색에도 유리하게 설계했습니다." },
+    { cat: "stage", type: "stage", stageName: "이든", roman: "Eden", field: "🎬 크리에이터", meaning: "낙원처럼 편안하고 매력적인 이름", story: "영어 발음과도 자연스럽게 어울리는 크리에이터용 활동명. 기억하기 쉬우면서도 개성이 살아있습니다." },
   ],
   "pet": [
     { cat: "pet", type: "pet", name: "진주", english: "Pearl", animal: "🐕 말티즈", meaning: "빛나는 진주처럼 귀하고 소중한", story: "하얀 털이 진주처럼 빛나는 말티즈에게 딱 맞는 이름. 짧고 부르기 좋으며, 품격과 사랑스러움을 동시에 담았습니다." },
@@ -241,7 +308,7 @@ const ALL_CARDS: Record<CatId, AnyCard[]> = {
 // ── 카드 텍스트 번역 오버레이 (meaning/story/tagline/desc만 언어별로) ──
 type KNTrans = { meaning: string; story: string };
 type GoodsTrans = { tagline: string; desc: string };
-type CardTransByCat = { "korean-name": KNTrans[]; "child": KNTrans[]; "pet": KNTrans[]; "foreign": KNTrans[]; "goods": GoodsTrans[] };
+type CardTransByCat = { "korean-name": KNTrans[]; "child": KNTrans[]; "self": KNTrans[]; "stage": KNTrans[]; "pet": KNTrans[]; "foreign": KNTrans[]; "goods": GoodsTrans[] };
 const CARD_TRANS_BY_LANG: Record<Lang, CardTransByCat> = {
   ko: {
     "korean-name": [
@@ -255,6 +322,14 @@ const CARD_TRANS_BY_LANG: Record<Lang, CardTransByCat> = {
       { meaning: "상서로운 빛으로 곱게 피어남", story: "金(김) 성씨와 瑞(상서)·姸(곱다)의 조합. 오행 수·금의 조화가 고르고, 음운이 부드럽게 이어집니다." },
       { meaning: "넓고 깊은 바다처럼 준수하게", story: "朴(박) 성씨에 俊(준수)·浩(넓은 물)의 조합. 남성적 기운이 넘치면서도 음절 균형이 자연스럽습니다." },
       { meaning: "드넓은 하늘처럼 높고 자유롭게", story: "순우리말 이름 '하늘'. 性(이) 성씨와 두 음절의 경쾌한 조화. 어디서든 기억되는 맑고 밝은 이름입니다." },
+    ],
+    "self": [
+      { meaning: "따뜻하고 온화한 새로운 시작", story: "개명을 원하시는 분들을 위한 예시입니다. 기존 성씨를 유지하며 '다온(茶溫)' — 따뜻하고 온화한 — 새로운 인상으로 설계했습니다." },
+      { meaning: "평안이 깃든 새로운 나", story: "삶의 전환점에서 평안과 안정을 바라며 '유안(有安)'으로 설계했습니다. 정(鄭) 성씨와의 음운 조화도 함께 고려했습니다." },
+    ],
+    "stage": [
+      { meaning: "물 흐르듯 자유롭고 세련된 존재감", story: "부르기 쉽고 국제적으로도 발음하기 좋은 음절 조합. 개성 있는 활동명으로 SNS·검색에도 유리하게 설계했습니다." },
+      { meaning: "낙원처럼 편안하고 매력적인 이름", story: "영어 발음과도 자연스럽게 어울리는 크리에이터용 활동명. 기억하기 쉬우면서도 개성이 살아있습니다." },
     ],
     "pet": [
       { meaning: "빛나는 진주처럼 귀하고 소중한", story: "하얀 털이 진주처럼 빛나는 말티즈에게 딱 맞는 이름. 짧고 부르기 좋으며, 품격과 사랑스러움을 동시에 담았습니다." },
@@ -286,6 +361,14 @@ const CARD_TRANS_BY_LANG: Record<Lang, CardTransByCat> = {
       { meaning: "Handsome as a wide and deep sea", story: "Park (朴) surname with 俊 (handsome) · 浩 (vast water). Masculine energy with naturally balanced syllables." },
       { meaning: "High and free as the vast sky", story: "'하늘 (sky)' — a pure Korean name. Lee surname with two crisp syllables. Clear and bright, memorable everywhere." },
     ],
+    "self": [
+      { meaning: "A warm and gentle new beginning", story: "An example for those seeking a legal name change. Keeping the original surname, we designed '다온 (茶溫)' — warm and gentle — for a fresh new impression." },
+      { meaning: "A new self rooted in peace", story: "Designed as '유안 (有安)' for those wishing peace and stability at a turning point in life, while balancing phonetic harmony with the Jeong (鄭) surname." },
+    ],
+    "stage": [
+      { meaning: "A free, refined presence flowing like water", story: "An easy-to-call syllable combination that also sounds natural internationally. Designed to be favorable for SNS and search as a distinctive stage name." },
+      { meaning: "A comfortable, appealing name like paradise", story: "A creator's stage name that blends naturally with English pronunciation. Easy to remember while keeping a distinct personality." },
+    ],
     "pet": [
       { meaning: "Precious and dear as a shining pearl", story: "Perfect for a Maltese whose white fur shines like a pearl. Short, easy to call, full of elegance and adorableness." },
       { meaning: "A soft and pure white fluff", story: "Gentle as white tofu. A name from Korea's iconic food — friendly and warm, just like your pet." },
@@ -315,6 +398,14 @@ const CARD_TRANS_BY_LANG: Record<Lang, CardTransByCat> = {
       { meaning: "めでたい光の中で美しく咲く", story: "金（キム）姓と瑞（めでたい）・姸（美しい）の組み合わせ。水・金の五行バランスが整い、音韻も滑らかです。" },
       { meaning: "広く深い海のように凛々しく", story: "朴（パク）姓に俊（凛々しい）・浩（広い水）の組み合わせ。男性的な力強さと自然な音節バランスを持つ名前。" },
       { meaning: "広大な空のように高く自由に", story: "純韓国語名「하늘（空）」。李（イ）姓と二音節の爽やかな響き。どこでも覚えてもらえる明るい名前です。" },
+    ],
+    "self": [
+      { meaning: "温かく穏やかな新しい始まり", story: "改名をご希望の方のための例です。既存の姓を残しながら「다온（茶溫）」—温かく穏やかな—新しい印象で設計しました。" },
+      { meaning: "安らぎの宿る新しい自分", story: "人生の転換点で平安と安定を願い「유안（有安）」を設計。鄭（チョン）姓との音韻調和も考慮しています。" },
+    ],
+    "stage": [
+      { meaning: "水のように自由で洗練された存在感", story: "呼びやすく国際的にも発音しやすい音節の組み合わせ。個性的な活動名としてSNS·検索にも有利に設計しました。" },
+      { meaning: "楽園のように心地よく魅力的な名前", story: "英語の発音とも自然に馴染むクリエイター向けの活動名。覚えやすく個性も感じられます。" },
     ],
     "pet": [
       { meaning: "輝く真珠のように大切で愛しい", story: "白い毛並みが真珠のように輝くマルチーズにぴったりの名前。短くて呼びやすく、品格と可愛らしさを兼ね備えています。" },
@@ -346,6 +437,14 @@ const CARD_TRANS_BY_LANG: Record<Lang, CardTransByCat> = {
       { meaning: "如宽阔深邃的大海般英俊", story: "朴（박）姓配以俊（英俊）·浩（宽广之水）的组合。充满阳刚之气，音节平衡自然。" },
       { meaning: "如广阔天空般高远自由", story: "纯韩语名「하늘（天空）」。李（이）姓与两个轻快音节的完美融合。清亮明朗，令人难忘。" },
     ],
+    "self": [
+      { meaning: "温暖而平和的新开始", story: "为希望改名的您提供的示例。保留原姓氏，设计出「다온（茶溫）」——温暖平和——的全新形象。" },
+      { meaning: "安宁常驻的全新自我", story: "为在人生转折点渴望平安与稳定的您设计「유안（有安）」，同时兼顾与郑（鄭）姓的音韵和谐。" },
+    ],
+    "stage": [
+      { meaning: "如水般自由洗练的存在感", story: "易于称呼、国际发音也顺畅的音节组合。作为个性化艺名，在社交媒体和搜索中也更具优势。" },
+      { meaning: "如乐园般舒适迷人的名字", story: "与英语发音自然契合的创作者艺名。易于记忆同时不失个性。" },
+    ],
     "pet": [
       { meaning: "如闪亮珍珠般珍贵可爱", story: "白色毛发如珍珠般闪亮的马尔济斯的完美名字。简短易叫，兼具品格与可爱。" },
       { meaning: "柔软纯白的小棉球", story: "白嫩柔软如豆腐一般的孩子。取自韩国代表性食物的名字，亲切温暖。" },
@@ -375,6 +474,14 @@ const CARD_TRANS_BY_LANG: Record<Lang, CardTransByCat> = {
       { meaning: "Floreciendo bellamente en luz auspiciosa", story: "Apellido Kim (金) con 瑞 (auspicioso) · 姸 (bello). Equilibrio de ohaeng agua y metal con flujo fonético suave." },
       { meaning: "Apuesto como un mar ancho y profundo", story: "Apellido Park (朴) con 俊 (apuesto) · 浩 (agua vasta). Energía masculina con sílabas naturalmente equilibradas." },
       { meaning: "Alto y libre como el vasto cielo", story: "'하늘 (cielo)' — nombre puramente coreano. Apellido Lee con dos sílabas nítidas. Claro y brillante, memorable en cualquier lugar." },
+    ],
+    "self": [
+      { meaning: "Un nuevo comienzo cálido y sereno", story: "Un ejemplo para quienes buscan un cambio de nombre. Manteniendo el apellido original, diseñamos '다온 (茶溫)' — cálido y sereno — para una nueva impresión." },
+      { meaning: "Un nuevo yo arraigado en la paz", story: "Diseñado como '유안 (有安)' para quienes desean paz y estabilidad en un punto de inflexión, equilibrando la armonía fonética con el apellido Jeong (鄭)." },
+    ],
+    "stage": [
+      { meaning: "Una presencia libre y refinada, fluida como el agua", story: "Una combinación de sílabas fácil de llamar y también natural en pronunciación internacional. Diseñado para ser favorable en redes sociales y búsquedas." },
+      { meaning: "Un nombre cómodo y atractivo como el paraíso", story: "Un nombre artístico para creadores que combina naturalmente con la pronunciación en inglés. Fácil de recordar y lleno de personalidad." },
     ],
     "pet": [
       { meaning: "Precioso como una perla brillante", story: "Perfecto para un Maltés cuyo pelo blanco brilla como una perla. Corto, fácil de llamar, lleno de elegancia y ternura." },
@@ -406,6 +513,14 @@ const CARD_TRANS_BY_LANG: Record<Lang, CardTransByCat> = {
       { meaning: "Beau comme une mer large et profonde", story: "Nom de famille Park (朴) avec 俊 (beau) · 浩 (vaste eau). Énergie masculine avec des syllabes naturellement équilibrées." },
       { meaning: "Haut et libre comme le vaste ciel", story: "'하늘 (ciel)' — prénom purement coréen. Nom de famille Lee avec deux syllabes vives. Clair et lumineux, mémorable partout." },
     ],
+    "self": [
+      { meaning: "Un nouveau départ chaleureux et serein", story: "Un exemple pour ceux qui souhaitent changer de nom. En conservant le nom de famille d'origine, nous avons conçu '다온 (茶溫)' — chaleureux et serein." },
+      { meaning: "Un nouveau moi ancré dans la paix", story: "Conçu comme '유안 (有安)' pour ceux qui souhaitent la paix et la stabilité à un tournant de leur vie, en équilibrant l'harmonie phonétique avec le nom de famille Jeong (鄭)." },
+    ],
+    "stage": [
+      { meaning: "Une présence libre et raffinée, fluide comme l'eau", story: "Une combinaison de syllabes facile à appeler et naturelle à prononcer à l'international. Conçu pour être favorable sur les réseaux sociaux et la recherche." },
+      { meaning: "Un nom confortable et attrayant comme le paradis", story: "Un nom de scène pour créateurs qui se marie naturellement avec la prononciation anglaise. Facile à retenir tout en gardant une forte personnalité." },
+    ],
     "pet": [
       { meaning: "Précieux comme une perle brillante", story: "Parfait pour un Maltais dont le pelage blanc brille comme une perle. Court, facile à appeler, alliant élégance et mignonnerie." },
       { meaning: "Un doux et pur petit flocon blanc", story: "Doux comme du tofu blanc. Un prénom tiré de l'aliment iconique coréen — amical et chaleureux, tout comme votre animal." },
@@ -435,6 +550,14 @@ const CARD_TRANS_BY_LANG: Record<Lang, CardTransByCat> = {
       { meaning: "Расцветающая в благостном свете", story: "Фамилия Ким (金) с 瑞 (благостный) · 姸 (прекрасный). Сбалансированные пять элементов воды и металла с плавной фонетикой." },
       { meaning: "Статный, как широкое и глубокое море", story: "Фамилия Пак (朴) с 俊 (статный) · 浩 (широкая вода). Мужественная энергия с естественно сбалансированными слогами." },
       { meaning: "Высокий и свободный, как бескрайнее небо", story: "«하늘 (небо)» — чисто корейское имя. Фамилия Ли с двумя чёткими слогами. Светлое и яркое, запоминается везде." },
+    ],
+    "self": [
+      { meaning: "Тёплое и спокойное новое начало", story: "Пример для тех, кто хочет сменить имя. Сохранив исходную фамилию, мы создали «다온 (茶溫)» — тёплое и спокойное — для нового впечатления." },
+      { meaning: "Новое я, укоренённое в спокойствии", story: "Создано как «유안 (有安)» для тех, кто желает мира и стабильности на переломном этапе жизни, с учётом гармонии с фамилией Чон (鄭)." },
+    ],
+    "stage": [
+      { meaning: "Свободное, утончённое присутствие, текущее как вода", story: "Лёгкая для произношения комбинация слогов, звучащая естественно и на международном уровне. Создано для продвижения в соцсетях и поиске." },
+      { meaning: "Комфортное, притягательное имя, как рай", story: "Сценическое имя для творческих людей, естественно сочетающееся с английским произношением. Легко запоминается и сохраняет индивидуальность." },
     ],
     "pet": [
       { meaning: "Драгоценный и любимый, как сияющая жемчужина", story: "Идеальное имя для мальтийской болонки с белой шерстью, сияющей как жемчуг. Короткое, лёгкое в произношении, изящное и милое." },
@@ -466,6 +589,14 @@ const CARD_TRANS_BY_LANG: Record<Lang, CardTransByCat> = {
       { meaning: "وسيم كبحر واسع وعميق", story: "اسم عائلة Park (朴) مع 俊 (وسيم) · 浩 (ماء شاسع). طاقة رجولية مع مقاطع متوازنة بشكل طبيعي." },
       { meaning: "عالٍ وحر كالسماء الشاسعة", story: "«하늘 (السماء)» — اسم كوري خالص. اسم عائلة Lee مع مقطعين نضيرين. صافٍ ومشرق، لا يُنسى في أي مكان." },
     ],
+    "self": [
+      { meaning: "بداية جديدة دافئة وهادئة", story: "مثال لمن يرغبون في تغيير الاسم. مع الحفاظ على اللقب الأصلي، صممنا «다온 (茶溫)» — دافئ وهادئ — لانطباع جديد." },
+      { meaning: "ذات جديدة متجذرة في السلام", story: "صُمم «유안 (有安)» لمن يتمنون السلام والاستقرار في نقطة تحول بالحياة، مع مراعاة الانسجام الصوتي مع لقب Jeong (鄭)." },
+    ],
+    "stage": [
+      { meaning: "حضور حر ورقيق يتدفق كالماء", story: "مزيج مقاطع سهل النداء وطبيعي النطق دولياً. صُمم ليكون مناسباً لمواقع التواصل والبحث كاسم فني مميز." },
+      { meaning: "اسم مريح وجذاب كالجنة", story: "اسم فني للمبدعين يتناغم بشكل طبيعي مع النطق الإنجليزي. سهل التذكر ومليء بالشخصية." },
+    ],
     "pet": [
       { meaning: "ثمين وعزيز كلؤلؤة لامعة", story: "مثالي لكلب مالطي يتلألأ فراؤه الأبيض كاللؤلؤ. قصير وسهل النداء، يجمع الأناقة والحلاوة." },
       { meaning: "قطعة قطن ناعمة وبيضاء نقية", story: "ناعم كالتوفو الأبيض. اسم مأخوذ من الطعام الكوري الشهير — ودود ودافئ مثل حيوانك الأليف." },
@@ -495,6 +626,14 @@ const CARD_TRANS_BY_LANG: Record<Lang, CardTransByCat> = {
       { meaning: "शुभ प्रकाश में सुंदर खिलना", story: "Kim (金) उपनाम के साथ 瑞 (शुभ) · 姸 (सुंदर) का संयोजन। जल और धातु के पाँच तत्वों का संतुलन, सुचारु ध्वन्यात्मक प्रवाह।" },
       { meaning: "विशाल और गहरे समुद्र जैसा सुन्दर", story: "Park (朴) उपनाम के साथ 俊 (सुन्दर) · 浩 (विशाल जल) का संयोजन। पौरुष ऊर्जा और प्राकृतिक संतुलित अक्षर।" },
       { meaning: "विशाल आकाश जैसा ऊँचा और स्वतंत्र", story: "'하늘 (आकाश)' — शुद्ध कोरियाई नाम। Lee उपनाम के साथ दो स्पष्ट अक्षर। स्वच्छ और उज्ज्वल, हर जगह यादगार।" },
+    ],
+    "self": [
+      { meaning: "गर्मजोशी भरी और शांत नई शुरुआत", story: "नाम बदलना चाहने वालों के लिए एक उदाहरण। मूल उपनाम बनाए रखते हुए, हमने '다온 (茶溫)' — गर्म और शांत — डिज़ाइन किया।" },
+      { meaning: "शांति में निहित नया स्वरूप", story: "जीवन के मोड़ पर शांति और स्थिरता चाहने वालों के लिए '유안 (有安)' डिज़ाइन किया, साथ ही Jeong (鄭) उपनाम के साथ ध्वन्यात्मक सामंजस्य को भी ध्यान में रखा।" },
+    ],
+    "stage": [
+      { meaning: "पानी की तरह स्वतंत्र और परिष्कृत उपस्थिति", story: "पुकारने में आसान और अंतरराष्ट्रीय स्तर पर भी स्वाभाविक उच्चारण वाला अक्षर संयोजन। सोशल मीडिया और खोज के लिए अनुकूल डिज़ाइन।" },
+      { meaning: "स्वर्ग जैसा आरामदायक और आकर्षक नाम", story: "अंग्रेज़ी उच्चारण से स्वाभाविक रूप से मेल खाता क्रिएटर स्टेज नाम। याद रखने में आसान फिर भी व्यक्तित्व से भरपूर।" },
     ],
     "pet": [
       { meaning: "चमकते मोती जैसा अनमोल और प्रिय", story: "माल्टीज़ के लिए उत्तम नाम जिसका सफेद फर मोती जैसा चमकता है। छोटा, पुकारने में आसान, सुरुचिपूर्ण और प्यारा।" },
@@ -535,6 +674,8 @@ const HOME_COPY = {
     cats: {
       "korean-name": { label: "나의 한국 이름", sub: "외국인 한국 이름" },
       "child":        { label: "아이 이름",      sub: "태명·아기이름" },
+      "self":         { label: "개명·나에게",    sub: "본인 개명" },
+      "stage":        { label: "활동명·예명",    sub: "크리에이터 예명" },
       "pet":          { label: "반려동물",        sub: "반려견·반려묘" },
       "foreign":      { label: "외국 이름",       sub: "한국→외국이름" },
       "goods":        { label: "도장·굿즈",       sub: "도장·문패·선물" },
@@ -542,6 +683,8 @@ const HOME_COPY = {
     ctaLabels: {
       "korean-name": "나의 한국이름 만들기",
       "child":        "이름 설계 시작하기",
+      "self":         "나의 새 이름 설계하기",
+      "stage":        "활동명 설계 시작하기",
       "pet":          "반려동물 이름 짓기",
       "foreign":      "이름 설계 시작하기",
       "goods":        "도장·굿즈 주문하기",
@@ -561,6 +704,8 @@ const HOME_COPY = {
     cats: {
       "korean-name": { label: "My Korean Name",  sub: "Korean name for you" },
       "child":        { label: "Baby Name",       sub: "Newborn · Rename" },
+      "self":         { label: "Rename / Myself", sub: "Personal rename" },
+      "stage":        { label: "Stage Name",      sub: "Creator alias" },
       "pet":          { label: "Pet Name",        sub: "Dog · Cat · Other" },
       "foreign":      { label: "Foreign Name",    sub: "Korean → Foreign" },
       "goods":        { label: "Stamp · Goods",   sub: "Stamp · Nameplate" },
@@ -568,6 +713,8 @@ const HOME_COPY = {
     ctaLabels: {
       "korean-name": "Create My Korean Name",
       "child":        "Design a Name",
+      "self":         "Design My New Name",
+      "stage":        "Design a Stage Name",
       "pet":          "Name My Pet",
       "foreign":      "Design a Name",
       "goods":        "Order Goods",
@@ -587,6 +734,8 @@ const HOME_COPY = {
     cats: {
       "korean-name": { label: "我的韩国名字", sub: "外国人韩国名字" },
       "child":        { label: "儿童名字",     sub: "新生儿·改名" },
+      "self":         { label: "改名·为自己",   sub: "本人改名" },
+      "stage":        { label: "艺名·活动名",   sub: "创作者艺名" },
       "pet":          { label: "宠物名字",     sub: "狗·猫·其他" },
       "foreign":      { label: "外国名字",     sub: "韩国→外国名字" },
       "goods":        { label: "印章·商品",    sub: "印章·门牌·礼品" },
@@ -594,6 +743,8 @@ const HOME_COPY = {
     ctaLabels: {
       "korean-name": "创建我的韩国名字",
       "child":        "开始名字设计",
+      "self":         "设计我的新名字",
+      "stage":        "设计艺名",
       "pet":          "为宠物起名",
       "foreign":      "开始名字设计",
       "goods":        "订购印章·商品",
@@ -613,6 +764,8 @@ const HOME_COPY = {
     cats: {
       "korean-name": { label: "私の韓国名",   sub: "外国人向け韓国名" },
       "child":        { label: "お子様の名前", sub: "赤ちゃん·改名" },
+      "self":         { label: "改名·自分",    sub: "本人改名" },
+      "stage":        { label: "活動名·芸名",  sub: "クリエイター芸名" },
       "pet":          { label: "ペット名",     sub: "犬·猫·その他" },
       "foreign":      { label: "外国名",       sub: "韓国→外国名" },
       "goods":        { label: "印鑑·グッズ",  sub: "印鑑·表札·贈り物" },
@@ -620,6 +773,8 @@ const HOME_COPY = {
     ctaLabels: {
       "korean-name": "韓国名を作る",
       "child":        "名前設計を始める",
+      "self":         "新しい名前を設計する",
+      "stage":        "活動名を設計する",
       "pet":          "ペット名を付ける",
       "foreign":      "名前設計を始める",
       "goods":        "印鑑·グッズを注文",
@@ -639,6 +794,8 @@ const HOME_COPY = {
     cats: {
       "korean-name": { label: "Mi nombre coreano", sub: "Para extranjeros" },
       "child":        { label: "Nombre de bebé",    sub: "Recién nacido" },
+      "self":         { label: "Cambio de nombre",  sub: "Para mí" },
+      "stage":        { label: "Nombre artístico",  sub: "Creador" },
       "pet":          { label: "Nombre de mascota", sub: "Perro · Gato" },
       "foreign":      { label: "Nombre extranjero", sub: "Coreano → Extranjero" },
       "goods":        { label: "Sello · Artículos", sub: "Sello · Placa" },
@@ -646,6 +803,8 @@ const HOME_COPY = {
     ctaLabels: {
       "korean-name": "Crear mi nombre coreano",
       "child":        "Diseñar un nombre",
+      "self":         "Diseñar mi nuevo nombre",
+      "stage":        "Diseñar nombre artístico",
       "pet":          "Nombrar mi mascota",
       "foreign":      "Diseñar un nombre",
       "goods":        "Pedir sello · artículos",
@@ -665,6 +824,8 @@ const HOME_COPY = {
     cats: {
       "korean-name": { label: "Mon prénom coréen", sub: "Pour étrangers" },
       "child":        { label: "Prénom bébé",       sub: "Nouveau-né" },
+      "self":         { label: "Changement de nom", sub: "Pour moi" },
+      "stage":        { label: "Nom de scène",      sub: "Créateur" },
       "pet":          { label: "Prénom animal",     sub: "Chien · Chat" },
       "foreign":      { label: "Prénom étranger",   sub: "Coréen → Étranger" },
       "goods":        { label: "Sceau · Articles",  sub: "Sceau · Plaque" },
@@ -672,6 +833,8 @@ const HOME_COPY = {
     ctaLabels: {
       "korean-name": "Créer mon prénom coréen",
       "child":        "Concevoir un prénom",
+      "self":         "Concevoir mon nouveau nom",
+      "stage":        "Concevoir un nom de scène",
       "pet":          "Nommer mon animal",
       "foreign":      "Concevoir un prénom",
       "goods":        "Commander des articles",
@@ -691,6 +854,8 @@ const HOME_COPY = {
     cats: {
       "korean-name": { label: "Моё корейское имя", sub: "Для иностранцев" },
       "child":        { label: "Имя ребёнка",       sub: "Новорождённый" },
+      "self":         { label: "Смена имени",       sub: "Для себя" },
+      "stage":        { label: "Псевдоним",         sub: "Для творчества" },
       "pet":          { label: "Кличка питомца",    sub: "Собака · Кошка" },
       "foreign":      { label: "Иностранное имя",   sub: "Корейское → Иностранное" },
       "goods":        { label: "Печать · Сувениры", sub: "Печать · Табличка" },
@@ -698,6 +863,8 @@ const HOME_COPY = {
     ctaLabels: {
       "korean-name": "Создать корейское имя",
       "child":        "Начать дизайн имени",
+      "self":         "Создать новое имя",
+      "stage":        "Создать сценическое имя",
       "pet":          "Назвать питомца",
       "foreign":      "Начать дизайн имени",
       "goods":        "Заказать печать",
@@ -717,6 +884,8 @@ const HOME_COPY = {
     cats: {
       "korean-name": { label: "اسمي الكوري",     sub: "للأجانب" },
       "child":        { label: "اسم الطفل",       sub: "مولود جديد" },
+      "self":         { label: "تغيير الاسم",     sub: "لنفسي" },
+      "stage":        { label: "اسم فني",         sub: "للمبدعين" },
       "pet":          { label: "اسم الحيوان",     sub: "كلب · قطة" },
       "foreign":      { label: "الاسم الأجنبي",   sub: "كوري → أجنبي" },
       "goods":        { label: "ختم · بضائع",     sub: "ختم · لافتة" },
@@ -724,6 +893,8 @@ const HOME_COPY = {
     ctaLabels: {
       "korean-name": "إنشاء اسمي الكوري",
       "child":        "تصميم اسم",
+      "self":         "تصميم اسمي الجديد",
+      "stage":        "تصميم الاسم الفني",
       "pet":          "تسمية حيواني",
       "foreign":      "تصميم اسم",
       "goods":        "طلب ختم · بضائع",
@@ -743,6 +914,8 @@ const HOME_COPY = {
     cats: {
       "korean-name": { label: "मेरा कोरियाई नाम", sub: "विदेशियों के लिए" },
       "child":        { label: "बच्चे का नाम",     sub: "नवजात · नाम बदलें" },
+      "self":         { label: "नाम परिवर्तन",     sub: "स्वयं के लिए" },
+      "stage":        { label: "स्टेज नाम",        sub: "क्रिएटर्स के लिए" },
       "pet":          { label: "पालतू का नाम",     sub: "कुत्ता · बिल्ली" },
       "foreign":      { label: "विदेशी नाम",       sub: "कोरियाई → विदेशी" },
       "goods":        { label: "स्टाम्प · वस्तुएं", sub: "स्टाम्प · नेमप्लेट" },
@@ -750,6 +923,8 @@ const HOME_COPY = {
     ctaLabels: {
       "korean-name": "मेरा कोरियाई नाम बनाएं",
       "child":        "नाम डिज़ाइन शुरू करें",
+      "self":         "अपना नया नाम डिज़ाइन करें",
+      "stage":        "स्टेज नाम डिज़ाइन करें",
       "pet":          "पालतू का नाम रखें",
       "foreign":      "नाम डिज़ाइन शुरू करें",
       "goods":        "स्टाम्प ऑर्डर करें",
@@ -1289,6 +1464,47 @@ function NameCard({ card, accent }: { card: AnyCard; accent: string }) {
     );
   }
 
+  if (card.type === "self") {
+    const c = card as SelfCard;
+    return (
+      <div style={base}>
+        <AccentBar />
+        <div style={{ padding: "22px 26px 26px" }}>
+          <div style={{ fontSize: 10, letterSpacing: "0.16em", color: accent, fontWeight: 700, textTransform: "uppercase", marginBottom: 18 }}>RENAME DESIGN · 개명</div>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 8 }}>
+            <span style={{ fontSize: 20, color: accent, fontFamily: "serif", fontWeight: 900 }}>{c.surname}</span>
+            <span style={{ fontSize: 50, fontWeight: 900, color: "#1B2A5E", fontFamily: serif, letterSpacing: 6, lineHeight: 1 }}>{c.name}</span>
+          </div>
+          <div style={{ fontSize: 15, color: accent, letterSpacing: 5, marginBottom: 4, fontFamily: "serif", fontWeight: 600 }}>{c.fullHanja}</div>
+          <div style={{ fontSize: 11, color: "#AAA", marginBottom: 18, letterSpacing: "0.06em" }}>{c.roman}</div>
+          <div style={{ height: 1, background: "#EAEAEA", marginBottom: 14 }} />
+          <div style={{ fontSize: 14, color: "#1B2A5E", fontWeight: 700, marginBottom: 8 }}>{c.meaning}</div>
+          <div style={{ fontSize: 13, color: "#666", lineHeight: 1.85 }}>{c.story}</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (card.type === "stage") {
+    const c = card as StageCard;
+    return (
+      <div style={base}>
+        <AccentBar />
+        <div style={{ padding: "22px 26px 26px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
+            <span style={{ fontSize: 10, letterSpacing: "0.16em", color: accent, fontWeight: 700, textTransform: "uppercase" }}>STAGE NAME DESIGN</span>
+            <span style={{ fontSize: 12, background: "#1B2A5E", color: accent, borderRadius: 20, padding: "3px 10px", fontWeight: 600 }}>{c.field}</span>
+          </div>
+          <div style={{ fontSize: 50, fontWeight: 900, color: "#1B2A5E", fontFamily: serif, letterSpacing: 6, lineHeight: 1, marginBottom: 8 }}>{c.stageName}</div>
+          <div style={{ fontSize: 11, color: "#AAA", marginBottom: 18, letterSpacing: "0.06em" }}>{c.roman}</div>
+          <div style={{ height: 1, background: "#EAEAEA", marginBottom: 14 }} />
+          <div style={{ fontSize: 14, color: "#1B2A5E", fontWeight: 700, marginBottom: 8 }}>{c.meaning}</div>
+          <div style={{ fontSize: 13, color: "#666", lineHeight: 1.85 }}>{c.story}</div>
+        </div>
+      </div>
+    );
+  }
+
   if (card.type === "pet") {
     const c = card as PetCard;
     return (
@@ -1401,6 +1617,12 @@ function BigNameCard({ card, accent, bg, lang }: { card: AnyCard; accent: string
   } else if (card.type === "child") {
     const c = card as ChildCard;
     name = `${c.surname}${c.name}`; hanja = c.fullHanja; meaning = c.meaning; story = c.story; badge = c.roman;
+  } else if (card.type === "self") {
+    const c = card as SelfCard;
+    name = `${c.surname}${c.name}`; hanja = c.fullHanja; meaning = c.meaning; story = c.story; badge = c.roman;
+  } else if (card.type === "stage") {
+    const c = card as StageCard;
+    name = c.stageName; hanja = c.roman; meaning = c.meaning; story = c.story; badge = c.field;
   } else if (card.type === "pet") {
     const c = card as PetCard;
     name = c.name; hanja = c.english; meaning = c.meaning; story = c.story; badge = c.animal;
@@ -1511,6 +1733,14 @@ const REVIEWS_BY_CAT: Record<CatId, ReviewEntry[]> = {
     { name: "김지현", flag: "🇰🇷", content: "2026년 딸 이름 서윤이로 지었어요. 음양오행까지 고려해줘서 믿음이 갔어요!" },
     { name: "박민준", flag: "🇰🇷", content: "2026년 아들 도현이 이름 여기서 결정했어요. 사주까지 맞춰줘서 감사해요!" },
   ],
+  "self": [
+    { name: "이다온", flag: "🇰🇷", content: "2026년 새로운 시작을 다짐하며 다온으로 개명했어요. 성씨와의 조화까지 신경써줘서 만족스러워요!" },
+    { name: "정유안", flag: "🇰🇷", content: "2026년 인생의 전환점에서 유안이라는 이름을 얻었어요. 의미까지 꼼꼼히 설명해주셔서 좋았어요!" },
+  ],
+  "stage": [
+    { name: "루하", flag: "🇰🇷", content: "2026년 활동명 루하로 데뷔했어요. 부르기 쉽고 기억에 잘 남는다는 얘기를 많이 들어요!" },
+    { name: "이든", flag: "🇰🇷", content: "2026년 크리에이터 활동명 이든을 지었어요. 해외 팬들도 발음하기 쉬워서 좋아해요!" },
+  ],
   "pet": [
     { name: "Sophie", flag: "🇫🇷", content: "2026년 반려견에게 사랑이라는 이름을 지어줬어요. 너무 예쁜 이름이에요!" },
     { name: "Wang Lei", flag: "🇨🇳", content: "2026년 고양이 이름을 하늘이로 지었어요. 한국어로 sky라는 뜻이래요!" },
@@ -1529,6 +1759,8 @@ const REVIEW_CONTENT_BY_LANG: Record<Lang, Record<CatId, string[]>> = {
   ko: {
     "korean-name": ["2026년 이하늘이라는 한국이름이 생겼어요. 고마워요 윙크네이밍!", "2026년 박서연이라는 한국이름이 생겼어요. 한국 친구들이 너무 좋아해요!", "2026년 강도윤이 되었습니다. 나의 부캐릭터는 이제 한국인이에요!", "태권도 사범님께서 승급 기념으로 한국이름을 만들어 주셨다. 그렇게 알게 된 윙크 네이밍. 난 정말 운이 좋다!", "한국에 도착해서 가장 먼저 한 것이 한국 이름 만들기였다. 덕분에 즐겁고 의미있는 여행을 했다. 친구들에게 윙크네이밍을 추천하고 있다!"],
     "child": ["2026년 딸 이름 서윤이로 지었어요. 음양오행까지 고려해줘서 믿음이 갔어요!", "2026년 아들 도현이 이름 여기서 결정했어요. 사주까지 맞춰줘서 감사해요!"],
+    "self": ["2026년 새로운 시작을 다짐하며 다온으로 개명했어요. 성씨와의 조화까지 신경써줘서 만족스러워요!", "2026년 인생의 전환점에서 유안이라는 이름을 얻었어요. 의미까지 꼼꼼히 설명해주셔서 좋았어요!"],
+    "stage": ["2026년 활동명 루하로 데뷔했어요. 부르기 쉽고 기억에 잘 남는다는 얘기를 많이 들어요!", "2026년 크리에이터 활동명 이든을 지었어요. 해외 팬들도 발음하기 쉬워서 좋아해요!"],
     "pet": ["2026년 반려견에게 사랑이라는 이름을 지어줬어요. 너무 예쁜 이름이에요!", "2026년 고양이 이름을 하늘이로 지었어요. 한국어로 sky라는 뜻이래요!"],
     "foreign": ["2026년 활동명으로 Luna라는 이름을 받았어요. 해외 SNS에서 반응이 좋아요!", "2026년 영어이름 Ethan을 만들었어요. 발음도 좋고 의미도 마음에 들어요!"],
     "goods": ["2026년 도장까지 주문했어요. 한국 전통 매듭 목걸이 너무 예뻐요!", "2026년 이름카드 QR코드 보여줬더니 친구들이 신기해했어요!"],
@@ -1536,6 +1768,8 @@ const REVIEW_CONTENT_BY_LANG: Record<Lang, Record<CatId, string[]>> = {
   en: {
     "korean-name": ["In 2026 I got my Korean name, Lee Haneul. Thank you Wink Naming!", "In 2026 I got Park Seoyeon as my Korean name. My Korean friends absolutely love it!", "In 2026 I became Kang Doyun. My alter ego is now officially Korean!", "My taekwondo master gave me a Korean name to celebrate my belt promotion. That's how I found Wink Naming. I'm so lucky!", "The first thing I did when I arrived in Korea was get a Korean name. It made my trip so joyful and meaningful. I'm recommending Wink Naming to all my friends!"],
     "child": ["In 2026 I named my daughter Seoyun. I trusted them because they considered yin-yang and the five elements!", "In 2026 I decided on the name Dohyun for my son here. Thank you for considering his saju too!"],
+    "self": ["In 2026 I renamed myself Da-on to mark a fresh start. I loved how they matched it with my surname!", "In 2026 I found the name Yu-an at a turning point in my life. They explained the meaning so carefully!"],
+    "stage": ["In 2026 I debuted with the stage name Ru-ha. People say it's easy to say and hard to forget!", "In 2026 I got the creator name Eden. My overseas fans find it easy to pronounce too!"],
     "pet": ["In 2026 I named my dog Sarangi (Love). Such a beautiful name!", "In 2026 I named my cat Haneul. They told me it means 'sky' in Korean!"],
     "foreign": ["In 2026 I got the stage name Luna. The response on overseas social media has been amazing!", "In 2026 I created the English name Ethan. I love both the pronunciation and the meaning!"],
     "goods": ["In 2026 I even ordered a stamp. The Korean traditional knot necklace is so beautiful!", "In 2026 when I showed the name card QR code, my friends were so amazed!"],
@@ -1543,6 +1777,8 @@ const REVIEW_CONTENT_BY_LANG: Record<Lang, Record<CatId, string[]>> = {
   ja: {
     "korean-name": ["2026年に「이하늘」という韓国名ができました。ありがとうWinkNaming！", "2026年に「박서연」という韓国名をもらいました。韓国の友達に大好評です！", "2026年に「강도윤」になりました。私の副キャラはもう韓国人です！", "テコンドーの師範が昇段記念に韓国名を作ってくれました。それがWinkNamingとの出会い。本当にラッキーです！", "韓国に着いてまず最初にしたことは韓国名を作ることでした。おかげで楽しく意味ある旅ができました。友達にもWinkNamingを勧めています！"],
     "child": ["2026年に娘の名前を서윤にしました。陰陽五行まで考えてくれて安心でした！", "2026年に息子の도현という名前をここで決めました。四柱まで合わせてくれてありがとうございます！"],
+    "self": ["2026年、新しい始まりを願ってダオンに改名しました。姓との調和まで考えてくれて満足です！", "2026年、人生の転換点でユアンという名前を得ました。意味まで丁寧に説明してくれて良かったです！"],
+    "stage": ["2026年、活動名ルハでデビューしました。呼びやすく覚えやすいとよく言われます！", "2026年、クリエイター活動名イードゥンを作りました。海外ファンにも発音しやすいです！"],
     "pet": ["2026年に愛犬に사랑（愛）という名前をつけました。とても素敵な名前です！", "2026年に猫の名前を하늘にしました。韓国語で空という意味だそうです！"],
     "foreign": ["2026年に芸名としてLunaという名前をもらいました。海外SNSでの反応がいいです！", "2026年に英語名Ethanを作りました。発音も意味も気に入っています！"],
     "goods": ["2026年には印鑑まで注文しました。韓国伝統の結びのネックレスがとても素敵です！", "2026年にネームカードのQRコードを見せたら友達がびっくりしていました！"],
@@ -1550,6 +1786,8 @@ const REVIEW_CONTENT_BY_LANG: Record<Lang, Record<CatId, string[]>> = {
   zh: {
     "korean-name": ["2026年我有了「이하늘」这个韩国名字，谢谢WinkNaming！", "2026年我的韩国名字是「박서연」，韩国朋友们都非常喜欢！", "2026年我成了「강도윤」，我的副角色现在是韩国人了！", "跆拳道教练为了庆祝我晋级给我取了韩国名字，就这样认识了WinkNaming，我真的太幸运了！", "到达韩国后做的第一件事就是取韩国名字。因此拥有了愉快而有意义的旅行，现在正在向朋友们推荐WinkNaming！"],
     "child": ["2026年给女儿取名서윤。连阴阳五行都考虑到了，让我非常放心！", "2026年在这里决定了儿子도현的名字。连四柱都考虑进去了，真的很感谢！"],
+    "self": ["2026年为了迎接新的开始改名为多温。连和姓氏的和谐都考虑到了，很满意！", "2026年在人生转折点获得了有安这个名字。连含义都仔细解释了，很喜欢！"],
+    "stage": ["2026年以艺名Ru-ha出道了。大家都说好叫又好记！", "2026年取了创作者艺名Eden。海外粉丝也觉得很好发音！"],
     "pet": ["2026年给爱犬取了사랑（爱）这个名字，真的是个很美的名字！", "2026年给猫咪取名하늘，听说韩语里是天空的意思！"],
     "foreign": ["2026年获得了Luna这个艺名，在海外社交媒体上反响很好！", "2026年创建了英文名Ethan，发音和含义都很喜欢！"],
     "goods": ["2026年还订购了印章，韩国传统结绳项链太漂亮了！", "2026年展示名片QR码时，朋友们都惊叹不已！"],
@@ -1557,6 +1795,8 @@ const REVIEW_CONTENT_BY_LANG: Record<Lang, Record<CatId, string[]>> = {
   es: {
     "korean-name": ["¡En 2026 obtuve mi nombre coreano, Lee Haneul. Gracias Wink Naming!", "¡En 2026 obtuve Park Seoyeon como mi nombre coreano. A mis amigos coreanos les encanta!", "¡En 2026 me convertí en Kang Doyun. Mi alter ego ahora es oficialmente coreano!", "¡Mi maestro de taekwondo me hizo un nombre coreano para celebrar mi cinturón. Así conocí Wink Naming. ¡Qué suerte tengo!", "¡Lo primero que hice al llegar a Corea fue crear un nombre coreano. Gracias a eso tuve un viaje tan alegre y significativo. Estoy recomendando Wink Naming a todos mis amigos!"],
     "child": ["¡En 2026 nombré a mi hija Seoyun. Confiaba en ellos porque consideraron el yin-yang y los cinco elementos!", "¡En 2026 decidí el nombre Dohyun para mi hijo aquí. Gracias por considerar su saju también!"],
+    "self": ["¡En 2026 me cambié el nombre a Da-on para marcar un nuevo comienzo. Me encantó cómo lo armonizaron con mi apellido!", "¡En 2026 encontré el nombre Yu-an en un punto de inflexión de mi vida. Explicaron el significado con tanto cuidado!"],
+    "stage": ["¡En 2026 debuté con el nombre artístico Ru-ha. Dicen que es fácil de decir y de recordar!", "¡En 2026 obtuve el nombre de creador Eden. Mis fans en el extranjero también lo pronuncian fácilmente!"],
     "pet": ["¡En 2026 le puse a mi perro el nombre Sarangi (Amor). ¡Es un nombre tan bonito!", "¡En 2026 le puse a mi gato el nombre Haneul. Me dijeron que significa 'cielo' en coreano!"],
     "foreign": ["¡En 2026 obtuve el nombre artístico Luna. ¡La respuesta en las redes sociales internacionales ha sido increíble!", "¡En 2026 creé el nombre inglés Ethan. Me encanta tanto la pronunciación como el significado!"],
     "goods": ["¡En 2026 incluso pedí un sello. ¡El collar de nudo tradicional coreano es tan hermoso!", "¡En 2026 cuando mostré el código QR de la tarjeta de nombre, mis amigos quedaron asombrados!"],
@@ -1564,6 +1804,8 @@ const REVIEW_CONTENT_BY_LANG: Record<Lang, Record<CatId, string[]>> = {
   fr: {
     "korean-name": ["En 2026, j'ai obtenu mon prénom coréen, Lee Haneul. Merci Wink Naming !", "En 2026, j'ai obtenu Park Seoyeon comme prénom coréen. Mes amis coréens adorent !", "En 2026, je suis devenu Kang Doyun. Mon alter ego est maintenant officiellement coréen !", "Mon maître de taekwondo m'a créé un prénom coréen pour célébrer ma ceinture. C'est ainsi que j'ai découvert Wink Naming. Quelle chance !", "La première chose que j'ai faite en arrivant en Corée était de créer un prénom coréen. Cela a rendu mon voyage si joyeux et significatif. Je recommande Wink Naming à tous mes amis !"],
     "child": ["En 2026, j'ai nommé ma fille Seoyun. J'avais confiance car ils ont considéré le yin-yang et les cinq éléments !", "En 2026, j'ai décidé du prénom Dohyun pour mon fils ici. Merci d'avoir considéré son saju aussi !"],
+    "self": ["En 2026, j'ai changé mon prénom pour Da-on pour marquer un nouveau départ. J'ai adoré l'harmonie avec mon nom de famille !", "En 2026, j'ai trouvé le prénom Yu-an à un tournant de ma vie. Ils ont expliqué le sens avec tant de soin !"],
+    "stage": ["En 2026, j'ai débuté avec le nom de scène Ru-ha. On me dit qu'il est facile à dire et à retenir !", "En 2026, j'ai obtenu le nom de créateur Eden. Mes fans à l'étranger le prononcent facilement aussi !"],
     "pet": ["En 2026, j'ai donné à mon chien le prénom Sarangi (Amour). C'est un si beau prénom !", "En 2026, j'ai nommé mon chat Haneul. On m'a dit que ça signifie 'ciel' en coréen !"],
     "foreign": ["En 2026, j'ai obtenu le nom de scène Luna. La réponse sur les réseaux sociaux internationaux a été incroyable !", "En 2026, j'ai créé le prénom anglais Ethan. J'adore la prononciation et la signification !"],
     "goods": ["En 2026, j'ai même commandé un sceau. Le collier de nœud traditionnel coréen est si beau !", "En 2026, quand j'ai montré le code QR de la carte de nom, mes amis étaient stupéfaits !"],
@@ -1571,6 +1813,8 @@ const REVIEW_CONTENT_BY_LANG: Record<Lang, Record<CatId, string[]>> = {
   ru: {
     "korean-name": ["В 2026 году у меня появилось корейское имя Lee Haneul. Спасибо Wink Naming!", "В 2026 году моим корейским именем стало Park Seoyeon. Мои корейские друзья в восторге!", "В 2026 году я стал Kang Doyun. Теперь мой альтер эго официально кореец!", "Мой тренер по тхэквондо создал мне корейское имя в честь повышения пояса. Так я узнал о Wink Naming. Мне так повезло!", "Первое, что я сделала в Корее — создала корейское имя. Это сделало поездку такой радостной и значимой. Рекомендую Wink Naming всем друзьям!"],
     "child": ["В 2026 году я назвала дочь Сеюн. Я доверяла им, потому что они учли инь-ян и пять элементов!", "В 2026 году я выбрала здесь имя Духён для сына. Спасибо, что учли его саджу!"],
+    "self": ["В 2026 году я сменила имя на Да-он, чтобы отметить новое начало. Мне понравилось, как его согласовали с фамилией!", "В 2026 году я нашла имя Ю-ан на переломном моменте своей жизни. Значение объяснили так подробно!"],
+    "stage": ["В 2026 году я дебютировала со сценическим именем Ру-ха. Говорят, его легко произносить и запоминать!", "В 2026 году я получила творческое имя Иден. Зарубежным фанатам тоже легко его произносить!"],
     "pet": ["В 2026 году я дала собаке имя Саранги (Любовь). Такое красивое имя!", "В 2026 году я назвала кошку Ханыль. Говорят, это значит 'небо' по-корейски!"],
     "foreign": ["В 2026 году я получила сценическое имя Luna. Реакция в международных социальных сетях потрясающая!", "В 2026 году я создала английское имя Ethan. Мне нравится и произношение, и значение!"],
     "goods": ["В 2026 году я даже заказала печать. Корейское традиционное ожерелье с узлом такое красивое!", "В 2026 году, когда я показала QR-код именной карточки, друзья были поражены!"],
@@ -1578,6 +1822,8 @@ const REVIEW_CONTENT_BY_LANG: Record<Lang, Record<CatId, string[]>> = {
   ar: {
     "korean-name": ["في عام 2026 حصلت على اسمي الكوري Lee Haneul. شكراً Wink Naming!", "في عام 2026 أصبح اسمي الكوري Park Seoyeon. أصدقائي الكوريون يحبونه كثيراً!", "في عام 2026 أصبحت Kang Doyun. شخصيتي البديلة الآن رسمياً كورية!", "أعطاني أستاذ التايكوندو اسماً كورياً احتفالاً بترقيتي. هكذا عرفت Wink Naming. ما أحظاني!", "أول ما فعلته عند وصولي لكوريا كان الحصول على اسم كوري. جعل ذلك رحلتي ممتعة وذات معنى. أنصح الجميع بـ Wink Naming!"],
     "child": ["في عام 2026 سميت ابنتي Seoyun. وثقت بهم لأنهم أخذوا في الاعتبار اليين واليانغ والعناصر الخمسة!", "في عام 2026 اخترت هنا اسم Dohyun لابني. شكراً لمراعاة ساجو ابني أيضاً!"],
+    "self": ["في عام 2026 غيرت اسمي إلى Da-on لأبدأ فصلاً جديداً. أحببت كيف نسقوه مع اسم عائلتي!", "في عام 2026 وجدت اسم Yu-an في نقطة تحول في حياتي. شرحوا المعنى بعناية شديدة!"],
+    "stage": ["في عام 2026 بدأت بالاسم الفني Ru-ha. يقولون إنه سهل النطق ولا يُنسى!", "في عام 2026 حصلت على اسم المبدع Eden. حتى معجبيّ في الخارج ينطقونه بسهولة!"],
     "pet": ["في عام 2026 أعطيت كلبي اسم Sarangi (حب). اسم جميل جداً!", "في عام 2026 سميت قطتي Haneul. قالوا لي إنها تعني 'السماء' بالكورية!"],
     "foreign": ["في عام 2026 حصلت على اسم فني Luna. الاستجابة على وسائل التواصل الاجتماعي الدولية رائعة!", "في عام 2026 أنشأت الاسم الإنجليزي Ethan. أحب النطق والمعنى!"],
     "goods": ["في عام 2026 طلبت حتى ختماً. عقد العقدة الكورية التقليدية جميل جداً!", "في عام 2026 عندما أريت رمز QR لبطاقة الاسم، أُذهل أصدقائي!"],
@@ -1585,6 +1831,8 @@ const REVIEW_CONTENT_BY_LANG: Record<Lang, Record<CatId, string[]>> = {
   hi: {
     "korean-name": ["2026 में मुझे Lee Haneul कोरियाई नाम मिला। धन्यवाद Wink Naming!", "2026 में Park Seoyeon मेरा कोरियाई नाम बना। मेरे कोरियाई दोस्तों को बहुत पसंद है!", "2026 में मैं Kang Doyun बन गया। मेरा अल्टर ईगो अब आधिकारिक रूप से कोरियाई है!", "मेरे ताइक्वांडो गुरु ने बेल्ट प्रमोशन के उपलक्ष्य में कोरियाई नाम बनाया। इस तरह Wink Naming से परिचय हुआ। मैं कितना भाग्यशाली हूँ!", "कोरिया पहुँचकर सबसे पहला काम था कोरियाई नाम बनवाना। इससे यात्रा बहुत आनंदमय और अर्थपूर्ण बनी। सभी मित्रों को Wink Naming की सिफारिश कर रही हूँ!"],
     "child": ["2026 में बेटी का नाम Seoyun रखा। यिन-यांग और पाँच तत्वों पर विचार करने से विश्वास हुआ!", "2026 में यहाँ बेटे के लिए Dohyun नाम तय किया। साजू का भी ध्यान रखने के लिए शुक्रिया!"],
+    "self": ["2026 में नई शुरुआत के लिए मैंने अपना नाम बदलकर Da-on रखा। उपनाम के साथ तालमेल बिठाना बहुत पसंद आया!", "2026 में जीवन के एक मोड़ पर मुझे Yu-an नाम मिला। अर्थ को इतनी बारीकी से समझाया गया!"],
+    "stage": ["2026 में स्टेज नाम Ru-ha के साथ डेब्यू किया। लोग कहते हैं कि यह बोलने और याद रखने में आसान है!", "2026 में क्रिएटर नाम Eden मिला। विदेशी फैंस को भी बोलने में आसान लगता है!"],
     "pet": ["2026 में कुत्ते को Sarangi (प्यार) नाम दिया। कितना सुंदर नाम है!", "2026 में बिल्ली का नाम Haneul रखा। बताया कि कोरियाई में 'आकाश' का अर्थ है!"],
     "foreign": ["2026 में स्टेज नाम Luna मिला। अंतर्राष्ट्रीय सोशल मीडिया पर बहुत अच्छी प्रतिक्रिया है!", "2026 में अंग्रेज़ी नाम Ethan बनाया। उच्चारण और अर्थ दोनों पसंद हैं!"],
     "goods": ["2026 में मुहर भी मँगवाई। कोरियाई पारंपरिक गाँठ का हार इतना सुंदर है!", "2026 में नाम कार्ड QR कोड दिखाया तो दोस्त हैरान रह गए!"],
@@ -1606,6 +1854,8 @@ function ReviewsSection({ copy, lang }: { copy: HomeCopy; lang: Lang }) {
   const CAT_TAB_LABELS: Record<CatId, string> = {
     "korean-name": copy.cats["korean-name"].label,
     "child":        copy.cats["child"].label,
+    "self":         copy.cats["self"].label,
+    "stage":        copy.cats["stage"].label,
     "pet":          copy.cats["pet"].label,
     "foreign":      copy.cats["foreign"].label,
     "goods":        copy.cats["goods"].label,
@@ -2090,6 +2340,12 @@ export default function HomePage() {
                   )}
                   {c.type === "child" && (
                     <div style={{ fontSize: 18, fontWeight: 900, color: "#1B2A5E", fontFamily: serif, letterSpacing: 2 }}>{(c as ChildCard).surname}{(c as ChildCard).name}</div>
+                  )}
+                  {c.type === "self" && (
+                    <div style={{ fontSize: 18, fontWeight: 900, color: "#1B2A5E", fontFamily: serif, letterSpacing: 2 }}>{(c as SelfCard).surname}{(c as SelfCard).name}</div>
+                  )}
+                  {c.type === "stage" && (
+                    <div style={{ fontSize: 18, fontWeight: 900, color: "#1B2A5E", fontFamily: serif, letterSpacing: 2 }}>{(c as StageCard).stageName}</div>
                   )}
                   {c.type === "pet" && (
                     <div style={{ fontSize: 18, fontWeight: 900, color: "#1B2A5E", fontFamily: serif, letterSpacing: 2 }}>{(c as PetCard).name}</div>

@@ -3,7 +3,7 @@
 import { forwardRef } from "react";
 import { QRCodeSVG } from "qrcode.react";
 
-const SITE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? "https://yoonseul-naming.vercel.app";
+const SITE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? "https://wink-naming.com";
 
 type Props = {
   name: string;
@@ -238,7 +238,7 @@ const NameGiftCard = forwardRef<HTMLDivElement, Props>(function NameGiftCard(pro
             textTransform: "uppercase",
             fontFamily: "'Cormorant Garamond', 'Georgia', serif",
           }}>
-            wink-naming.vercel.app
+            wink-naming.com
           </div>
           {showQr && (
             <div style={{

@@ -100,7 +100,7 @@ export default function MultiLangNameCard({ data, lang = "ko", onClose }: Props)
       `🇰🇷 ${koreanRomanized}`,
       data.chinese_pinyin ? `🇨🇳 ${data.chinese_pinyin}` : "",
       data.japanese_kana ? `🇯🇵 ${data.japanese_kana}` : "",
-      "\n윙크 네이밍 — yoonseul-naming.vercel.app",
+      "\n윙크 네이밍 — wink-naming.com",
     ].filter(Boolean).join("\n");
 
     if (navigator.share) {
@@ -273,7 +273,7 @@ export default function MultiLangNameCard({ data, lang = "ko", onClose }: Props)
             borderTop: "1px solid rgba(201,168,76,0.10)",
           }}>
             <div style={{ fontSize: 10, color: "rgba(201,168,76,0.40)", letterSpacing: "0.12em" }}>
-              yoonseul-naming.vercel.app
+              wink-naming.com
             </div>
             {data.score && (
               <div style={{
