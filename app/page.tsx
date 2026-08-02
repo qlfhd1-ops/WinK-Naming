@@ -1759,6 +1759,77 @@ function BigNameCard({ card, accent, bg, lang }: { card: AnyCard; accent: string
   );
 }
 
+// ── 카테고리별 영상 슬라이드 데이터 ──────────────────────
+// 카테고리마다 원하는 만큼 영상을 추가할 수 있다 — 이름카드 순환 사이클
+// 마지막에 이어 붙어 카드 → 카드 → ... → 영상1 → 영상2 → 다시 카드1 순으로 돈다.
+// 클릭 전에는 썸네일만 노출하고, 클릭해야 iframe이 실제로 로드/재생된다.
+type CategoryVideo = { id: string; label: string; caption: string };
+
+const CATEGORY_VIDEOS: Partial<Record<CatId, CategoryVideo[]>> = {
+  goods: [
+    {
+      id: "PJ7LImfsCcA",
+      label: "WINK NAMING GOODS · 여행지 소식",
+      caption: "늘어난 부산 관광객, 지금 이름 새긴 도장·굿즈로 특별한 기념을 남겨보세요",
+    },
+  ],
+};
+
+function CategoryVideoCard({
+  video, accent, bg, playing, onPlay,
+}: { video: CategoryVideo; accent: string; bg: string; playing: boolean; onPlay: () => void }) {
+  return (
+    <div
+      className="lg-big-name-card"
+      style={{ background: `linear-gradient(135deg, ${bg} 0%, #1B2A5E 100%)`, border: `1px solid ${accent}22` }}
+    >
+      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, #1B2A5E 0%, ${accent} 100%)`, zIndex: 2 }} />
+      {playing ? (
+        <iframe
+          src={`https://www.youtube.com/embed/${video.id}?autoplay=1&rel=0`}
+          title={video.caption}
+          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: "none" }}
+          allow="autoplay; encrypted-media; picture-in-picture"
+          allowFullScreen
+        />
+      ) : (
+        <button
+          type="button"
+          onClick={onPlay}
+          aria-label="영상 재생"
+          style={{
+            position: "absolute", inset: 0, width: "100%", height: "100%",
+            border: "none", padding: 0, cursor: "pointer",
+            backgroundImage: `url(https://i.ytimg.com/vi/${video.id}/hqdefault.jpg)`,
+            backgroundSize: "cover", backgroundPosition: "center",
+          }}
+        >
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(0deg, rgba(6,14,34,0.75) 0%, rgba(6,14,34,0.15) 55%, rgba(6,14,34,0.55) 100%)" }} />
+          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{
+              width: 64, height: 64, borderRadius: "50%",
+              background: "rgba(255,255,255,0.92)", display: "flex", alignItems: "center", justifyContent: "center",
+              boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
+            }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="#1B2A5E" aria-hidden>
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </div>
+          </div>
+          <div style={{ position: "absolute", left: 22, right: 22, bottom: 20, textAlign: "left" }}>
+            <div style={{ fontSize: 10, letterSpacing: "0.16em", color: accent, fontWeight: 700, textTransform: "uppercase", marginBottom: 8 }}>
+              {video.label}
+            </div>
+            <div style={{ fontSize: "clamp(15px,1.8vw,20px)", fontWeight: 800, color: "#FFFFFF", lineHeight: 1.4 }}>
+              {video.caption}
+            </div>
+          </div>
+        </button>
+      )}
+    </div>
+  );
+}
+
 // ── 고객 후기 데이터 (카테고리별) ────────────────────────
 type ReviewEntry = { name: string; flag: string; content: string; koreanName?: string };
 
@@ -2098,6 +2169,7 @@ export default function HomePage() {
   const [showLangPicker, setShowLangPicker] = useState(false);
   const [returnInfo, setReturnInfo] = useState<ReturnInfo | null>(null);
   const [showBanner, setShowBanner] = useState(false);
+  const [videoPlaying, setVideoPlaying] = useState(false);
 
   useEffect(() => {
     try {
@@ -2139,17 +2211,22 @@ export default function HomePage() {
 
   useEffect(() => {
     const t = setInterval(() => {
-      const len = ALL_CARDS[selectedId].length;
+      // 영상이 재생 중이면 자동전환을 멈춘다
+      if (videoPlaying) return;
+      const videoCount = CATEGORY_VIDEOS[selectedId]?.length ?? 0;
+      const len = ALL_CARDS[selectedId].length + videoCount;
       setCardIdx(i => (i + 1) % len);
       setAnimKey(k => k + 1);
+      setVideoPlaying(false);
     }, 4000);
     return () => clearInterval(t);
-  }, [selectedId, lang]);
+  }, [selectedId, lang, videoPlaying]);
 
   const handleCatSelect = (id: CatId) => {
     setSelectedId(id);
     setCardIdx(0);
     setAnimKey(k => k + 1);
+    setVideoPlaying(false);
   };
 
   const handleStart = (href: (lang: string) => string) => {
@@ -2165,7 +2242,10 @@ export default function HomePage() {
 
   const cat = CATS.find(c => c.id === selectedId) ?? CATS[0];
   const cards = getCards(lang, selectedId);
-  const card = cards[cardIdx];
+  const videos = CATEGORY_VIDEOS[selectedId] ?? [];
+  const isVideoSlide = cardIdx >= cards.length;
+  const activeVideo = isVideoSlide ? videos[cardIdx - cards.length] : undefined;
+  const card = cards[isVideoSlide ? 0 : cardIdx] ?? cards[0];
   const theme = THEME[selectedId];
   const copy = (HOME_COPY[lang] ?? HOME_COPY.ko) as HomeCopy;
   const catCopy = copy.cats[selectedId as CatId];
@@ -2248,18 +2328,39 @@ export default function HomePage() {
             {cat.emoji} {catCopy.label} · 이름 설계 프리뷰
           </div>
           <div key={`${selectedId}-${animKey}`} style={{ animation: "lgFadeIn 0.4s ease", width: "100%" }}>
-            <BigNameCard card={card} accent={theme.accent} bg={theme.bg} lang={lang} />
+            {activeVideo ? (
+              <CategoryVideoCard
+                video={activeVideo}
+                accent={theme.accent}
+                bg={theme.bg}
+                playing={videoPlaying}
+                onPlay={() => setVideoPlaying(true)}
+              />
+            ) : (
+              <BigNameCard card={card} accent={theme.accent} bg={theme.bg} lang={lang} />
+            )}
           </div>
           {/* 슬라이드 도트 */}
           <div style={{ display: "flex", gap: 5, marginTop: 14, justifyContent: "center" }}>
             {cards.map((_, i) => (
               <button
-                key={i}
-                onClick={() => { setCardIdx(i); setAnimKey(k => k + 1); }}
+                key={`c${i}`}
+                onClick={() => { setCardIdx(i); setAnimKey(k => k + 1); setVideoPlaying(false); }}
                 aria-label={`예시 ${i + 1}`}
                 style={{ height: 4, borderRadius: 2, border: "none", cursor: "pointer", padding: 0, background: i === cardIdx ? "#C9A84C" : "rgba(0,0,0,0.14)", width: i === cardIdx ? 14 : 5, transition: "all 0.3s" }}
               />
             ))}
+            {videos.map((v, vi) => {
+              const i = cards.length + vi;
+              return (
+                <button
+                  key={v.id}
+                  onClick={() => { setCardIdx(i); setAnimKey(k => k + 1); setVideoPlaying(false); }}
+                  aria-label={`영상 ${vi + 1}`}
+                  style={{ height: 4, borderRadius: 2, border: "none", cursor: "pointer", padding: 0, background: i === cardIdx ? "#C9A84C" : "rgba(0,0,0,0.14)", width: i === cardIdx ? 14 : 5, transition: "all 0.3s" }}
+                />
+              );
+            })}
           </div>
           {selectedId === "korean-name" && (
             <div style={{ marginTop: 12, textAlign: "center", lineHeight: 2 }}>
