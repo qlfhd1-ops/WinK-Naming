@@ -1758,6 +1758,7 @@ export default function DesignPage() {
   const [ktfMemo, setKtfMemo] = useState("");
   const [ftkName, setFtkName] = useState("");
   const [ftkMethod, setFtkMethod] = useState("");
+  const [ftkNameStyle, setFtkNameStyle] = useState("");
   const [ftkMood, setFtkMood] = useState("");
   const [ftkMemo, setFtkMemo] = useState("");
 
@@ -1876,6 +1877,10 @@ export default function DesignPage() {
   const handleFTKSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!ftkName.trim()) { setError(lang === "ko" ? "이름을 입력해 주세요." : "Please enter a name."); return; }
+    if (!gender) { setError(lang === "ko" ? "성별을 선택해 주세요." : "Please select a gender."); return; }
+
+    const styleFinal = [ftkNameStyle, ftkMood].filter(Boolean).join(", ") || "자연스러운";
+
     const payload: BriefPayload = {
       ...form,
       category: "foreign_to_korean",
@@ -1883,11 +1888,14 @@ export default function DesignPage() {
       targetName: ftkName.trim(),
       familyName: "",
       purpose: ftkMethod || "발음대로",
-      styleKeywords: ftkMood || "자연스러운",
+      styleKeywords: styleFinal,
       avoidKeywords: "",
       targetCountry: "한국",
       preferredScript: "한글",
       memo: ftkMemo.trim(),
+      gender: gender as BriefPayload["gender"],
+      birthDate: birthDate || undefined,
+      birthTime: birthTime || undefined,
     };
     setError("");
     sessionStorage.setItem("winkNamingBrief", JSON.stringify(payload));
@@ -1911,6 +1919,20 @@ export default function DesignPage() {
   const FTK_METHODS = lang === "ko"
     ? ["발음대로 (석호필 스타일)", "순수 한글 이름 (하늘, 새벽)", "한국 배우/셀럽 느낌"]
     : ["By pronunciation (Korean-style)", "Pure Korean name (Haneul, Saebyeok)", "Korean celebrity style"];
+  const FTK_GENDER_OPTIONS: Array<{ value: "남자" | "여자" | "중성"; label: string }> = lang === "ko"
+    ? [
+        { value: "남자", label: "남성" },
+        { value: "여자", label: "여성" },
+        { value: "중성", label: "중성 (성별 무관)" },
+      ]
+    : [
+        { value: "남자", label: "Male" },
+        { value: "여자", label: "Female" },
+        { value: "중성", label: "Neutral" },
+      ];
+  const FTK_NAME_STYLES = lang === "ko"
+    ? ["남성적인 이름", "여성적인 이름", "혼용 가능한 이름 (중성적)"]
+    : ["Masculine-leaning", "Feminine-leaning", "Unisex / Neutral"];
   const FTK_MOODS = lang === "ko"
     ? ["활발한", "조용한", "카리스마", "따뜻한", "지적인", "예술적"]
     : ["Energetic", "Calm", "Charismatic", "Warm", "Intellectual", "Artistic"];
@@ -2043,26 +2065,106 @@ export default function DesignPage() {
               />
             </section>
 
-            {/* ② 변환 방식 */}
+            {/* ② 성별 (필수) */}
             <section className="wink-form-section">
               <div className="wink-section-head">
-                <h2 className="wink-section-title">{lang === "ko" ? "② 변환 방식" : "② Conversion Style"}</h2>
+                <h2 className="wink-section-title">{lang === "ko" ? "② 성별" : "② Gender"}</h2>
+                <p className="wink-section-desc">
+                  {lang === "ko"
+                    ? "성별에 맞는 한자·음운을 반영해 이름을 설계합니다. 정확한 결과를 위해 꼭 선택해 주세요."
+                    : "We tailor Hanja and phonetics to match gender. Please select for accurate results."}
+                </p>
+              </div>
+              <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
+                {FTK_GENDER_OPTIONS.map(({ value, label }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setGender(gender === value ? "" : value)}
+                    style={{
+                      flex: 1,
+                      padding: "14px 0",
+                      borderRadius: 14,
+                      fontSize: 15,
+                      fontWeight: gender === value ? 800 : 500,
+                      cursor: "pointer",
+                      border: gender === value ? "2px solid var(--gold-main)" : "1px solid var(--line-strong)",
+                      background: gender === value ? "var(--gold-soft)" : "transparent",
+                      color: gender === value ? "var(--gold-main)" : "var(--text-soft)",
+                      transition: "all 0.18s ease",
+                    }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            {/* ③ 변환 방식 */}
+            <section className="wink-form-section">
+              <div className="wink-section-head">
+                <h2 className="wink-section-title">{lang === "ko" ? "③ 변환 방식" : "③ Conversion Style"}</h2>
               </div>
               <ChipGroup chips={FTK_METHODS} selected={ftkMethod ? [ftkMethod] : []} onToggle={(c) => setFtkMethod(ftkMethod === c ? "" : c)} single />
             </section>
 
-            {/* ③ 성격/분위기 */}
+            {/* ④ 이름 스타일 (성별 느낌) */}
             <section className="wink-form-section">
               <div className="wink-section-head">
-                <h2 className="wink-section-title">{lang === "ko" ? "③ 성격 / 분위기" : "③ Personality / Mood"}</h2>
+                <h2 className="wink-section-title">{lang === "ko" ? "④ 이름 스타일" : "④ Name Style"}</h2>
+                <p className="wink-section-desc">
+                  {lang === "ko"
+                    ? "이름이 풍기는 느낌을 선택해 주세요. 성별과 다르게 설정하셔도 괜찮습니다."
+                    : "Choose the tone the name should carry — it can differ from your gender."}
+                </p>
+              </div>
+              <ChipGroup chips={FTK_NAME_STYLES} selected={ftkNameStyle ? [ftkNameStyle] : []} onToggle={(c) => setFtkNameStyle(ftkNameStyle === c ? "" : c)} single />
+            </section>
+
+            {/* ⑤ 성격/분위기 */}
+            <section className="wink-form-section">
+              <div className="wink-section-head">
+                <h2 className="wink-section-title">{lang === "ko" ? "⑤ 성격 / 분위기" : "⑤ Personality / Mood"}</h2>
               </div>
               <ChipGroup chips={FTK_MOODS} selected={ftkMood ? [ftkMood] : []} onToggle={(c) => setFtkMood(ftkMood === c ? "" : c)} single />
             </section>
 
-            {/* ④ 추가 요청사항 */}
+            {/* ⑥ 생년월일 (선택 — AI 성명학) */}
             <section className="wink-form-section">
               <div className="wink-section-head">
-                <h2 className="wink-section-title">{lang === "ko" ? "④ 추가 요청사항" : "④ Additional Notes"}</h2>
+                <h2 className="wink-section-title">{lang === "ko" ? "⑥ 생년월일 (선택)" : "⑥ Date of Birth (optional)"}</h2>
+                <p className="wink-section-desc">
+                  {lang === "ko"
+                    ? "생년월일을 입력하면 사주 오행을 분석해 부족한 기운을 보완하는 한자를 함께 반영합니다. 시간은 선택 사항입니다."
+                    : "If provided, we analyze your Five Elements (Saju) balance and reflect complementary Hanja. Time is optional."}
+                </p>
+              </div>
+              <div className="wink-form-grid">
+                <div className="wink-field">
+                  <label>{lang === "ko" ? "생년월일" : "Date of birth"}</label>
+                  <input
+                    type="date"
+                    value={birthDate}
+                    onChange={(e) => setBirthDate(e.target.value)}
+                    className="wink-input"
+                  />
+                </div>
+                <div className="wink-field">
+                  <label>{lang === "ko" ? "태어난 시간 (선택)" : "Time of birth (optional)"}</label>
+                  <input
+                    type="time"
+                    value={birthTime}
+                    onChange={(e) => setBirthTime(e.target.value)}
+                    className="wink-input"
+                  />
+                </div>
+              </div>
+            </section>
+
+            {/* ⑦ 추가 요청사항 */}
+            <section className="wink-form-section">
+              <div className="wink-section-head">
+                <h2 className="wink-section-title">{lang === "ko" ? "⑦ 추가 요청사항" : "⑦ Additional Notes"}</h2>
               </div>
               <textarea
                 className="wink-textarea"
