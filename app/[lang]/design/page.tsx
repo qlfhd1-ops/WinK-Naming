@@ -1043,6 +1043,7 @@ const COPY = {
 type FTKCopy = {
   eyebrow: string; title: string; subtitle: string; note: string;
   s1Title: string; s1Desc: string; namePlaceholder: string;
+  countryTitle: string; countryDesc: string; countryPlaceholder: string;
   s2Title: string; s2Desc: string;
   genderMale: string; genderFemale: string; genderNeutral: string;
   s3Title: string; methods: readonly string[];
@@ -1061,20 +1062,23 @@ const FTK_COPY: Record<AppLang, FTKCopy> = {
     s1Title: "① 이름 입력 (풀네임)",
     s1Desc: "성씨를 포함한 풀네임을 입력해 주세요.",
     namePlaceholder: "예: Michael Scofield, Emma, Pierre",
-    s2Title: "② 성별",
+    countryTitle: "② 국적 / 출신 국가",
+    countryDesc: "어느 나라 출신이신가요? 원본 이름의 문화적 배경을 더 정확히 분석하는 데 활용됩니다.",
+    countryPlaceholder: "예: 미국, 브라질, 나이지리아, 베트남",
+    s2Title: "③ 성별",
     s2Desc: "성별에 맞는 한자·음운을 반영해 이름을 설계합니다. 정확한 결과를 위해 꼭 선택해 주세요.",
     genderMale: "남성", genderFemale: "여성", genderNeutral: "중성 (성별 무관)",
-    s3Title: "③ 변환 방식",
+    s3Title: "④ 변환 방식",
     methods: ["발음대로 (석호필 스타일)", "순수 한글 이름 (하늘, 새벽)", "한국 배우/셀럽 느낌"],
-    s4Title: "④ 이름 스타일",
+    s4Title: "⑤ 이름 스타일",
     s4Desc: "이름이 풍기는 느낌을 선택해 주세요. 성별과 다르게 설정하셔도 괜찮습니다.",
     nameStyles: ["남성적인 이름", "여성적인 이름", "혼용 가능한 이름 (중성적)"],
-    s5Title: "⑤ 성격 / 분위기",
+    s5Title: "⑥ 성격 / 분위기",
     moods: ["활발한", "조용한", "카리스마", "따뜻한", "지적인", "예술적"],
-    s6Title: "⑥ 생년월일 (선택)",
+    s6Title: "⑦ 생년월일 (선택)",
     s6Desc: "생년월일을 입력하면 사주 오행을 분석해 부족한 기운을 보완하는 한자를 함께 반영합니다. 시간은 선택 사항입니다.",
     dobLabel: "생년월일", tobLabel: "태어난 시간 (선택)",
-    s7Title: "⑦ 추가 요청사항",
+    s7Title: "⑧ 추가 요청사항",
     memoPlaceholder: "피하고 싶은 이름 스타일이나 특별한 요청이 있으면 적어 주세요.",
   },
   en: {
@@ -1085,20 +1089,23 @@ const FTK_COPY: Record<AppLang, FTKCopy> = {
     s1Title: "① Your Full Name",
     s1Desc: "Please enter your full name (first and last).",
     namePlaceholder: "e.g. Michael Scofield, Emma, Pierre",
-    s2Title: "② Gender",
+    countryTitle: "② Nationality / Country",
+    countryDesc: "Where are you from? This helps us analyze the cultural background of your original name more accurately.",
+    countryPlaceholder: "e.g. USA, Brazil, Nigeria, Vietnam",
+    s2Title: "③ Gender",
     s2Desc: "We tailor Hanja and phonetics to match gender. Please select for accurate results.",
     genderMale: "Male", genderFemale: "Female", genderNeutral: "Neutral",
-    s3Title: "③ Conversion Style",
+    s3Title: "④ Conversion Style",
     methods: ["By pronunciation (Korean-style)", "Pure Korean name (Haneul, Saebyeok)", "Korean celebrity style"],
-    s4Title: "④ Name Style",
+    s4Title: "⑤ Name Style",
     s4Desc: "Choose the tone the name should carry — it can differ from your gender.",
     nameStyles: ["Masculine-leaning", "Feminine-leaning", "Unisex / Neutral"],
-    s5Title: "⑤ Personality / Mood",
+    s5Title: "⑥ Personality / Mood",
     moods: ["Energetic", "Calm", "Charismatic", "Warm", "Intellectual", "Artistic"],
-    s6Title: "⑥ Date of Birth (optional)",
+    s6Title: "⑦ Date of Birth (optional)",
     s6Desc: "If provided, we analyze your Five Elements (Saju) balance and reflect complementary Hanja. Time is optional.",
     dobLabel: "Date of birth", tobLabel: "Time of birth (optional)",
-    s7Title: "⑦ Additional Notes",
+    s7Title: "⑧ Additional Notes",
     memoPlaceholder: "Any styles to avoid or special requests?",
   },
   ja: {
@@ -1109,20 +1116,23 @@ const FTK_COPY: Record<AppLang, FTKCopy> = {
     s1Title: "①お名前を入力(フルネーム)",
     s1Desc: "姓を含むフルネームを入力してください。",
     namePlaceholder: "例: Michael Scofield, Emma, Pierre",
-    s2Title: "②性別",
+    countryTitle: "②国籍・出身国",
+    countryDesc: "どちらのご出身ですか? 元のお名前の文化的背景をより正確に分析するために使用します。",
+    countryPlaceholder: "例: アメリカ、ブラジル、ナイジェリア、ベトナム",
+    s2Title: "③性別",
     s2Desc: "性別に合わせた漢字・音韻で名前を設計します。正確な結果のため必ず選択してください。",
     genderMale: "男性", genderFemale: "女性", genderNeutral: "中性(性別を問わない)",
-    s3Title: "③変換方式",
+    s3Title: "④変換方式",
     methods: ["発音重視(スギョンピル式)", "純ハングル名(ハヌル、セビョク)", "韓国スター風"],
-    s4Title: "④名前のスタイル",
+    s4Title: "⑤名前のスタイル",
     s4Desc: "名前が持つ雰囲気を選んでください。性別と異なる設定でも構いません。",
     nameStyles: ["男性的な名前", "女性的な名前", "男女兼用(中性的)な名前"],
-    s5Title: "⑤性格・雰囲気",
+    s5Title: "⑥性格・雰囲気",
     moods: ["活発な", "静かな", "カリスマ性のある", "温かい", "知的な", "芸術的な"],
-    s6Title: "⑥生年月日(任意)",
+    s6Title: "⑦生年月日(任意)",
     s6Desc: "生年月日を入力すると四柱推命の五行を分析し、不足する気を補う漢字を反映します。時間は任意です。",
     dobLabel: "生年月日", tobLabel: "生まれた時間(任意)",
-    s7Title: "⑦追加のご要望",
+    s7Title: "⑧追加のご要望",
     memoPlaceholder: "避けたいスタイルや特別なご要望があればご記入ください。",
   },
   zh: {
@@ -1133,20 +1143,23 @@ const FTK_COPY: Record<AppLang, FTKCopy> = {
     s1Title: "①输入姓名(全名)",
     s1Desc: "请输入包含姓氏的全名。",
     namePlaceholder: "例如: Michael Scofield, Emma, Pierre",
-    s2Title: "②性别",
+    countryTitle: "②国籍/所属国家",
+    countryDesc: "您来自哪个国家?这将帮助我们更准确地分析您原名字的文化背景。",
+    countryPlaceholder: "例如:美国、巴西、尼日利亚、越南",
+    s2Title: "③性别",
     s2Desc: "我们会根据性别搭配合适的汉字与音韵来设计名字。为了得到准确的结果，请务必选择。",
     genderMale: "男性", genderFemale: "女性", genderNeutral: "中性(不限性别)",
-    s3Title: "③转换方式",
+    s3Title: "④转换方式",
     methods: ["按发音转换(音译风格)", "纯韩文名字(하늘、새벽)", "韩国明星/艺人风格"],
-    s4Title: "④名字风格",
+    s4Title: "⑤名字风格",
     s4Desc: "请选择名字所散发的气质，可以与性别设置不同。",
     nameStyles: ["偏男性化的名字", "偏女性化的名字", "中性/男女皆宜的名字"],
-    s5Title: "⑤性格 / 气质",
+    s5Title: "⑥性格 / 气质",
     moods: ["活泼", "文静", "有魅力", "温暖", "知性", "艺术气息"],
-    s6Title: "⑥出生日期(选填)",
+    s6Title: "⑦出生日期(选填)",
     s6Desc: "填写出生日期后，我们会分析您的四柱五行，并在名字中融入能补足五行不足的汉字。出生时间为选填项。",
     dobLabel: "出生日期", tobLabel: "出生时间(选填)",
-    s7Title: "⑦补充要求",
+    s7Title: "⑧补充要求",
     memoPlaceholder: "如有想避免的风格或特别要求，请在此填写。",
   },
   es: {
@@ -1157,20 +1170,23 @@ const FTK_COPY: Record<AppLang, FTKCopy> = {
     s1Title: "① Tu nombre completo",
     s1Desc: "Ingresa tu nombre completo (nombre y apellido).",
     namePlaceholder: "ej. Michael Scofield, Emma, Pierre",
-    s2Title: "② Género",
+    countryTitle: "② Nacionalidad / País",
+    countryDesc: "¿De dónde eres? Esto nos ayuda a analizar con mayor precisión el trasfondo cultural de tu nombre original.",
+    countryPlaceholder: "ej. EE.UU., Brasil, Nigeria, Vietnam",
+    s2Title: "③ Género",
     s2Desc: "Adaptamos los hanja y la fonética según el género. Selecciónalo para obtener resultados precisos.",
     genderMale: "Masculino", genderFemale: "Femenino", genderNeutral: "Neutro",
-    s3Title: "③ Estilo de conversión",
+    s3Title: "④ Estilo de conversión",
     methods: ["Por pronunciación (estilo coreano)", "Nombre coreano puro (Haneul, Saebyeok)", "Estilo celebridad coreana"],
-    s4Title: "④ Estilo del nombre",
+    s4Title: "⑤ Estilo del nombre",
     s4Desc: "Elige el tono que debe transmitir el nombre; puede diferir de tu género.",
     nameStyles: ["Con tendencia masculina", "Con tendencia femenina", "Unisex / Neutro"],
-    s5Title: "⑤ Personalidad / Ambiente",
+    s5Title: "⑥ Personalidad / Ambiente",
     moods: ["Enérgico", "Tranquilo", "Carismático", "Cálido", "Intelectual", "Artístico"],
-    s6Title: "⑥ Fecha de nacimiento (opcional)",
+    s6Title: "⑦ Fecha de nacimiento (opcional)",
     s6Desc: "Si la proporcionas, analizamos tu equilibrio de los Cinco Elementos (Saju) y reflejamos hanja complementarios. La hora es opcional.",
     dobLabel: "Fecha de nacimiento", tobLabel: "Hora de nacimiento (opcional)",
-    s7Title: "⑦ Notas adicionales",
+    s7Title: "⑧ Notas adicionales",
     memoPlaceholder: "¿Algún estilo que evitar o solicitud especial?",
   },
   ru: {
@@ -1181,20 +1197,23 @@ const FTK_COPY: Record<AppLang, FTKCopy> = {
     s1Title: "① Введите полное имя",
     s1Desc: "Введите полное имя, включая фамилию.",
     namePlaceholder: "напр. Michael Scofield, Emma, Pierre",
-    s2Title: "② Пол",
+    countryTitle: "② Национальность / Страна",
+    countryDesc: "Откуда вы? Это поможет нам точнее проанализировать культурный контекст вашего исходного имени.",
+    countryPlaceholder: "напр. США, Бразилия, Нигерия, Вьетнам",
+    s2Title: "③ Пол",
     s2Desc: "Мы подбираем ханча и фонетику в соответствии с полом. Пожалуйста, выберите для точного результата.",
     genderMale: "Мужской", genderFemale: "Женский", genderNeutral: "Нейтральный",
-    s3Title: "③ Способ преобразования",
+    s3Title: "④ Способ преобразования",
     methods: ["По произношению (в корейском стиле)", "Чисто корейское имя (Ханыль, Сэбёк)", "В стиле корейской знаменитости"],
-    s4Title: "④ Стиль имени",
+    s4Title: "⑤ Стиль имени",
     s4Desc: "Выберите тон, который должно передавать имя — он может отличаться от вашего пола.",
     nameStyles: ["Более мужественный", "Более женственный", "Унисекс / нейтральный"],
-    s5Title: "⑤ Характер / настроение",
+    s5Title: "⑥ Характер / настроение",
     moods: ["Энергичный", "Спокойный", "Харизматичный", "Тёплый", "Интеллектуальный", "Творческий"],
-    s6Title: "⑥ Дата рождения (необязательно)",
+    s6Title: "⑦ Дата рождения (необязательно)",
     s6Desc: "При указании даты рождения мы анализируем баланс пяти элементов (Саджу) и подбираем ханча, дополняющие недостающие элементы. Время рождения указывать не обязательно.",
     dobLabel: "Дата рождения", tobLabel: "Время рождения (необязательно)",
-    s7Title: "⑦ Дополнительные пожелания",
+    s7Title: "⑧ Дополнительные пожелания",
     memoPlaceholder: "Укажите стили, которых стоит избегать, или особые пожелания.",
   },
   fr: {
@@ -1205,20 +1224,23 @@ const FTK_COPY: Record<AppLang, FTKCopy> = {
     s1Title: "① Votre nom complet",
     s1Desc: "Veuillez saisir votre nom complet (prénom et nom).",
     namePlaceholder: "ex. Michael Scofield, Emma, Pierre",
-    s2Title: "② Genre",
+    countryTitle: "② Nationalité / Pays",
+    countryDesc: "D'où venez-vous ? Cela nous aide à analyser plus précisément le contexte culturel de votre nom d'origine.",
+    countryPlaceholder: "ex. États-Unis, Brésil, Nigeria, Vietnam",
+    s2Title: "③ Genre",
     s2Desc: "Nous adaptons les hanja et la phonétique selon le genre. Merci de le sélectionner pour un résultat précis.",
     genderMale: "Masculin", genderFemale: "Féminin", genderNeutral: "Neutre",
-    s3Title: "③ Style de conversion",
+    s3Title: "④ Style de conversion",
     methods: ["Par prononciation (style coréen)", "Nom coréen pur (Haneul, Saebyeok)", "Style célébrité coréenne"],
-    s4Title: "④ Style du nom",
+    s4Title: "⑤ Style du nom",
     s4Desc: "Choisissez la tonalité que le nom doit véhiculer — elle peut différer de votre genre.",
     nameStyles: ["À tendance masculine", "À tendance féminine", "Unisexe / Neutre"],
-    s5Title: "⑤ Personnalité / Ambiance",
+    s5Title: "⑥ Personnalité / Ambiance",
     moods: ["Énergique", "Calme", "Charismatique", "Chaleureux", "Intellectuel", "Artistique"],
-    s6Title: "⑥ Date de naissance (facultatif)",
+    s6Title: "⑦ Date de naissance (facultatif)",
     s6Desc: "Si vous la renseignez, nous analysons votre équilibre des Cinq Éléments (Saju) et intégrons des hanja complémentaires. L'heure est facultative.",
     dobLabel: "Date de naissance", tobLabel: "Heure de naissance (facultatif)",
-    s7Title: "⑦ Remarques supplémentaires",
+    s7Title: "⑧ Remarques supplémentaires",
     memoPlaceholder: "Un style à éviter ou une demande particulière ?",
   },
   ar: {
@@ -1229,20 +1251,23 @@ const FTK_COPY: Record<AppLang, FTKCopy> = {
     s1Title: "① أدخل اسمك الكامل",
     s1Desc: "يرجى إدخال اسمك الكامل (الاسم الأول واسم العائلة).",
     namePlaceholder: "مثال: Michael Scofield, Emma, Pierre",
-    s2Title: "② الجنس",
+    countryTitle: "② الجنسية / البلد",
+    countryDesc: "من أين أنت؟ يساعدنا هذا على تحليل الخلفية الثقافية لاسمك الأصلي بدقة أكبر.",
+    countryPlaceholder: "مثال: الولايات المتحدة، البرازيل، نيجيريا، فيتنام",
+    s2Title: "③ الجنس",
     s2Desc: "نصمم الأحرف الصينية (هانجا) والنطق بما يتناسب مع الجنس. يرجى الاختيار للحصول على نتائج دقيقة.",
     genderMale: "ذكر", genderFemale: "أنثى", genderNeutral: "محايد (بغض النظر عن الجنس)",
-    s3Title: "③ طريقة التحويل",
+    s3Title: "④ طريقة التحويل",
     methods: ["حسب النطق (بالطراز الكوري)", "اسم كوري خالص (هانول، سيبيوك)", "بأسلوب نجوم كوريا"],
-    s4Title: "④ أسلوب الاسم",
+    s4Title: "⑤ أسلوب الاسم",
     s4Desc: "اختر النبرة التي تريد أن يحملها الاسم — يمكن أن تختلف عن جنسك.",
     nameStyles: ["يميل إلى الذكورة", "يميل إلى الأنوثة", "محايد / يناسب الجنسين"],
-    s5Title: "⑤ الشخصية / الأجواء",
+    s5Title: "⑥ الشخصية / الأجواء",
     moods: ["نشيط", "هادئ", "كاريزمي", "دافئ", "ذكي", "فني"],
-    s6Title: "⑥ تاريخ الميلاد (اختياري)",
+    s6Title: "⑦ تاريخ الميلاد (اختياري)",
     s6Desc: "عند إدخاله، نحلّل توازن العناصر الخمسة (سجو) ونعكس أحرف هانجا مكمّلة. وقت الميلاد اختياري.",
     dobLabel: "تاريخ الميلاد", tobLabel: "وقت الميلاد (اختياري)",
-    s7Title: "⑦ ملاحظات إضافية",
+    s7Title: "⑧ ملاحظات إضافية",
     memoPlaceholder: "هل هناك أسلوب تريد تجنبه أو طلب خاص؟",
   },
   hi: {
@@ -1253,20 +1278,23 @@ const FTK_COPY: Record<AppLang, FTKCopy> = {
     s1Title: "① अपना पूरा नाम दर्ज करें",
     s1Desc: "कृपया उपनाम सहित अपना पूरा नाम दर्ज करें।",
     namePlaceholder: "उदा. Michael Scofield, Emma, Pierre",
-    s2Title: "② लिंग",
+    countryTitle: "② राष्ट्रीयता / देश",
+    countryDesc: "आप कहाँ से हैं? इससे हमें आपके मूल नाम की सांस्कृतिक पृष्ठभूमि का अधिक सटीक विश्लेषण करने में मदद मिलती है।",
+    countryPlaceholder: "उदा. अमेरिका, ब्राज़ील, नाइजीरिया, वियतनाम",
+    s2Title: "③ लिंग",
     s2Desc: "हम लिंग के अनुसार हान्जा और उच्चारण चुनते हैं। सटीक परिणाम के लिए कृपया चुनें।",
     genderMale: "पुरुष", genderFemale: "महिला", genderNeutral: "न्यूट्रल (लिंग निरपेक्ष)",
-    s3Title: "③ रूपांतरण शैली",
+    s3Title: "④ रूपांतरण शैली",
     methods: ["उच्चारण के अनुसार (कोरियाई शैली)", "शुद्ध कोरियाई नाम (हानेउल, सैब्योक)", "कोरियाई सेलिब्रिटी शैली"],
-    s4Title: "④ नाम की शैली",
+    s4Title: "⑤ नाम की शैली",
     s4Desc: "नाम का भाव चुनें — यह आपके लिंग से अलग भी हो सकता है।",
     nameStyles: ["पुरुष-प्रधान नाम", "स्त्री-प्रधान नाम", "यूनिसेक्स / न्यूट्रल नाम"],
-    s5Title: "⑤ व्यक्तित्व / भाव",
+    s5Title: "⑥ व्यक्तित्व / भाव",
     moods: ["ऊर्जावान", "शांत", "करिश्माई", "गर्मजोशी भरा", "बौद्धिक", "कलात्मक"],
-    s6Title: "⑥ जन्म तिथि (वैकल्पिक)",
+    s6Title: "⑦ जन्म तिथि (वैकल्पिक)",
     s6Desc: "जन्म तिथि देने पर हम आपके पंचतत्व (साजू) संतुलन का विश्लेषण करके पूरक हान्जा शामिल करते हैं। समय बताना वैकल्पिक है।",
     dobLabel: "जन्म तिथि", tobLabel: "जन्म का समय (वैकल्पिक)",
-    s7Title: "⑦ अतिरिक्त अनुरोध",
+    s7Title: "⑧ अतिरिक्त अनुरोध",
     memoPlaceholder: "कोई शैली जिससे बचना है या कोई विशेष अनुरोध?",
   },
 };
@@ -1989,6 +2017,7 @@ export default function DesignPage() {
   const [ktfMood, setKtfMood] = useState("");
   const [ktfMemo, setKtfMemo] = useState("");
   const [ftkName, setFtkName] = useState("");
+  const [ftkCountry, setFtkCountry] = useState("");
   const [ftkMethod, setFtkMethod] = useState("");
   const [ftkNameStyle, setFtkNameStyle] = useState("");
   const [ftkMood, setFtkMood] = useState("");
@@ -2128,6 +2157,7 @@ export default function DesignPage() {
       gender: gender as BriefPayload["gender"],
       birthDate: birthDate || undefined,
       birthTime: birthTime || undefined,
+      originCountry: ftkCountry.trim() || undefined,
     };
     setError("");
     sessionStorage.setItem("winkNamingBrief", JSON.stringify(payload));
@@ -2282,7 +2312,23 @@ export default function DesignPage() {
               />
             </section>
 
-            {/* ② 성별 (필수) */}
+            {/* ② 국적 / 출신 국가 */}
+            <section className="wink-form-section">
+              <div className="wink-section-head">
+                <h2 className="wink-section-title">{ftk.countryTitle}</h2>
+                <p className="wink-section-desc">
+                  {ftk.countryDesc}
+                </p>
+              </div>
+              <input
+                className="wink-input"
+                value={ftkCountry}
+                onChange={(e) => setFtkCountry(e.target.value)}
+                placeholder={ftk.countryPlaceholder}
+              />
+            </section>
+
+            {/* ③ 성별 (필수) */}
             <section className="wink-form-section">
               <div className="wink-section-head">
                 <h2 className="wink-section-title">{ftk.s2Title}</h2>
@@ -2315,7 +2361,7 @@ export default function DesignPage() {
               </div>
             </section>
 
-            {/* ③ 변환 방식 */}
+            {/* ④ 변환 방식 */}
             <section className="wink-form-section">
               <div className="wink-section-head">
                 <h2 className="wink-section-title">{ftk.s3Title}</h2>
@@ -2323,7 +2369,7 @@ export default function DesignPage() {
               <ChipGroup chips={FTK_METHODS} selected={ftkMethod ? [ftkMethod] : []} onToggle={(c) => setFtkMethod(ftkMethod === c ? "" : c)} single />
             </section>
 
-            {/* ④ 이름 스타일 (성별 느낌) */}
+            {/* ⑤ 이름 스타일 (성별 느낌) */}
             <section className="wink-form-section">
               <div className="wink-section-head">
                 <h2 className="wink-section-title">{ftk.s4Title}</h2>
@@ -2334,7 +2380,7 @@ export default function DesignPage() {
               <ChipGroup chips={FTK_NAME_STYLES} selected={ftkNameStyle ? [ftkNameStyle] : []} onToggle={(c) => setFtkNameStyle(ftkNameStyle === c ? "" : c)} single />
             </section>
 
-            {/* ⑤ 성격/분위기 */}
+            {/* ⑥ 성격/분위기 */}
             <section className="wink-form-section">
               <div className="wink-section-head">
                 <h2 className="wink-section-title">{ftk.s5Title}</h2>
@@ -2342,7 +2388,7 @@ export default function DesignPage() {
               <ChipGroup chips={FTK_MOODS} selected={ftkMood ? [ftkMood] : []} onToggle={(c) => setFtkMood(ftkMood === c ? "" : c)} single />
             </section>
 
-            {/* ⑥ 생년월일 (선택 — AI 성명학) */}
+            {/* ⑦ 생년월일 (선택 — AI 성명학) */}
             <section className="wink-form-section">
               <div className="wink-section-head">
                 <h2 className="wink-section-title">{ftk.s6Title}</h2>
@@ -2372,7 +2418,7 @@ export default function DesignPage() {
               </div>
             </section>
 
-            {/* ⑦ 추가 요청사항 */}
+            {/* ⑧ 추가 요청사항 */}
             <section className="wink-form-section">
               <div className="wink-section-head">
                 <h2 className="wink-section-title">{ftk.s7Title}</h2>

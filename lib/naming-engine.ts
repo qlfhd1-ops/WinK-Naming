@@ -14,6 +14,7 @@ export type BriefPayload = {
   birthDate?: string;   // YYYY-MM-DD, required for child
   birthTime?: string;   // HH:MM, optional for child
   childOrder?: string;  // 첫째 | 둘째 | 셋째 | 넷째 | 다섯째 | 조카
+  originCountry?: string; // 사용자의 국적/출신 국가 (foreign_to_korean 전용)
   needsGlobalPronunciation: boolean;
   needsStampPackage: boolean;
   needsDoorplatePackage: boolean;
