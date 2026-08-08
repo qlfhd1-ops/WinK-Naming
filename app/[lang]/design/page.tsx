@@ -1039,6 +1039,238 @@ const COPY = {
   },
 } as const;
 
+// ── FTK(외국이름→한국이름) 전용 폼 다국어 사전 ──────────────────
+type FTKCopy = {
+  eyebrow: string; title: string; subtitle: string; note: string;
+  s1Title: string; s1Desc: string; namePlaceholder: string;
+  s2Title: string; s2Desc: string;
+  genderMale: string; genderFemale: string; genderNeutral: string;
+  s3Title: string; methods: readonly string[];
+  s4Title: string; s4Desc: string; nameStyles: readonly string[];
+  s5Title: string; moods: readonly string[];
+  s6Title: string; s6Desc: string; dobLabel: string; tobLabel: string;
+  s7Title: string; memoPlaceholder: string;
+};
+
+const FTK_COPY: Record<AppLang, FTKCopy> = {
+  ko: {
+    eyebrow: "외국이름 → 한국이름",
+    title: "한글로 불릴 나만의 이름",
+    subtitle: "외국 이름의 발음과 뉘앙스를 살리면서, 한글로 자연스럽게 불릴 수 있는 이름 3가지를 설계합니다.",
+    note: "✦ 한글로 표기하면 어떻게 될까요? 이름마다 「한글의 위대함」을 느낄 수 있는 표기도 함께 안내합니다.",
+    s1Title: "① 이름 입력 (풀네임)",
+    s1Desc: "성씨를 포함한 풀네임을 입력해 주세요.",
+    namePlaceholder: "예: Michael Scofield, Emma, Pierre",
+    s2Title: "② 성별",
+    s2Desc: "성별에 맞는 한자·음운을 반영해 이름을 설계합니다. 정확한 결과를 위해 꼭 선택해 주세요.",
+    genderMale: "남성", genderFemale: "여성", genderNeutral: "중성 (성별 무관)",
+    s3Title: "③ 변환 방식",
+    methods: ["발음대로 (석호필 스타일)", "순수 한글 이름 (하늘, 새벽)", "한국 배우/셀럽 느낌"],
+    s4Title: "④ 이름 스타일",
+    s4Desc: "이름이 풍기는 느낌을 선택해 주세요. 성별과 다르게 설정하셔도 괜찮습니다.",
+    nameStyles: ["남성적인 이름", "여성적인 이름", "혼용 가능한 이름 (중성적)"],
+    s5Title: "⑤ 성격 / 분위기",
+    moods: ["활발한", "조용한", "카리스마", "따뜻한", "지적인", "예술적"],
+    s6Title: "⑥ 생년월일 (선택)",
+    s6Desc: "생년월일을 입력하면 사주 오행을 분석해 부족한 기운을 보완하는 한자를 함께 반영합니다. 시간은 선택 사항입니다.",
+    dobLabel: "생년월일", tobLabel: "태어난 시간 (선택)",
+    s7Title: "⑦ 추가 요청사항",
+    memoPlaceholder: "피하고 싶은 이름 스타일이나 특별한 요청이 있으면 적어 주세요.",
+  },
+  en: {
+    eyebrow: "Foreign Name → Korean Name",
+    title: "Your Name, in Korean",
+    subtitle: "We design 3 Korean names that capture the sound and feel of your foreign name.",
+    note: "✦ See how beautifully your name looks in Hangul — the Korean script known for its elegance and logic.",
+    s1Title: "① Your Full Name",
+    s1Desc: "Please enter your full name (first and last).",
+    namePlaceholder: "e.g. Michael Scofield, Emma, Pierre",
+    s2Title: "② Gender",
+    s2Desc: "We tailor Hanja and phonetics to match gender. Please select for accurate results.",
+    genderMale: "Male", genderFemale: "Female", genderNeutral: "Neutral",
+    s3Title: "③ Conversion Style",
+    methods: ["By pronunciation (Korean-style)", "Pure Korean name (Haneul, Saebyeok)", "Korean celebrity style"],
+    s4Title: "④ Name Style",
+    s4Desc: "Choose the tone the name should carry — it can differ from your gender.",
+    nameStyles: ["Masculine-leaning", "Feminine-leaning", "Unisex / Neutral"],
+    s5Title: "⑤ Personality / Mood",
+    moods: ["Energetic", "Calm", "Charismatic", "Warm", "Intellectual", "Artistic"],
+    s6Title: "⑥ Date of Birth (optional)",
+    s6Desc: "If provided, we analyze your Five Elements (Saju) balance and reflect complementary Hanja. Time is optional.",
+    dobLabel: "Date of birth", tobLabel: "Time of birth (optional)",
+    s7Title: "⑦ Additional Notes",
+    memoPlaceholder: "Any styles to avoid or special requests?",
+  },
+  ja: {
+    eyebrow: "外国の名前 → 韓国名",
+    title: "ハングルで呼ばれる、あなたの名前",
+    subtitle: "元の名前の発音とニュアンスを活かしながら、ハングルで自然に呼べる名前を3つご提案します。",
+    note: "✦ ハングルで表記するとどうなる? 「ハングルの美しさ」を感じられる表記もあわせてご案内します。",
+    s1Title: "①お名前を入力(フルネーム)",
+    s1Desc: "姓を含むフルネームを入力してください。",
+    namePlaceholder: "例: Michael Scofield, Emma, Pierre",
+    s2Title: "②性別",
+    s2Desc: "性別に合わせた漢字・音韻で名前を設計します。正確な結果のため必ず選択してください。",
+    genderMale: "男性", genderFemale: "女性", genderNeutral: "中性(性別を問わない)",
+    s3Title: "③変換方式",
+    methods: ["発音重視(スギョンピル式)", "純ハングル名(ハヌル、セビョク)", "韓国スター風"],
+    s4Title: "④名前のスタイル",
+    s4Desc: "名前が持つ雰囲気を選んでください。性別と異なる設定でも構いません。",
+    nameStyles: ["男性的な名前", "女性的な名前", "男女兼用(中性的)な名前"],
+    s5Title: "⑤性格・雰囲気",
+    moods: ["活発な", "静かな", "カリスマ性のある", "温かい", "知的な", "芸術的な"],
+    s6Title: "⑥生年月日(任意)",
+    s6Desc: "生年月日を入力すると四柱推命の五行を分析し、不足する気を補う漢字を反映します。時間は任意です。",
+    dobLabel: "生年月日", tobLabel: "生まれた時間(任意)",
+    s7Title: "⑦追加のご要望",
+    memoPlaceholder: "避けたいスタイルや特別なご要望があればご記入ください。",
+  },
+  zh: {
+    eyebrow: "外国名字 → 韩国名字",
+    title: "属于你的韩文名字",
+    subtitle: "我们会在保留原名发音与韵味的基础上，为您设计3个可以用韩文自然称呼的名字。",
+    note: "✦ 用韩文书写会是什么样子？我们还会附上能感受到「韩文之美」的写法说明。",
+    s1Title: "①输入姓名(全名)",
+    s1Desc: "请输入包含姓氏的全名。",
+    namePlaceholder: "例如: Michael Scofield, Emma, Pierre",
+    s2Title: "②性别",
+    s2Desc: "我们会根据性别搭配合适的汉字与音韵来设计名字。为了得到准确的结果，请务必选择。",
+    genderMale: "男性", genderFemale: "女性", genderNeutral: "中性(不限性别)",
+    s3Title: "③转换方式",
+    methods: ["按发音转换(音译风格)", "纯韩文名字(하늘、새벽)", "韩国明星/艺人风格"],
+    s4Title: "④名字风格",
+    s4Desc: "请选择名字所散发的气质，可以与性别设置不同。",
+    nameStyles: ["偏男性化的名字", "偏女性化的名字", "中性/男女皆宜的名字"],
+    s5Title: "⑤性格 / 气质",
+    moods: ["活泼", "文静", "有魅力", "温暖", "知性", "艺术气息"],
+    s6Title: "⑥出生日期(选填)",
+    s6Desc: "填写出生日期后，我们会分析您的四柱五行，并在名字中融入能补足五行不足的汉字。出生时间为选填项。",
+    dobLabel: "出生日期", tobLabel: "出生时间(选填)",
+    s7Title: "⑦补充要求",
+    memoPlaceholder: "如有想避免的风格或特别要求，请在此填写。",
+  },
+  es: {
+    eyebrow: "Nombre extranjero → Nombre coreano",
+    title: "Tu nombre, en coreano",
+    subtitle: "Diseñamos 3 nombres coreanos que capturan el sonido y la esencia de tu nombre extranjero.",
+    note: "✦ ¿Cómo se vería tu nombre en hangul? Te mostramos también una escritura que revela toda la belleza del hangul.",
+    s1Title: "① Tu nombre completo",
+    s1Desc: "Ingresa tu nombre completo (nombre y apellido).",
+    namePlaceholder: "ej. Michael Scofield, Emma, Pierre",
+    s2Title: "② Género",
+    s2Desc: "Adaptamos los hanja y la fonética según el género. Selecciónalo para obtener resultados precisos.",
+    genderMale: "Masculino", genderFemale: "Femenino", genderNeutral: "Neutro",
+    s3Title: "③ Estilo de conversión",
+    methods: ["Por pronunciación (estilo coreano)", "Nombre coreano puro (Haneul, Saebyeok)", "Estilo celebridad coreana"],
+    s4Title: "④ Estilo del nombre",
+    s4Desc: "Elige el tono que debe transmitir el nombre; puede diferir de tu género.",
+    nameStyles: ["Con tendencia masculina", "Con tendencia femenina", "Unisex / Neutro"],
+    s5Title: "⑤ Personalidad / Ambiente",
+    moods: ["Enérgico", "Tranquilo", "Carismático", "Cálido", "Intelectual", "Artístico"],
+    s6Title: "⑥ Fecha de nacimiento (opcional)",
+    s6Desc: "Si la proporcionas, analizamos tu equilibrio de los Cinco Elementos (Saju) y reflejamos hanja complementarios. La hora es opcional.",
+    dobLabel: "Fecha de nacimiento", tobLabel: "Hora de nacimiento (opcional)",
+    s7Title: "⑦ Notas adicionales",
+    memoPlaceholder: "¿Algún estilo que evitar o solicitud especial?",
+  },
+  ru: {
+    eyebrow: "Иностранное имя → Корейское имя",
+    title: "Ваше имя на корейском",
+    subtitle: "Мы разработаем 3 корейских имени, сохраняющих звучание и настроение вашего иностранного имени.",
+    note: "✦ Как будет выглядеть ваше имя на хангыле? Мы также покажем написание, передающее «величие хангыля».",
+    s1Title: "① Введите полное имя",
+    s1Desc: "Введите полное имя, включая фамилию.",
+    namePlaceholder: "напр. Michael Scofield, Emma, Pierre",
+    s2Title: "② Пол",
+    s2Desc: "Мы подбираем ханча и фонетику в соответствии с полом. Пожалуйста, выберите для точного результата.",
+    genderMale: "Мужской", genderFemale: "Женский", genderNeutral: "Нейтральный",
+    s3Title: "③ Способ преобразования",
+    methods: ["По произношению (в корейском стиле)", "Чисто корейское имя (Ханыль, Сэбёк)", "В стиле корейской знаменитости"],
+    s4Title: "④ Стиль имени",
+    s4Desc: "Выберите тон, который должно передавать имя — он может отличаться от вашего пола.",
+    nameStyles: ["Более мужественный", "Более женственный", "Унисекс / нейтральный"],
+    s5Title: "⑤ Характер / настроение",
+    moods: ["Энергичный", "Спокойный", "Харизматичный", "Тёплый", "Интеллектуальный", "Творческий"],
+    s6Title: "⑥ Дата рождения (необязательно)",
+    s6Desc: "При указании даты рождения мы анализируем баланс пяти элементов (Саджу) и подбираем ханча, дополняющие недостающие элементы. Время рождения указывать не обязательно.",
+    dobLabel: "Дата рождения", tobLabel: "Время рождения (необязательно)",
+    s7Title: "⑦ Дополнительные пожелания",
+    memoPlaceholder: "Укажите стили, которых стоит избегать, или особые пожелания.",
+  },
+  fr: {
+    eyebrow: "Prénom étranger → Prénom coréen",
+    title: "Votre nom, en coréen",
+    subtitle: "Nous concevons 3 noms coréens qui capturent le son et l'essence de votre nom d'origine.",
+    note: "✦ À quoi ressemblerait votre nom en hangeul ? Nous vous montrons aussi une écriture qui révèle toute la beauté du hangeul.",
+    s1Title: "① Votre nom complet",
+    s1Desc: "Veuillez saisir votre nom complet (prénom et nom).",
+    namePlaceholder: "ex. Michael Scofield, Emma, Pierre",
+    s2Title: "② Genre",
+    s2Desc: "Nous adaptons les hanja et la phonétique selon le genre. Merci de le sélectionner pour un résultat précis.",
+    genderMale: "Masculin", genderFemale: "Féminin", genderNeutral: "Neutre",
+    s3Title: "③ Style de conversion",
+    methods: ["Par prononciation (style coréen)", "Nom coréen pur (Haneul, Saebyeok)", "Style célébrité coréenne"],
+    s4Title: "④ Style du nom",
+    s4Desc: "Choisissez la tonalité que le nom doit véhiculer — elle peut différer de votre genre.",
+    nameStyles: ["À tendance masculine", "À tendance féminine", "Unisexe / Neutre"],
+    s5Title: "⑤ Personnalité / Ambiance",
+    moods: ["Énergique", "Calme", "Charismatique", "Chaleureux", "Intellectuel", "Artistique"],
+    s6Title: "⑥ Date de naissance (facultatif)",
+    s6Desc: "Si vous la renseignez, nous analysons votre équilibre des Cinq Éléments (Saju) et intégrons des hanja complémentaires. L'heure est facultative.",
+    dobLabel: "Date de naissance", tobLabel: "Heure de naissance (facultatif)",
+    s7Title: "⑦ Remarques supplémentaires",
+    memoPlaceholder: "Un style à éviter ou une demande particulière ?",
+  },
+  ar: {
+    eyebrow: "اسم أجنبي → اسم كوري",
+    title: "اسمك، باللغة الكورية",
+    subtitle: "نصمم 3 أسماء كورية تحافظ على نطق ونكهة اسمك الأجنبي.",
+    note: "✦ كيف سيبدو اسمك بالهانغل؟ سنعرض لك أيضًا كتابة تُظهر جمال الهانغل الكوري.",
+    s1Title: "① أدخل اسمك الكامل",
+    s1Desc: "يرجى إدخال اسمك الكامل (الاسم الأول واسم العائلة).",
+    namePlaceholder: "مثال: Michael Scofield, Emma, Pierre",
+    s2Title: "② الجنس",
+    s2Desc: "نصمم الأحرف الصينية (هانجا) والنطق بما يتناسب مع الجنس. يرجى الاختيار للحصول على نتائج دقيقة.",
+    genderMale: "ذكر", genderFemale: "أنثى", genderNeutral: "محايد (بغض النظر عن الجنس)",
+    s3Title: "③ طريقة التحويل",
+    methods: ["حسب النطق (بالطراز الكوري)", "اسم كوري خالص (هانول، سيبيوك)", "بأسلوب نجوم كوريا"],
+    s4Title: "④ أسلوب الاسم",
+    s4Desc: "اختر النبرة التي تريد أن يحملها الاسم — يمكن أن تختلف عن جنسك.",
+    nameStyles: ["يميل إلى الذكورة", "يميل إلى الأنوثة", "محايد / يناسب الجنسين"],
+    s5Title: "⑤ الشخصية / الأجواء",
+    moods: ["نشيط", "هادئ", "كاريزمي", "دافئ", "ذكي", "فني"],
+    s6Title: "⑥ تاريخ الميلاد (اختياري)",
+    s6Desc: "عند إدخاله، نحلّل توازن العناصر الخمسة (سجو) ونعكس أحرف هانجا مكمّلة. وقت الميلاد اختياري.",
+    dobLabel: "تاريخ الميلاد", tobLabel: "وقت الميلاد (اختياري)",
+    s7Title: "⑦ ملاحظات إضافية",
+    memoPlaceholder: "هل هناك أسلوب تريد تجنبه أو طلب خاص؟",
+  },
+  hi: {
+    eyebrow: "विदेशी नाम → कोरियाई नाम",
+    title: "कोरियाई में आपका नाम",
+    subtitle: "हम आपके मूल नाम की ध्वनि और भाव को बनाए रखते हुए 3 कोरियाई नाम डिज़ाइन करते हैं।",
+    note: "✦ हांगुल में आपका नाम कैसा दिखेगा? हम हर नाम के साथ हांगुल की सुंदरता दर्शाने वाला लेखन भी दिखाते हैं।",
+    s1Title: "① अपना पूरा नाम दर्ज करें",
+    s1Desc: "कृपया उपनाम सहित अपना पूरा नाम दर्ज करें।",
+    namePlaceholder: "उदा. Michael Scofield, Emma, Pierre",
+    s2Title: "② लिंग",
+    s2Desc: "हम लिंग के अनुसार हान्जा और उच्चारण चुनते हैं। सटीक परिणाम के लिए कृपया चुनें।",
+    genderMale: "पुरुष", genderFemale: "महिला", genderNeutral: "न्यूट्रल (लिंग निरपेक्ष)",
+    s3Title: "③ रूपांतरण शैली",
+    methods: ["उच्चारण के अनुसार (कोरियाई शैली)", "शुद्ध कोरियाई नाम (हानेउल, सैब्योक)", "कोरियाई सेलिब्रिटी शैली"],
+    s4Title: "④ नाम की शैली",
+    s4Desc: "नाम का भाव चुनें — यह आपके लिंग से अलग भी हो सकता है।",
+    nameStyles: ["पुरुष-प्रधान नाम", "स्त्री-प्रधान नाम", "यूनिसेक्स / न्यूट्रल नाम"],
+    s5Title: "⑤ व्यक्तित्व / भाव",
+    moods: ["ऊर्जावान", "शांत", "करिश्माई", "गर्मजोशी भरा", "बौद्धिक", "कलात्मक"],
+    s6Title: "⑥ जन्म तिथि (वैकल्पिक)",
+    s6Desc: "जन्म तिथि देने पर हम आपके पंचतत्व (साजू) संतुलन का विश्लेषण करके पूरक हान्जा शामिल करते हैं। समय बताना वैकल्पिक है।",
+    dobLabel: "जन्म तिथि", tobLabel: "जन्म का समय (वैकल्पिक)",
+    s7Title: "⑦ अतिरिक्त अनुरोध",
+    memoPlaceholder: "कोई शैली जिससे बचना है या कोई विशेष अनुरोध?",
+  },
+};
+
 // ── Category map (per language) ──────────────────────────────
 
 type CategoryInfo = {
@@ -1916,26 +2148,15 @@ export default function DesignPage() {
     ? ["세련된", "친근한", "강한", "우아한", "현대적", "클래식"]
     : ["Sophisticated", "Friendly", "Strong", "Elegant", "Modern", "Classic"];
 
-  const FTK_METHODS = lang === "ko"
-    ? ["발음대로 (석호필 스타일)", "순수 한글 이름 (하늘, 새벽)", "한국 배우/셀럽 느낌"]
-    : ["By pronunciation (Korean-style)", "Pure Korean name (Haneul, Saebyeok)", "Korean celebrity style"];
-  const FTK_GENDER_OPTIONS: Array<{ value: "남자" | "여자" | "중성"; label: string }> = lang === "ko"
-    ? [
-        { value: "남자", label: "남성" },
-        { value: "여자", label: "여성" },
-        { value: "중성", label: "중성 (성별 무관)" },
-      ]
-    : [
-        { value: "남자", label: "Male" },
-        { value: "여자", label: "Female" },
-        { value: "중성", label: "Neutral" },
-      ];
-  const FTK_NAME_STYLES = lang === "ko"
-    ? ["남성적인 이름", "여성적인 이름", "혼용 가능한 이름 (중성적)"]
-    : ["Masculine-leaning", "Feminine-leaning", "Unisex / Neutral"];
-  const FTK_MOODS = lang === "ko"
-    ? ["활발한", "조용한", "카리스마", "따뜻한", "지적인", "예술적"]
-    : ["Energetic", "Calm", "Charismatic", "Warm", "Intellectual", "Artistic"];
+  const ftk = FTK_COPY[lang];
+  const FTK_METHODS = ftk.methods;
+  const FTK_GENDER_OPTIONS: Array<{ value: "남자" | "여자" | "중성"; label: string }> = [
+    { value: "남자", label: ftk.genderMale },
+    { value: "여자", label: ftk.genderFemale },
+    { value: "중성", label: ftk.genderNeutral },
+  ];
+  const FTK_NAME_STYLES = ftk.nameStyles;
+  const FTK_MOODS = ftk.moods;
 
   // ── 한국이름 → 외국이름 전용 폼 ─────────────────────────
   if (isKTF) {
@@ -2029,20 +2250,16 @@ export default function DesignPage() {
           <div className="wink-chip">{ui.chip}</div>
           <section className="wink-panel" style={{ marginBottom: 24, padding: "28px 24px", background: heroBackground }}>
             <div style={{ fontSize: 11, letterSpacing: "0.14em", color: "rgba(201,168,76,0.75)", fontWeight: 700, marginBottom: 12, textTransform: "uppercase" }}>
-              {lang === "ko" ? "외국이름 → 한국이름" : "Foreign Name → Korean Name"}
+              {ftk.eyebrow}
             </div>
             <h1 className="wink-title" style={{ marginBottom: 8 }}>
-              {lang === "ko" ? "한글로 불릴 나만의 이름" : "Your Name, in Korean"}
+              {ftk.title}
             </h1>
             <p className="wink-sub">
-              {lang === "ko"
-                ? "외국 이름의 발음과 뉘앙스를 살리면서, 한글로 자연스럽게 불릴 수 있는 이름 3가지를 설계합니다."
-                : "We design 3 Korean names that capture the sound and feel of your foreign name."}
+              {ftk.subtitle}
             </p>
             <div style={{ marginTop: 14, padding: "12px 16px", borderRadius: 12, background: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.2)", fontSize: 13, color: "var(--gold-main)", lineHeight: 1.7 }}>
-              {lang === "ko"
-                ? "✦ 한글로 표기하면 어떻게 될까요? 이름마다 「한글의 위대함」을 느낄 수 있는 표기도 함께 안내합니다."
-                : "✦ See how beautifully your name looks in Hangul — the Korean script known for its elegance and logic."}
+              {ftk.note}
             </div>
           </section>
           <form onSubmit={handleFTKSubmit} className="wink-form">
@@ -2051,16 +2268,16 @@ export default function DesignPage() {
             {/* ① 이름 입력 (풀네임, 성씨 없음) */}
             <section className="wink-form-section">
               <div className="wink-section-head">
-                <h2 className="wink-section-title">{lang === "ko" ? "① 이름 입력 (풀네임)" : "① Your Full Name"}</h2>
+                <h2 className="wink-section-title">{ftk.s1Title}</h2>
                 <p className="wink-section-desc">
-                  {lang === "ko" ? "성씨를 포함한 풀네임을 입력해 주세요." : "Please enter your full name (first and last)."}
+                  {ftk.s1Desc}
                 </p>
               </div>
               <input
                 className="wink-input"
                 value={ftkName}
                 onChange={(e) => setFtkName(e.target.value)}
-                placeholder={lang === "ko" ? "예: Michael Scofield, Emma, Pierre" : "e.g. Michael Scofield, Emma, Pierre"}
+                placeholder={ftk.namePlaceholder}
                 required
               />
             </section>
@@ -2068,11 +2285,9 @@ export default function DesignPage() {
             {/* ② 성별 (필수) */}
             <section className="wink-form-section">
               <div className="wink-section-head">
-                <h2 className="wink-section-title">{lang === "ko" ? "② 성별" : "② Gender"}</h2>
+                <h2 className="wink-section-title">{ftk.s2Title}</h2>
                 <p className="wink-section-desc">
-                  {lang === "ko"
-                    ? "성별에 맞는 한자·음운을 반영해 이름을 설계합니다. 정확한 결과를 위해 꼭 선택해 주세요."
-                    : "We tailor Hanja and phonetics to match gender. Please select for accurate results."}
+                  {ftk.s2Desc}
                 </p>
               </div>
               <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
@@ -2103,7 +2318,7 @@ export default function DesignPage() {
             {/* ③ 변환 방식 */}
             <section className="wink-form-section">
               <div className="wink-section-head">
-                <h2 className="wink-section-title">{lang === "ko" ? "③ 변환 방식" : "③ Conversion Style"}</h2>
+                <h2 className="wink-section-title">{ftk.s3Title}</h2>
               </div>
               <ChipGroup chips={FTK_METHODS} selected={ftkMethod ? [ftkMethod] : []} onToggle={(c) => setFtkMethod(ftkMethod === c ? "" : c)} single />
             </section>
@@ -2111,11 +2326,9 @@ export default function DesignPage() {
             {/* ④ 이름 스타일 (성별 느낌) */}
             <section className="wink-form-section">
               <div className="wink-section-head">
-                <h2 className="wink-section-title">{lang === "ko" ? "④ 이름 스타일" : "④ Name Style"}</h2>
+                <h2 className="wink-section-title">{ftk.s4Title}</h2>
                 <p className="wink-section-desc">
-                  {lang === "ko"
-                    ? "이름이 풍기는 느낌을 선택해 주세요. 성별과 다르게 설정하셔도 괜찮습니다."
-                    : "Choose the tone the name should carry — it can differ from your gender."}
+                  {ftk.s4Desc}
                 </p>
               </div>
               <ChipGroup chips={FTK_NAME_STYLES} selected={ftkNameStyle ? [ftkNameStyle] : []} onToggle={(c) => setFtkNameStyle(ftkNameStyle === c ? "" : c)} single />
@@ -2124,7 +2337,7 @@ export default function DesignPage() {
             {/* ⑤ 성격/분위기 */}
             <section className="wink-form-section">
               <div className="wink-section-head">
-                <h2 className="wink-section-title">{lang === "ko" ? "⑤ 성격 / 분위기" : "⑤ Personality / Mood"}</h2>
+                <h2 className="wink-section-title">{ftk.s5Title}</h2>
               </div>
               <ChipGroup chips={FTK_MOODS} selected={ftkMood ? [ftkMood] : []} onToggle={(c) => setFtkMood(ftkMood === c ? "" : c)} single />
             </section>
@@ -2132,16 +2345,14 @@ export default function DesignPage() {
             {/* ⑥ 생년월일 (선택 — AI 성명학) */}
             <section className="wink-form-section">
               <div className="wink-section-head">
-                <h2 className="wink-section-title">{lang === "ko" ? "⑥ 생년월일 (선택)" : "⑥ Date of Birth (optional)"}</h2>
+                <h2 className="wink-section-title">{ftk.s6Title}</h2>
                 <p className="wink-section-desc">
-                  {lang === "ko"
-                    ? "생년월일을 입력하면 사주 오행을 분석해 부족한 기운을 보완하는 한자를 함께 반영합니다. 시간은 선택 사항입니다."
-                    : "If provided, we analyze your Five Elements (Saju) balance and reflect complementary Hanja. Time is optional."}
+                  {ftk.s6Desc}
                 </p>
               </div>
               <div className="wink-form-grid">
                 <div className="wink-field">
-                  <label>{lang === "ko" ? "생년월일" : "Date of birth"}</label>
+                  <label>{ftk.dobLabel}</label>
                   <input
                     type="date"
                     value={birthDate}
@@ -2150,7 +2361,7 @@ export default function DesignPage() {
                   />
                 </div>
                 <div className="wink-field">
-                  <label>{lang === "ko" ? "태어난 시간 (선택)" : "Time of birth (optional)"}</label>
+                  <label>{ftk.tobLabel}</label>
                   <input
                     type="time"
                     value={birthTime}
@@ -2164,14 +2375,14 @@ export default function DesignPage() {
             {/* ⑦ 추가 요청사항 */}
             <section className="wink-form-section">
               <div className="wink-section-head">
-                <h2 className="wink-section-title">{lang === "ko" ? "⑦ 추가 요청사항" : "⑦ Additional Notes"}</h2>
+                <h2 className="wink-section-title">{ftk.s7Title}</h2>
               </div>
               <textarea
                 className="wink-textarea"
                 rows={3}
                 value={ftkMemo}
                 onChange={(e) => setFtkMemo(e.target.value)}
-                placeholder={lang === "ko" ? "피하고 싶은 이름 스타일이나 특별한 요청이 있으면 적어 주세요." : "Any styles to avoid or special requests?"}
+                placeholder={ftk.memoPlaceholder}
               />
             </section>
 
