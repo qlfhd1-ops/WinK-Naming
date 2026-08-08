@@ -399,7 +399,7 @@ function ChipGroup({
   onToggle,
   single = false,
 }: {
-  chips: string[];
+  chips: readonly string[];
   selected: string[];
   onToggle: (chip: string) => void;
   single?: boolean;
