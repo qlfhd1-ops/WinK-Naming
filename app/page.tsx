@@ -10,6 +10,10 @@ const LANG_LABELS: Record<Lang, string> = {
   ko:"한국어", en:"English", ja:"日本語", zh:"中文",
   es:"Español", fr:"Français", ru:"Русский", ar:"العربية", hi:"हिन्दी",
 };
+const LANG_FLAGS: Record<Lang, string> = {
+  ko:"🇰🇷", en:"🇺🇸", ja:"🇯🇵", zh:"🇨🇳",
+  es:"🇪🇸", fr:"🇫🇷", ru:"🇷🇺", ar:"🇸🇦", hi:"🇮🇳",
+};
 
 const THEME = {
   "korean-name":  { accent: "#C9A84C", bg: "#0F1A3A", badge: "#1a2d5a" },
@@ -2162,7 +2166,7 @@ function ReturnBanner({
 // ── 메인 컴포넌트 ─────────────────────────────────────────
 export default function HomePage() {
   const router = useRouter();
-  const [lang, setLang] = useState<Lang>("ko");
+  const [lang, setLang] = useState<Lang>("en");
   const [selectedId, setSelectedId] = useState<CatId>("korean-name");
   const [cardIdx, setCardIdx] = useState(0);
   const [animKey, setAnimKey] = useState(0);
@@ -2266,8 +2270,15 @@ export default function HomePage() {
             <div style={{ fontSize: 9, color: "#AAA", letterSpacing: "0.14em" }}>WINK NAMING</div>
           </div>
         </button>
-        <button onClick={() => setShowLangPicker(true)} style={{ background: "rgba(27,42,94,0.07)", border: "1px solid rgba(27,42,94,0.16)", borderRadius: 10, padding: "8px 14px", fontSize: 13, color: "#1B2A5E", cursor: "pointer", display: "flex", alignItems: "center", gap: 5, fontWeight: 600, fontFamily: sans }}>
-          🌐 {lang.toUpperCase()}
+        <button
+          onClick={() => setShowLangPicker(true)}
+          className="lg-lang-btn"
+          aria-label="Change language"
+          style={{ background: "linear-gradient(135deg,#C9A84C,#B8953A)", border: "none", borderRadius: 24, padding: "10px 18px", fontSize: 14, color: "#FFFFFF", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontWeight: 800, fontFamily: sans, letterSpacing: "0.02em" }}
+        >
+          <span style={{ fontSize: 15 }}>{LANG_FLAGS[lang]}</span>
+          {lang.toUpperCase()}
+          <span style={{ fontSize: 9, opacity: 0.85 }}>▾</span>
         </button>
       </header>
 
@@ -2528,11 +2539,14 @@ export default function HomePage() {
       {/* ── 언어 선택 모달 ── */}
       {showLangPicker && (
         <div style={{ position: "fixed", inset: 0, zIndex: 100, background: "rgba(27,42,94,0.18)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center" }} onClick={() => setShowLangPicker(false)}>
-          <div style={{ background: "#FFFFFF", borderRadius: 20, padding: "28px 24px", width: "min(320px,90vw)", maxHeight: "80vh", overflowY: "auto", boxShadow: "0 24px 60px rgba(27,42,94,0.14)", border: "1px solid #E8E8E8" }} onClick={e => e.stopPropagation()}>
-            <div style={{ fontSize: 17, fontWeight: 900, color: "#1B2A5E", marginBottom: 18, fontFamily: serif }}>언어 선택 · Language</div>
+          <div style={{ background: "#FFFFFF", borderRadius: 20, padding: "28px 24px", width: "min(340px,90vw)", maxHeight: "80vh", overflowY: "auto", boxShadow: "0 24px 60px rgba(27,42,94,0.14)", border: "1px solid #E8E8E8" }} onClick={e => e.stopPropagation()}>
+            <div style={{ fontSize: 17, fontWeight: 900, color: "#1B2A5E", marginBottom: 4, fontFamily: serif }}>🌐 Select your language</div>
+            <div style={{ fontSize: 12, color: "#999", marginBottom: 18 }}>언어 선택 · Language</div>
             {LANGS.map(l => (
-              <button key={l} onClick={() => handleLangSelect(l)} style={{ display: "block", width: "100%", textAlign: "left", padding: "11px 16px", borderRadius: 12, marginBottom: 6, border: lang === l ? "2px solid #1B2A5E" : "1px solid #E8E8E8", background: lang === l ? "rgba(27,42,94,0.05)" : "transparent", cursor: "pointer", fontSize: 15, color: "#1B2A5E", fontWeight: lang === l ? 700 : 500, fontFamily: sans }}>
+              <button key={l} onClick={() => handleLangSelect(l)} style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", textAlign: "left", padding: "12px 16px", borderRadius: 12, marginBottom: 6, border: lang === l ? "2px solid #C9A84C" : "1px solid #E8E8E8", background: lang === l ? "rgba(201,168,76,0.08)" : "transparent", cursor: "pointer", fontSize: 15, color: "#1B2A5E", fontWeight: lang === l ? 700 : 500, fontFamily: sans }}>
+                <span style={{ fontSize: 20 }}>{LANG_FLAGS[l]}</span>
                 {LANG_LABELS[l]}
+                {lang === l && <span style={{ marginLeft: "auto", fontSize: 13, color: "#C9A84C" }}>✓</span>}
               </button>
             ))}
           </div>
@@ -2553,6 +2567,12 @@ export default function HomePage() {
           100% { transform: translateX(-33.333%); }
         }
         .marquee-track { animation: marqueeScroll 40s linear infinite; }
+        @keyframes lgLangPulse {
+          0%, 100% { box-shadow: 0 4px 14px rgba(201,168,76,0.45); }
+          50%      { box-shadow: 0 4px 22px rgba(201,168,76,0.85), 0 0 0 6px rgba(201,168,76,0.16); }
+        }
+        .lg-lang-btn { animation: lgLangPulse 2.4s ease-in-out infinite; }
+        .lg-lang-btn:hover { animation-play-state: paused; filter: brightness(1.05); }
       `}</style>
     </div>
   );
