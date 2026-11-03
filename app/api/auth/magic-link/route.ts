@@ -13,10 +13,9 @@ import { createClient } from "@supabase/supabase-js";
  * 매직링크의 목적지는 항상 wink-naming.com으로 강제한다.
  */
 
-// Vercel Production 환경변수 불일치로 "Invalid API key" 발생 — 확인될 때까지 직접 고정.
-const SUPABASE_URL = "https://cyntpbjhpklgzkiwbmph.supabase.co";
-const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5bnRwYmpocGtsZ3praXdibXBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5MzAzOTYsImV4cCI6MjA4NzUwNjM5Nn0.-821zOmHC7v3y8NzC1FJ1yc92Q5l1E77K3jDzp6P9fE";
+// anon 키는 공개 키 (비밀 아님) — 환경변수로 관리.
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 const CANONICAL_BASE_URL = "https://wink-naming.com";
 
@@ -40,6 +39,11 @@ export async function POST(req: NextRequest) {
 
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
       return NextResponse.json({ ok: false, error: "invalid email" }, { status: 400 });
+    }
+
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+      console.error("[magic-link] Supabase env vars missing");
+      return NextResponse.json({ ok: false, error: "server misconfigured" }, { status: 500 });
     }
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
