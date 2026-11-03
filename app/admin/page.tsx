@@ -32,7 +32,21 @@ type DashStats = {
   popularFamilyNames: NameCount[];
   recentOrders: OrderRow[];
   monthlyRevenue: MonthRevenue[];
+  totalLeads: number;
+  completedLeads: number;
+  droppedLeads: number;
+  leadCompletionRate: number;
 };
+type LeadRow = {
+  id: string;
+  created_at: string;
+  guest_email: string | null;
+  category: string;
+  lang: string;
+  status: string;
+  user_id: string | null;
+};
+const LEAD_STATUS_LABEL: Record<string, string> = { completed: "완료", started: "이탈(미완료)" };
 
 const CATEGORY_LABEL: Record<string, string> = {
   child: "아이 이름", brand: "브랜드명", pet: "반려동물",
@@ -109,6 +123,16 @@ export default function AdminPage() {
   const [loading,   setLoading]  = useState(false);
   const adminPwRef = useRef(""); // 비밀번호 인증 시 사용
 
+  // ── 리드 상세보기 (자세히 보기) ──────────────────────────
+  const [leadsOpen, setLeadsOpen] = useState(false);
+  const [leadsLoading, setLeadsLoading] = useState(false);
+  const [leadsErr, setLeadsErr] = useState("");
+  const [leads, setLeads] = useState<LeadRow[]>([]);
+  const [leadsTotal, setLeadsTotal] = useState(0);
+  const [leadsPage, setLeadsPage] = useState(1);
+  const [leadsStatusFilter, setLeadsStatusFilter] = useState<"all" | "completed" | "started">("all");
+  const LEADS_PAGE_SIZE = 20;
+
   // ── 인증: 비밀번호(우선) → Supabase 세션 순서로 시도 ──────────────────
   useEffect(() => {
     const check = async () => {
@@ -172,6 +196,41 @@ export default function AdminPage() {
       setStats(json.stats);
     } catch (e) { setStatsErr(e instanceof Error ? e.message : "서버 연결 실패"); }
     finally  { setLoading(false); }
+  };
+
+  const getAuthHeaders = (): Record<string, string> =>
+    adminPwRef.current
+      ? { "X-Admin-Password": adminPwRef.current }
+      : { "Authorization": `Bearer ${accessTokenRef.current}` };
+
+  const loadLeads = async (page = leadsPage, status = leadsStatusFilter) => {
+    setLeadsLoading(true);
+    setLeadsErr("");
+    try {
+      const res = await fetch(`/api/admin/leads?status=${status}&page=${page}&pageSize=${LEADS_PAGE_SIZE}`, {
+        headers: getAuthHeaders(),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.ok) { setLeadsErr(json.error ?? "리드 조회 실패"); return; }
+      setLeads(json.leads);
+      setLeadsTotal(json.total);
+      setLeadsPage(page);
+    } catch (e) {
+      setLeadsErr(e instanceof Error ? e.message : "서버 연결 실패");
+    } finally {
+      setLeadsLoading(false);
+    }
+  };
+
+  const toggleLeadsDetail = () => {
+    const next = !leadsOpen;
+    setLeadsOpen(next);
+    if (next && leads.length === 0) loadLeads(1, leadsStatusFilter);
+  };
+
+  const changeLeadsStatusFilter = (status: "all" | "completed" | "started") => {
+    setLeadsStatusFilter(status);
+    loadLeads(1, status);
   };
 
   const handleSignOut = async () => {
@@ -424,6 +483,132 @@ export default function AdminPage() {
                 </div>
               </Card>
             </div>
+
+            {/* ── 3.5. 리드 유입 & 이탈 추적 ─────────────────── */}
+            <Card style={{ marginBottom: 20 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                <SectionLabel>리드 유입 & 이탈 추적</SectionLabel>
+                <button
+                  type="button"
+                  onClick={toggleLeadsDetail}
+                  style={{
+                    padding: "6px 14px", borderRadius: 8,
+                    border: "1px solid rgba(201,168,76,0.3)",
+                    background: leadsOpen ? "rgba(201,168,76,0.12)" : "transparent",
+                    color: "rgba(201,168,76,0.9)", fontSize: 11, fontWeight: 700, cursor: "pointer",
+                  }}
+                >
+                  {leadsOpen ? "닫기" : "자세히 보기"}
+                </button>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 10, marginBottom: leadsOpen ? 18 : 0 }}>
+                {[
+                  { label: "총 리드 수", value: fmt(stats.totalLeads), accent: "rgba(100,160,255,0.95)" },
+                  { label: "완료", value: fmt(stats.completedLeads), accent: "rgba(100,210,120,0.95)" },
+                  { label: "이탈(미완료)", value: fmt(stats.droppedLeads), accent: "rgba(255,120,120,0.9)" },
+                  { label: "완료율", value: `${stats.leadCompletionRate}%`, accent: "rgba(201,168,76,0.95)" },
+                ].map((item) => (
+                  <div key={item.label} style={{ padding: "12px 14px", borderRadius: 12, background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                    <div style={{ fontSize: 20, fontWeight: 900, color: item.accent, fontVariantNumeric: "tabular-nums" }}>{item.value}</div>
+                    <div style={{ fontSize: 11, color: "rgba(200,218,248,0.5)", marginTop: 4 }}>{item.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              {leadsOpen && (
+                <div>
+                  {/* 상태 필터 */}
+                  <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
+                    {([
+                      { v: "all", l: "전체" },
+                      { v: "completed", l: "완료" },
+                      { v: "started", l: "이탈(미완료)" },
+                    ] as const).map((opt) => (
+                      <button
+                        key={opt.v}
+                        type="button"
+                        onClick={() => changeLeadsStatusFilter(opt.v)}
+                        style={{
+                          padding: "5px 12px", borderRadius: 999, fontSize: 11, fontWeight: 600, cursor: "pointer",
+                          border: `1px solid ${leadsStatusFilter === opt.v ? "rgba(201,168,76,0.5)" : "rgba(255,255,255,0.1)"}`,
+                          background: leadsStatusFilter === opt.v ? "rgba(201,168,76,0.12)" : "transparent",
+                          color: leadsStatusFilter === opt.v ? "rgba(201,168,76,0.95)" : "rgba(200,218,248,0.55)",
+                        }}
+                      >
+                        {opt.l}
+                      </button>
+                    ))}
+                  </div>
+
+                  {leadsErr && (
+                    <div style={{ fontSize: 12, color: "rgba(255,130,130,0.9)", marginBottom: 10 }}>{leadsErr}</div>
+                  )}
+                  {leadsLoading ? (
+                    <div style={{ fontSize: 12, color: "rgba(200,218,248,0.4)", padding: "16px 0", textAlign: "center" }}>불러오는 중...</div>
+                  ) : leads.length === 0 ? (
+                    <div style={{ fontSize: 12, color: "rgba(200,218,248,0.35)", padding: "16px 0", textAlign: "center" }}>데이터 없음</div>
+                  ) : (
+                    <>
+                      <div style={{
+                        display: "grid",
+                        gridTemplateColumns: "110px 1fr 100px 60px 90px",
+                        gap: 8, padding: "6px 10px",
+                        borderBottom: "1px solid rgba(255,255,255,0.06)",
+                        marginBottom: 4,
+                      }}>
+                        {["날짜", "이메일", "카테고리", "언어", "상태"].map((h) => (
+                          <div key={h} style={{ fontSize: 10, fontWeight: 700, color: "rgba(200,218,248,0.4)", letterSpacing: "0.06em", textTransform: "uppercase" }}>{h}</div>
+                        ))}
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 3, maxHeight: 360, overflowY: "auto" }}>
+                        {leads.map((lead) => (
+                          <div key={lead.id} style={{
+                            display: "grid", gridTemplateColumns: "110px 1fr 100px 60px 90px", gap: 8, alignItems: "center",
+                            padding: "8px 10px", borderRadius: 9,
+                            background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)",
+                          }}>
+                            <div style={{ fontSize: 11, color: "rgba(200,218,248,0.5)" }}>{fmtDate(lead.created_at)}</div>
+                            <div style={{ fontSize: 12, color: "#f0f5ff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                              {lead.guest_email ?? "—"}
+                            </div>
+                            <div style={{ fontSize: 11, color: "rgba(200,218,248,0.6)" }}>{CATEGORY_LABEL[lead.category] ?? lead.category}</div>
+                            <div style={{ fontSize: 11, color: "rgba(200,218,248,0.45)" }}>{lead.lang}</div>
+                            <div style={{
+                              fontSize: 11, fontWeight: 700,
+                              color: lead.status === "completed" ? "rgba(100,210,120,0.9)" : "rgba(255,150,150,0.9)",
+                            }}>
+                              {LEAD_STATUS_LABEL[lead.status] ?? lead.status}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* 페이지네이션 */}
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12 }}>
+                        <span style={{ fontSize: 11, color: "rgba(200,218,248,0.4)" }}>
+                          총 {fmt(leadsTotal)}건 중 {(leadsPage - 1) * LEADS_PAGE_SIZE + 1}–{Math.min(leadsPage * LEADS_PAGE_SIZE, leadsTotal)}
+                        </span>
+                        <div style={{ display: "flex", gap: 6 }}>
+                          <button
+                            type="button"
+                            disabled={leadsPage <= 1}
+                            onClick={() => loadLeads(leadsPage - 1, leadsStatusFilter)}
+                            style={{ padding: "4px 10px", borderRadius: 7, border: "1px solid rgba(255,255,255,0.1)", background: "transparent", color: leadsPage <= 1 ? "rgba(200,218,248,0.25)" : "rgba(200,218,248,0.7)", fontSize: 11, cursor: leadsPage <= 1 ? "not-allowed" : "pointer" }}
+                          >이전</button>
+                          <button
+                            type="button"
+                            disabled={leadsPage * LEADS_PAGE_SIZE >= leadsTotal}
+                            onClick={() => loadLeads(leadsPage + 1, leadsStatusFilter)}
+                            style={{ padding: "4px 10px", borderRadius: 7, border: "1px solid rgba(255,255,255,0.1)", background: "transparent", color: leadsPage * LEADS_PAGE_SIZE >= leadsTotal ? "rgba(200,218,248,0.25)" : "rgba(200,218,248,0.7)", fontSize: 11, cursor: leadsPage * LEADS_PAGE_SIZE >= leadsTotal ? "not-allowed" : "pointer" }}
+                          >다음</button>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+            </Card>
 
             {/* ── 4. 주문/결제 내역 테이블 ─────────────────── */}
             <Card style={{ marginBottom: 20 }}>

@@ -16,6 +16,7 @@ type BriefPayload = {
   needsDoorplatePackage: boolean;
   needsGiftCardPackage: boolean;
   lang: "ko" | "en" | "ja" | "zh" | "es";
+  guestEmail?: string;
 };
 
 type ResultRow = {
@@ -64,6 +65,7 @@ export async function POST(req: Request) {
     const brief = body?.brief as BriefPayload | undefined;
     const results = body?.results as ResultRow[] | undefined;
     const userId = typeof body?.userId === "string" ? body.userId : null;
+    const leadBriefId = typeof body?.leadBriefId === "string" ? body.leadBriefId : null;
 
     if (!brief || !brief.purpose || !brief.styleKeywords) {
       return NextResponse.json(
@@ -81,7 +83,7 @@ export async function POST(req: Request) {
 
     const supabase = getAdminClient();
 
-    const briefInsertRow = {
+    const briefRowFields = {
       user_id: userId,
       lang: brief.lang,
       category: brief.category,
@@ -97,16 +99,36 @@ export async function POST(req: Request) {
       needs_stamp_package: brief.needsStampPackage,
       needs_doorplate_package: brief.needsDoorplatePackage,
       needs_giftcard_package: brief.needsGiftCardPackage,
+      guest_email: brief.guestEmail || null,
+      status: "completed",
+      updated_at: new Date().toISOString(),
     };
 
-    const { data: briefRow, error: briefError } = await (supabase as any)
-      .from("naming_briefs")
-      .insert([briefInsertRow])
-      .select("id")
-      .single();
+    let briefRow: { id: string } | null = null;
+    let briefError: any = null;
+
+    if (leadBriefId) {
+      // 이미 /api/brief/start 에서 생성된 리드 row를 완료 상태로 업데이트
+      const { data, error } = await (supabase as any)
+        .from("naming_briefs")
+        .update(briefRowFields)
+        .eq("id", leadBriefId)
+        .select("id")
+        .single();
+      briefRow = data;
+      briefError = error;
+    } else {
+      const { data, error } = await (supabase as any)
+        .from("naming_briefs")
+        .insert([briefRowFields])
+        .select("id")
+        .single();
+      briefRow = data;
+      briefError = error;
+    }
 
     if (briefError || !briefRow?.id) {
-      console.error("[brief insert error]", briefError);
+      console.error("[brief insert/update error]", briefError);
       return NextResponse.json(
         {
           ok: false,

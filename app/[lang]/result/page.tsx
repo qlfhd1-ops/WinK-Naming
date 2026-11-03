@@ -1442,6 +1442,7 @@ export default function ResultPage() {
   const [selectedPackage, setSelectedPackage] = useState<PackageType | "">("");
   const [message, setMessage] = useState("");
   const [briefId, setBriefId] = useState("");
+  const [leadBriefId, setLeadBriefId] = useState("");
   const [isSavingResult, setIsSavingResult] = useState(false);
   const [isSavingPackage, setIsSavingPackage] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
@@ -1497,6 +1498,7 @@ export default function ResultPage() {
   const [purchaseTab, setPurchaseTab] = useState<"single" | "bundle">("single");
 
   const hasCalledGPT = useRef(false);
+  const hasCapturedLead = useRef(false);
   const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null);
 
   useEffect(() => {
@@ -1570,6 +1572,32 @@ export default function ResultPage() {
     } catch { /* ignore */ }
     setBriefLoaded(true);
   }, [lang]);
+
+  // 리드 조기 캡처 — 이름 생성 완료 여부와 무관하게, 폼 제출 즉시 status='started'로 저장.
+  // 사용자가 결과를 기다리지 않고 이탈해도 이 row가 남아 대시보드 이탈 추적에 쓰인다.
+  useEffect(() => {
+    if (!briefLoaded || !brief || hasCapturedLead.current) return;
+    hasCapturedLead.current = true;
+    const captureLead = async () => {
+      let uid: string | null = null;
+      try {
+        if (supabaseRef.current) {
+          const { data: { user } } = await supabaseRef.current.auth.getUser();
+          uid = user?.id ?? null;
+        }
+      } catch { /* ignore */ }
+      try {
+        const res = await fetch("/api/brief/start", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ brief, userId: uid }),
+        });
+        const json = await res.json();
+        if (res.ok && json?.ok) setLeadBriefId(String(json.briefId ?? ""));
+      } catch { /* ignore — 리드 캡처 실패는 메인 플로우를 막지 않음 */ }
+    };
+    captureLead();
+  }, [briefLoaded, brief]);
 
   // GPT streaming call
   useEffect(() => {
@@ -1727,7 +1755,7 @@ export default function ResultPage() {
         const res = await fetch("/api/brief", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ brief, results: resultRows, userId }),
+          body: JSON.stringify({ brief, results: resultRows, userId, leadBriefId: leadBriefId || undefined }),
         });
         const json = await res.json();
         if (!res.ok || !json?.ok) throw new Error(json?.error || ui.saveFailed);
@@ -1740,7 +1768,7 @@ export default function ResultPage() {
       }
     };
     save();
-  }, [brief, results, briefId, isSavingResult, ui.saving, ui.saveDone, ui.saveFailed]);
+  }, [brief, results, briefId, isSavingResult, leadBriefId, ui.saving, ui.saveDone, ui.saveFailed]);
 
   // Record free usage once briefId is saved, then show privacy → upgrade flow
   useEffect(() => {

@@ -2023,6 +2023,9 @@ export default function DesignPage() {
   const [ftkMood, setFtkMood] = useState("");
   const [ftkMemo, setFtkMemo] = useState("");
 
+  // 리드 캡처용 이메일 (필수)
+  const [guestEmail, setGuestEmail] = useState("");
+
   // Free text fields (used as fallback / additional)
   const [consentPrivacy, setConsentPrivacy] = useState(false);
   const [consentTerms, setConsentTerms] = useState(false);
@@ -2086,6 +2089,14 @@ export default function DesignPage() {
       setError(ui.requiredBirth);
       return;
     }
+    if (!guestEmail.trim()) {
+      setError(emailRequiredMsg);
+      return;
+    }
+    if (!isValidEmail(guestEmail)) {
+      setError(emailInvalidMsg);
+      return;
+    }
 
     const scriptFinal = selectedScript || form.preferredScript.trim();
 
@@ -2106,6 +2117,7 @@ export default function DesignPage() {
       gender: (gender || undefined) as BriefPayload["gender"],
       childOrder: childOrder || undefined,
       memo: form.memo.trim(),
+      guestEmail: guestEmail.trim(),
     };
 
     setError("");
@@ -2117,6 +2129,8 @@ export default function DesignPage() {
   const handleKTFSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!ktfName.trim()) { setError(lang === "ko" ? "한국 이름을 입력해 주세요." : "Please enter your Korean name."); return; }
+    if (!guestEmail.trim()) { setError(emailRequiredMsg); return; }
+    if (!isValidEmail(guestEmail)) { setError(emailInvalidMsg); return; }
     const payload: BriefPayload = {
       ...form,
       category: "korean_to_foreign",
@@ -2129,6 +2143,7 @@ export default function DesignPage() {
       targetCountry: ktfLang || "미국/영어권",
       preferredScript: "로마자",
       memo: ktfMemo.trim(),
+      guestEmail: guestEmail.trim(),
     };
     setError("");
     sessionStorage.setItem("winkNamingBrief", JSON.stringify(payload));
@@ -2139,6 +2154,8 @@ export default function DesignPage() {
     e.preventDefault();
     if (!ftkName.trim()) { setError(lang === "ko" ? "이름을 입력해 주세요." : "Please enter a name."); return; }
     if (!gender) { setError(lang === "ko" ? "성별을 선택해 주세요." : "Please select a gender."); return; }
+    if (!guestEmail.trim()) { setError(emailRequiredMsg); return; }
+    if (!isValidEmail(guestEmail)) { setError(emailInvalidMsg); return; }
 
     const styleFinal = [ftkNameStyle, ftkMood].filter(Boolean).join(", ") || "자연스러운";
 
@@ -2158,6 +2175,7 @@ export default function DesignPage() {
       birthDate: birthDate || undefined,
       birthTime: birthTime || undefined,
       originCountry: ftkCountry.trim() || undefined,
+      guestEmail: guestEmail.trim(),
     };
     setError("");
     sessionStorage.setItem("winkNamingBrief", JSON.stringify(payload));
@@ -2166,6 +2184,14 @@ export default function DesignPage() {
 
   const categoryMap = CATEGORY_MAP[lang];
   const catUi = categoryMap[category];
+
+  // ── 리드 캡처용 이메일 입력 공통 문구 ──────────────────
+  const emailLabel = lang === "ko" ? "이메일 (필수)" : lang === "ja" ? "メールアドレス（必須）" : lang === "zh" ? "电子邮箱（必填）" : "Email (Required)";
+  const emailDesc = lang === "ko" ? "결과를 저장하고 받아보시려면 이메일이 필요합니다." : lang === "ja" ? "結果を保存してお届けするためにメールアドレスが必要です。" : lang === "zh" ? "需要邮箱才能保存并接收结果。" : "We need your email to save and deliver your results.";
+  const emailPlaceholder = "example@email.com";
+  const emailRequiredMsg = lang === "ko" ? "이메일을 입력해 주세요." : lang === "ja" ? "メールアドレスを入力してください。" : lang === "zh" ? "请输入电子邮箱。" : "Please enter your email.";
+  const emailInvalidMsg = lang === "ko" ? "올바른 이메일 주소를 입력해 주세요." : lang === "ja" ? "正しいメールアドレスを入力してください。" : lang === "zh" ? "请输入正确的电子邮箱地址。" : "Please enter a valid email address.";
+  const isValidEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
 
   // ── KTF 전용 폼 상수 ──────────────────────────────────
   const KTF_METHODS = lang === "ko"
@@ -2259,6 +2285,22 @@ export default function DesignPage() {
                 value={ktfMemo}
                 onChange={(e) => setKtfMemo(e.target.value)}
                 placeholder={lang === "ko" ? "특별히 원하는 느낌이나 피하고 싶은 이름 스타일이 있으면 적어 주세요." : "Any special requests or styles to avoid?"}
+              />
+            </section>
+
+            {/* ⑥ 이메일 (필수) */}
+            <section className="wink-form-section">
+              <div className="wink-section-head">
+                <h2 className="wink-section-title">{emailLabel}</h2>
+                <p className="wink-section-desc">{emailDesc}</p>
+              </div>
+              <input
+                type="email"
+                className="wink-input"
+                value={guestEmail}
+                onChange={(e) => setGuestEmail(e.target.value)}
+                placeholder={emailPlaceholder}
+                required
               />
             </section>
 
@@ -2432,6 +2474,22 @@ export default function DesignPage() {
               />
             </section>
 
+            {/* ⑨ 이메일 (필수) */}
+            <section className="wink-form-section">
+              <div className="wink-section-head">
+                <h2 className="wink-section-title">{emailLabel}</h2>
+                <p className="wink-section-desc">{emailDesc}</p>
+              </div>
+              <input
+                type="email"
+                className="wink-input"
+                value={guestEmail}
+                onChange={(e) => setGuestEmail(e.target.value)}
+                placeholder={emailPlaceholder}
+                required
+              />
+            </section>
+
             <div className="wink-actions" style={{ marginTop: 16 }}>
               <button type="button" className="wink-secondary-btn" onClick={() => router.push(`/${lang}/category`)}>{ui.back}</button>
               <button type="submit" className="wink-primary-btn">{ui.start}</button>
@@ -2575,10 +2633,32 @@ export default function DesignPage() {
                 </label>
               ))}
             </div>
+
+            {/* 이메일 (필수) */}
+            <div style={{ marginTop: 18 }}>
+              <label style={{ display: "block", fontSize: 14, fontWeight: 700, color: "var(--text-main)", marginBottom: 8 }}>
+                {emailLabel}
+              </label>
+              <p style={{ fontSize: 12.5, color: "var(--text-dim)", marginBottom: 8 }}>{emailDesc}</p>
+              <input
+                type="email"
+                className="wink-input"
+                value={guestEmail}
+                onChange={(e) => setGuestEmail(e.target.value)}
+                placeholder={emailPlaceholder}
+                required
+              />
+            </div>
+
             <button
               type="button"
-              disabled={!consentPrivacy || !consentTerms}
-              onClick={() => setConsentDone(true)}
+              disabled={!consentPrivacy || !consentTerms || !guestEmail.trim() || !isValidEmail(guestEmail)}
+              onClick={() => {
+                if (!guestEmail.trim()) { setError(emailRequiredMsg); return; }
+                if (!isValidEmail(guestEmail)) { setError(emailInvalidMsg); return; }
+                setError("");
+                setConsentDone(true);
+              }}
               style={{
                 marginTop: 20,
                 width: "100%",
@@ -2586,17 +2666,18 @@ export default function DesignPage() {
                 borderRadius: 14,
                 fontSize: 15,
                 fontWeight: 700,
-                cursor: !consentPrivacy || !consentTerms ? "not-allowed" : "pointer",
+                cursor: !consentPrivacy || !consentTerms || !guestEmail.trim() || !isValidEmail(guestEmail) ? "not-allowed" : "pointer",
                 border: "none",
-                background: !consentPrivacy || !consentTerms
+                background: !consentPrivacy || !consentTerms || !guestEmail.trim() || !isValidEmail(guestEmail)
                   ? "var(--line-strong)"
                   : "linear-gradient(135deg, var(--gold-main), #c9943a)",
-                color: !consentPrivacy || !consentTerms ? "var(--text-dim)" : "#fff",
+                color: !consentPrivacy || !consentTerms || !guestEmail.trim() || !isValidEmail(guestEmail) ? "var(--text-dim)" : "#fff",
                 transition: "all 0.2s ease",
               }}
             >
               {lang === "ko" ? "동의하고 이름 설계 시작하기" : lang === "ja" ? "同意して名前設計を始める" : lang === "zh" ? "同意并开始命名设计" : "Agree and Start Naming Design"}
             </button>
+            {error && <div style={{ color: "#e05c5c", fontSize: 13, marginTop: 10 }}>{error}</div>}
           </section>
         )}
 

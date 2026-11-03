@@ -21,6 +21,7 @@ export type BriefPayload = {
   needsGiftCardPackage: boolean;
   needsLogoPackage?: boolean;
   lang: "ko" | "en" | "ja" | "zh" | "es" | "ru" | "fr" | "ar" | "hi";
+  guestEmail?: string; // 리드 캡처용 연락처 (폼에서는 필수 입력)
 };
 
 export type NameCandidate = {

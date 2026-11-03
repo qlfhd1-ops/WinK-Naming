@@ -106,7 +106,8 @@ CREATE POLICY "naming_selections_select_own"
 
 -- ─── 4. naming_briefs ───────────────────────────────────────
 -- user_id가 NULL이면 비로그인(게스트) 작명. guest_email은 게스트의
--- 연락처를 남기기 위한 컬럼(현재 입력 폼에서는 아직 수집하지 않음).
+-- 연락처(리드 캡처용, 폼에서 필수 수집). status는 'started'(폼 제출 직후,
+-- 이름 생성 전 이탈 추적용)/'completed'(이름 생성까지 완료) 두 가지 값을 가짐.
 CREATE TABLE IF NOT EXISTS public.naming_briefs (
   id                         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id                    UUID REFERENCES auth.users(id) ON DELETE SET NULL,
@@ -126,7 +127,8 @@ CREATE TABLE IF NOT EXISTS public.naming_briefs (
   needs_giftcard_package     BOOLEAN NOT NULL DEFAULT true,
   created_at                 TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at                 TIMESTAMPTZ NOT NULL DEFAULT now(),
-  guest_email                TEXT
+  guest_email                TEXT,
+  status                     TEXT NOT NULL DEFAULT 'completed'
 );
 
 ALTER TABLE public.naming_briefs ENABLE ROW LEVEL SECURITY;
@@ -424,6 +426,8 @@ ALTER TABLE public.user_emails ENABLE ROW LEVEL SECURITY;
 
 -- ─── 인덱스 (위에서 테이블별로 생성한 것 제외, 나머지 전체) ────────
 CREATE INDEX IF NOT EXISTS idx_naming_briefs_user_id            ON public.naming_briefs(user_id);
+CREATE INDEX IF NOT EXISTS idx_naming_briefs_status             ON public.naming_briefs(status);
+CREATE INDEX IF NOT EXISTS idx_naming_briefs_guest_email         ON public.naming_briefs(guest_email);
 CREATE INDEX IF NOT EXISTS idx_naming_results_brief_id          ON public.naming_results(brief_id);
 CREATE INDEX IF NOT EXISTS idx_naming_results_user_id           ON public.naming_results(user_id);
 CREATE INDEX IF NOT EXISTS idx_naming_package_selections_brief_id ON public.naming_package_selections(brief_id);

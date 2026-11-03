@@ -85,17 +85,20 @@ export async function GET(req: Request) {
     revenueRes,
     monthlyRevenueRes,
     recentOrdersRes,
+    totalLeadsRes,
+    droppedLeadsRes,
   ] = await Promise.all([
-    // 총 이름 생성 수
-    supabase.from("naming_briefs").select("*", { count: "exact", head: true }),
-    // 최근 7일
+    // 총 이름 생성 수 (완료된 것만)
+    supabase.from("naming_briefs").select("*", { count: "exact", head: true }).eq("status", "completed"),
+    // 최근 7일 (완료된 것만)
     supabase.from("naming_briefs")
       .select("created_at")
+      .eq("status", "completed")
       .gte("created_at", weekAgoStart.toISOString()),
-    // 카테고리 분포
-    supabase.from("naming_briefs").select("category"),
-    // 성씨 분포
-    supabase.from("naming_briefs").select("family_name").not("family_name", "is", null),
+    // 카테고리 분포 (완료된 것만)
+    supabase.from("naming_briefs").select("category").eq("status", "completed"),
+    // 성씨 분포 (완료된 것만)
+    supabase.from("naming_briefs").select("family_name").eq("status", "completed").not("family_name", "is", null),
     // 유료 사용자 수
     supabase.from("user_plans")
       .select("*", { count: "exact", head: true })
@@ -119,6 +122,10 @@ export async function GET(req: Request) {
       .select("id, customer_name, customer_email, total_amount, currency, status, created_at")
       .order("created_at", { ascending: false })
       .limit(20),
+    // 총 리드 수 (완료+이탈 전체)
+    supabase.from("naming_briefs").select("*", { count: "exact", head: true }),
+    // 이탈한 리드 수 (폼 제출 후 이름 생성 전 이탈 — status='started')
+    supabase.from("naming_briefs").select("*", { count: "exact", head: true }).eq("status", "started"),
   ]);
 
   // ── 7일 일별 집계 ──
@@ -185,6 +192,14 @@ export async function GET(req: Request) {
     ? Math.round((totalOrders / totalGenerations) * 1000) / 10  // X.X%
     : 0;
 
+  // ── 리드 유입 & 이탈 ──
+  const totalLeads   = totalLeadsRes.count ?? 0;
+  const droppedLeads = droppedLeadsRes.count ?? 0;
+  const completedLeads = totalLeads - droppedLeads;
+  const leadCompletionRate = totalLeads > 0
+    ? Math.round((completedLeads / totalLeads) * 1000) / 10 // X.X%
+    : 0;
+
   return NextResponse.json({
     ok: true,
     stats: {
@@ -201,6 +216,10 @@ export async function GET(req: Request) {
       popularFamilyNames,
       recentOrders: recentOrdersRes.data ?? [],
       monthlyRevenue,
+      totalLeads,
+      completedLeads,
+      droppedLeads,
+      leadCompletionRate,
     },
   });
 }
