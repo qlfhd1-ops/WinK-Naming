@@ -310,7 +310,7 @@ const COPY = {
     purchaseReport: "Name Design Report PDF",
     purchaseStamp: "Seal Stamp",
     purchaseDoorplate: "Door Plate",
-    socialMsg: "Through the name you gifted,\na child who was once nameless can now receive a gift.\n윙크 네이밍 helps neglected children smile. 🤍",
+    socialMsg: "Through the name you gifted,\na child who was once nameless can now receive a gift.\nWink Naming helps neglected children smile. 🤍",
     arsTitle: "Not satisfied?",
     arsDesc: "If you've paid, we offer one free redesign as after-service.",
     arsBtn: "Request A/S Redesign",
@@ -334,7 +334,7 @@ const COPY = {
     selectThisName: "Select this name",
     nameSelectedBadge: "✓ Selected",
     selectionPrompt: "Please select one name. Packages and gift cards are available after selection.",
-    selectionTrustTitle: "윙크 네이밍 respects your choice",
+    selectionTrustTitle: "Wink Naming respects your choice",
     selectionTrustBody: "The name you selected will be carefully managed to avoid widespread use. Even under similar conditions, we strive to avoid recommending the same name to others.",
     level: { low: "Low", medium: "Medium", high: "High" },
     categoryMap: {
@@ -461,7 +461,7 @@ const COPY = {
     selectThisName: "选择此名字",
     nameSelectedBadge: "✓ 已选择",
     selectionPrompt: "请选择一个名字。选择后可使用套餐和礼品卡。",
-    selectionTrustTitle: "윙크 네이밍 尊重您的选择",
+    selectionTrustTitle: "Wink Naming 尊重您的选择",
     selectionTrustBody: "我们将严格管理您所选择的名字，确保不被大量推荐给他人。即使在相似条件下，也尽量避免推荐相同的名字。",
     level: { low: "低", medium: "中", high: "高" },
     categoryMap: {
@@ -496,7 +496,7 @@ const COPY = {
     purchaseReport: "姓名设计报告 PDF",
     purchaseStamp: "印章",
     purchaseDoorplate: "门牌",
-    socialMsg: "通过您赠送的名字，\n一个曾经没有名字的孩子可以收到礼物。\n윙크 네이밍正在帮助被忽视的孩子微笑。🤍",
+    socialMsg: "通过您赠送的名字，\n一个曾经没有名字的孩子可以收到礼物。\nWink Naming正在帮助被忽视的孩子微笑。🤍",
   },
   ja: {
     chip: `${BRAND_NAME} Report`,
@@ -604,7 +604,7 @@ const COPY = {
     selectThisName: "この名前を選ぶ",
     nameSelectedBadge: "✓ 選択済み",
     selectionPrompt: "気に入った名前を一つ選んでください。選択後にパッケージとギフトカードをご利用いただけます。",
-    selectionTrustTitle: "윙크 네이밍 はあなたの選択を尊重します",
+    selectionTrustTitle: "Wink Naming はあなたの選択を尊重します",
     selectionTrustBody: "選ばれた名前が多数に使用されないよう徹底管理し、同じ条件でも可能な限り同じ名前が推薦されないよう管理いたします。",
     level: { low: "低", medium: "中", high: "高" },
     categoryMap: {
@@ -639,7 +639,7 @@ const COPY = {
     purchaseReport: "名前設計レポート PDF",
     purchaseStamp: "印鑑",
     purchaseDoorplate: "表札",
-    socialMsg: "あなたが贈った名前を通じて、\n名もなく捨てられた子どもに贈り物ができます。\n윙크 네이밍は恵まれない子どもたちが笑顔になれるよう支援しています。🤍",
+    socialMsg: "あなたが贈った名前を通じて、\n名もなく捨てられた子どもに贈り物ができます。\nWink Namingは恵まれない子どもたちが笑顔になれるよう支援しています。🤍",
   },
   es: {
     chip: `${BRAND_NAME} Report`,
@@ -747,7 +747,7 @@ const COPY = {
     selectThisName: "Seleccionar este nombre",
     nameSelectedBadge: "✓ Seleccionado",
     selectionPrompt: "Por favor seleccione un nombre. Los paquetes y tarjetas regalo están disponibles después de la selección.",
-    selectionTrustTitle: "윙크 네이밍 respeta su elección",
+    selectionTrustTitle: "Wink Naming respeta su elección",
     selectionTrustBody: "El nombre que seleccione será cuidadosamente gestionado para evitar su uso generalizado. Incluso en condiciones similares, nos esforzamos por no recomendarlo a otros.",
     level: { low: "Bajo", medium: "Medio", high: "Alto" },
     categoryMap: {
@@ -782,7 +782,7 @@ const COPY = {
     purchaseReport: "Informe PDF de nombre",
     purchaseStamp: "Sello",
     purchaseDoorplate: "Placa de puerta",
-    socialMsg: "A través del nombre que regalaste,\nun niño sin nombre puede recibir un regalo.\n윙크 네이밍 ayuda a los niños olvidados a sonreír. 🤍",
+    socialMsg: "A través del nombre que regalaste,\nun niño sin nombre puede recibir un regalo.\nWink Naming ayuda a los niños olvidados a sonreír. 🤍",
   },
   ru: {
     chip: `${BRAND_NAME} Report`,
@@ -890,7 +890,7 @@ const COPY = {
     selectThisName: "Выбрать это имя",
     nameSelectedBadge: "✓ Выбрано",
     selectionPrompt: "Пожалуйста, выберите одно имя. Пакеты и подарочные карточки доступны после выбора.",
-    selectionTrustTitle: "윙크 네이밍 уважает ваш выбор",
+    selectionTrustTitle: "Wink Naming уважает ваш выбор",
     selectionTrustBody: "Выбранное вами имя будет тщательно управляться, чтобы избежать широкого использования. Даже в похожих условиях мы стараемся не рекомендовать одно и то же имя другим.",
     level: { low: "Низкий", medium: "Средний", high: "Высокий" },
     categoryMap: {
@@ -925,7 +925,7 @@ const COPY = {
     purchaseReport: "Отчёт PDF об имени",
     purchaseStamp: "Печать",
     purchaseDoorplate: "Табличка на дверь",
-    socialMsg: "Через подаренное вами имя\nребёнок, у которого не было имени, получает подарок.\n윙크 네이밍 помогает обездоленным детям улыбаться. 🤍",
+    socialMsg: "Через подаренное вами имя\nребёнок, у которого не было имени, получает подарок.\nWink Naming помогает обездоленным детям улыбаться. 🤍",
   },
   fr: {
     chip: `${BRAND_NAME} Report`,
@@ -1033,7 +1033,7 @@ const COPY = {
     selectThisName: "Sélectionner ce nom",
     nameSelectedBadge: "✓ Sélectionné",
     selectionPrompt: "Veuillez sélectionner un nom. Les forfaits et cartes cadeaux sont disponibles après la sélection.",
-    selectionTrustTitle: "윙크 네이밍 respecte votre choix",
+    selectionTrustTitle: "Wink Naming respecte votre choix",
     selectionTrustBody: "Le nom que vous avez sélectionné sera soigneusement géré pour éviter une utilisation généralisée. Même dans des conditions similaires, nous nous efforçons de ne pas recommander le même nom à d'autres.",
     level: { low: "Faible", medium: "Moyen", high: "Élevé" },
     categoryMap: {
@@ -1068,7 +1068,7 @@ const COPY = {
     purchaseReport: "Rapport PDF de nom",
     purchaseStamp: "Tampon",
     purchaseDoorplate: "Plaque de porte",
-    socialMsg: "Grâce au nom que vous avez offert,\nun enfant sans nom peut recevoir un cadeau.\n윙크 네이밍 aide les enfants négligés à sourire. 🤍",
+    socialMsg: "Grâce au nom que vous avez offert,\nun enfant sans nom peut recevoir un cadeau.\nWink Naming aide les enfants négligés à sourire. 🤍",
   },
   ar: {
     chip: `${BRAND_NAME} Report`,
@@ -1176,7 +1176,7 @@ const COPY = {
     selectThisName: "اختر هذا الاسم",
     nameSelectedBadge: "✓ محدد",
     selectionPrompt: "الرجاء اختيار اسم واحد. الحزم وبطاقات الهدايا متاحة بعد الاختيار.",
-    selectionTrustTitle: "윙크 네이밍 يحترم اختيارك",
+    selectionTrustTitle: "Wink Naming يحترم اختيارك",
     selectionTrustBody: "سيتم إدارة الاسم الذي اخترته بعناية لتجنب الاستخدام الواسع. حتى في ظروف مماثلة، نسعى لعدم التوصية بنفس الاسم للآخرين.",
     level: { low: "منخفض", medium: "متوسط", high: "مرتفع" },
     categoryMap: {
@@ -1211,7 +1211,7 @@ const COPY = {
     purchaseReport: "تقرير PDF للاسم",
     purchaseStamp: "ختم",
     purchaseDoorplate: "لوحة الباب",
-    socialMsg: "من خلال الاسم الذي أهديته،\nيمكن لطفل بلا اسم أن يتلقى هدية.\n윙크 네이밍 يساعد الأطفال المهملين على الابتسام. 🤍",
+    socialMsg: "من خلال الاسم الذي أهديته،\nيمكن لطفل بلا اسم أن يتلقى هدية.\nWink Naming يساعد الأطفال المهملين على الابتسام. 🤍",
   },
   hi: {
     chip: `${BRAND_NAME} Report`,
@@ -1319,7 +1319,7 @@ const COPY = {
     selectThisName: "यह नाम चुनें",
     nameSelectedBadge: "✓ चुना गया",
     selectionPrompt: "कृपया एक नाम चुनें। चुनाव के बाद पैकेज और उपहार कार्ड उपलब्ध होंगे।",
-    selectionTrustTitle: "윙크 네이밍 आपके चुनाव का सम्मान करता है",
+    selectionTrustTitle: "Wink Naming आपके चुनाव का सम्मान करता है",
     selectionTrustBody: "आपके द्वारा चुने गए नाम को व्यापक उपयोग से बचाने के लिए सावधानी से प्रबंधित किया जाएगा। समान परिस्थितियों में भी हम दूसरों को वही नाम सुझाने से बचते हैं।",
     level: { low: "कम", medium: "मध्यम", high: "अधिक" },
     categoryMap: {
@@ -1354,7 +1354,7 @@ const COPY = {
     purchaseReport: "नाम डिज़ाइन रिपोर्ट PDF",
     purchaseStamp: "मुहर",
     purchaseDoorplate: "दरवाज़े की पट्टिका",
-    socialMsg: "आपके दिए नाम के ज़रिए,\nएक बेनाम बच्चे को उपहार मिल सकता है।\n윙크 네이밍 उपेक्षित बच्चों को मुस्कुराने में मदद करता है। 🤍",
+    socialMsg: "आपके दिए नाम के ज़रिए,\nएक बेनाम बच्चे को उपहार मिल सकता है।\nWink Naming उपेक्षित बच्चों को मुस्कुराने में मदद करता है। 🤍",
   },
 } as const;
 

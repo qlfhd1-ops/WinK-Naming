@@ -2199,8 +2199,19 @@ export default function HomePage() {
         return;
       }
       const saved = localStorage.getItem(LANG_KEY);
-      if (saved && LANGS.includes(saved as Lang)) setLang(saved as Lang);
-    } catch { /* ignore */ }
+      if (saved && LANGS.includes(saved as Lang)) { setLang(saved as Lang); return; }
+
+      // 저장된 선택이 없으면 브라우저 언어(Accept-Language)로 자동 감지, 실패 시 en 유지
+      // 단, 1차 타깃이 외국인이므로 한국어 브라우저도 기본값은 영문(EN) 유지 — "ko"는 감지 대상에서 제외
+      const browserLangs = navigator.languages && navigator.languages.length
+        ? navigator.languages
+        : [navigator.language];
+      for (const bl of browserLangs) {
+        const code = bl.toLowerCase().split("-")[0];
+        if (code === "ko") continue;
+        if (LANGS.includes(code as Lang)) { setLang(code as Lang); return; }
+      }
+    } catch { /* ignore — fallback은 useState 기본값 "en" */ }
   }, []);
 
   useEffect(() => {
