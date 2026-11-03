@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { SERVICE_PRE_LAUNCH } from "@/lib/pricing";
 
 const LANG_KEY = "wink.naming.preferred-lang";
 const LANGS = ["ko","en","ja","zh","es","ru","fr","ar","hi"] as const;
@@ -202,6 +203,19 @@ const GOODS_DISCOUNT_BY_LANG: Record<string, string> = {
   ru: "10% скидка при заказе после дизайна имени",
   ar: "خصم 10% عند الطلب بعد تصميم الاسم",
   hi: "नाम डिज़ाइन के बाद ऑर्डर पर 10% छूट",
+};
+
+/** 사업자등록 전 — 가격 미표시, "추후 요금제 안내" 문구로 대체 (SERVICE_PRE_LAUNCH 참고) */
+const COMING_SOON_BY_LANG: Record<string, string> = {
+  ko: "추후 요금제 안내 (Coming Soon)",
+  en: "Pricing coming soon",
+  zh: "价格即将公布 (Coming Soon)",
+  ja: "価格は近日公開 (Coming Soon)",
+  es: "Precios próximamente",
+  fr: "Tarifs à venir",
+  ru: "Цены скоро появятся",
+  ar: "الأسعار قريبًا",
+  hi: "मूल्य जल्द आ रहा है",
 };
 
 type BaseCard = { cat: CatId; type: string };
@@ -2320,7 +2334,7 @@ export default function HomePage() {
               <span style={{ color: "#DDD" }}>·</span>
               <span style={{ color: "#C9A84C", fontWeight: 700 }}>{copy.free}</span>
               <span style={{ color: "#DDD" }}>·</span>
-              <span>{copy.later} {price.symbol}{price.amount}</span>
+              <span>{SERVICE_PRE_LAUNCH ? (COMING_SOON_BY_LANG[lang] ?? COMING_SOON_BY_LANG.ko) : `${copy.later} ${price.symbol}${price.amount}`}</span>
             </div>
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 20 }}>
@@ -2433,7 +2447,9 @@ export default function HomePage() {
               </button>
               <div style={{ fontSize: 13, color: "#888" }}>
                 {selectedId !== "goods"
-                  ? `${copy.noLogin} · ${copy.later} ${price.symbol}${price.amount}`
+                  ? (SERVICE_PRE_LAUNCH
+                      ? `${copy.noLogin} · ${COMING_SOON_BY_LANG[lang] ?? COMING_SOON_BY_LANG.ko}`
+                      : `${copy.noLogin} · ${copy.later} ${price.symbol}${price.amount}`)
                   : <span style={{ color: theme.accent, fontWeight: 700 }}>{GOODS_DISCOUNT_BY_LANG[lang] ?? GOODS_DISCOUNT_BY_LANG.ko}</span>
                 }
               </div>

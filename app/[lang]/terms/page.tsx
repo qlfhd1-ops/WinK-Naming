@@ -2,12 +2,38 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { isSupportedLang } from "@/lib/lang-config";
+import { SERVICE_PRE_LAUNCH } from "@/lib/pricing";
 
 export default function TermsPage() {
   const params = useParams();
   const router = useRouter();
   const rawLang = String(params.lang || "ko");
   const lang = isSupportedLang(rawLang) ? rawLang : "ko";
+
+  if (SERVICE_PRE_LAUNCH) {
+    return (
+      <main className="wink-page">
+        <div className="wink-container" style={{ maxWidth: 800 }}>
+          <div className="wink-chip">Legal</div>
+          <h1 className="wink-title" style={{ fontSize: "clamp(24px,4vw,40px)", marginBottom: 8 }}>
+            이용약관
+          </h1>
+          <section className="wink-panel" style={{ marginBottom: 32 }}>
+            <div className="wink-result-text" style={{ lineHeight: 2 }}>
+              아직 사업자등록 전인 서비스 준비 단계로, 이용약관은 사업자등록 완료 후 게시됩니다.
+              <br />
+              Terms of Service will be published once business registration is complete.
+            </div>
+          </section>
+          <div className="wink-actions">
+            <button type="button" className="wink-secondary-btn" onClick={() => router.push(`/${lang}`)}>
+              홈으로
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   const COMPANY = "[사업자명]";
   const EMAIL = "[이메일@example.com]";

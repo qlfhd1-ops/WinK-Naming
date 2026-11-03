@@ -5,6 +5,7 @@ import Script from "next/script";
 import { Noto_Serif_KR, Noto_Sans_KR } from "next/font/google";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import AudioPlayer from "@/components/AudioPlayer";
+import { SERVICE_PRE_LAUNCH } from "@/lib/pricing";
 
 const notoSerifKR = Noto_Serif_KR({
   weight: ["700", "900"],
@@ -79,6 +80,22 @@ export default function RootLayout({
         <Suspense fallback={null}>
           <GoogleAnalytics />
         </Suspense>
+        {SERVICE_PRE_LAUNCH && (
+          <div
+            style={{
+              width: "100%",
+              padding: "8px 16px",
+              background: "#1a2140",
+              color: "rgba(230,238,255,0.9)",
+              fontSize: 12,
+              fontWeight: 600,
+              textAlign: "center",
+              letterSpacing: "0.02em",
+            }}
+          >
+            서비스 준비 중 · Pre-launch Beta
+          </div>
+        )}
         {children}
         <AudioPlayer />
         {/* Kakao SDK — NEXT_PUBLIC_KAKAO_JS_KEY 설정 시 활성화 */}

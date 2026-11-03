@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/browser";
 import { AppLang, isSupportedLang } from "@/lib/lang-config";
 import { clearCart, getCartItems, type CartItem } from "@/lib/cart";
+import { SERVICE_PRE_LAUNCH } from "@/lib/pricing";
 
 // ─── Types ───────────────────────────────────────────────────
 type CustomerForm = {
@@ -610,6 +611,31 @@ export default function CheckoutPage() {
       if (calcTimeoutRef.current) clearTimeout(calcTimeoutRef.current);
     };
   }, [shipping.country, subtotal, loaded]);
+
+  if (SERVICE_PRE_LAUNCH) {
+    return (
+      <main className="wink-page">
+        <div className="wink-container" style={{ maxWidth: 800 }}>
+          <div className="wink-chip">Pre-launch</div>
+          <h1 className="wink-title" style={{ fontSize: "clamp(24px,4vw,40px)", marginBottom: 8 }}>
+            주문 준비 중
+          </h1>
+          <section className="wink-panel" style={{ marginBottom: 32 }}>
+            <div className="wink-result-text" style={{ lineHeight: 2 }}>
+              아직 사업자등록 전인 서비스 준비 단계로, 주문 기능은 사업자등록 완료 후 오픈됩니다.
+              <br />
+              Ordering is not yet available — it will open once business registration is complete.
+            </div>
+          </section>
+          <div className="wink-actions">
+            <button type="button" className="wink-secondary-btn" onClick={() => router.push(`/${lang}`)}>
+              홈으로
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   const shippingFee = shippingResult?.shipping_fee ?? 0;
   const total = subtotal + shippingFee;

@@ -87,6 +87,13 @@ export const SHOW_NAMEPLATE: Record<string, boolean> = {
 /** 로그인 시 월 무료 이름 생성 횟수 (베타 테스트 기간: 3회) */
 export const FREE_MONTHLY_QUOTA = 3;
 
+/**
+ * 사업자등록 전 "준비 중(Pre-launch)" 상태 플래그.
+ * true인 동안 가격 표시/결제 버튼(UpgradeModal·Stripe 체크아웃)을 UI에서 비활성화한다.
+ * 백엔드(Stripe webhook 등)는 그대로 유지하며, 사업자등록 완료 후 false로 전환하면 된다.
+ */
+export const SERVICE_PRE_LAUNCH = true;
+
 /** A/S 신청 가능 기간 (결제 후 일수) */
 export const ARS_ELIGIBLE_DAYS = 30;
 

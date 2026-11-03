@@ -4,7 +4,7 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { AppLang, isSupportedLang } from "@/lib/lang-config";
 import { createClient } from "@/lib/supabase/browser";
-import { PRICING } from "@/lib/pricing";
+import { PRICING, SERVICE_PRE_LAUNCH } from "@/lib/pricing";
 import SealStamp from "@/components/SealStamp";
 
 // ─── Types ───────────────────────────────────────────────
@@ -1221,6 +1221,31 @@ export default function OrderPage() {
     };
     load();
   }, []);
+
+  if (SERVICE_PRE_LAUNCH) {
+    return (
+      <main className="wink-page">
+        <div className="wink-container" style={{ maxWidth: 800 }}>
+          <div className="wink-chip">Pre-launch</div>
+          <h1 className="wink-title" style={{ fontSize: "clamp(24px,4vw,40px)", marginBottom: 8 }}>
+            주문 준비 중
+          </h1>
+          <section className="wink-panel" style={{ marginBottom: 32 }}>
+            <div className="wink-result-text" style={{ lineHeight: 2 }}>
+              아직 사업자등록 전인 서비스 준비 단계로, 도장·문패 주문 기능은 사업자등록 완료 후 오픈됩니다.
+              <br />
+              Ordering is not yet available — it will open once business registration is complete.
+            </div>
+          </section>
+          <div className="wink-actions">
+            <button type="button" className="wink-secondary-btn" onClick={() => router.push(`/${lang}`)}>
+              홈으로
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   const toggleProduct = (p: ProductType) => {
     setProducts((prev) => {

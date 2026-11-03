@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { PLANS, FREE_MONTHLY_QUOTA } from "@/lib/pricing";
+import { PLANS, FREE_MONTHLY_QUOTA, SERVICE_PRE_LAUNCH } from "@/lib/pricing";
 
 const CATEGORY_HEADLINE: Record<string, { ko: string; en: string }> = {
   child:              { ko: "소중한 아이의 이름이 완성됐습니다", en: "Your child's name has been crafted" },
@@ -16,6 +16,7 @@ const DEFAULT_HEADLINE = { ko: "당신의 이름을 선물합니다", en: "Your 
 const COPY = {
   ko: {
     betaNotice: "현재 베타 서비스 운영 중 · 베타 기간 특별 가격 적용",
+    preLaunchNotice: "서비스 준비 중 · 결제 기능은 곧 오픈됩니다",
     sub: (used: number, quota: number) =>
       `이번 달 ${quota}회 무료 체험 중 ${used}회를 사용하셨습니다.\n지금 업그레이드하시면 계속 이름을 설계하실 수 있습니다.`,
     freeLabel: "무료 체험",
@@ -23,6 +24,7 @@ const COPY = {
     perMonth: "/월",
     startBasic: "Basic 시작하기",
     startPremium: "Premium 시작하기",
+    comingSoon: "준비 중 (Coming Soon)",
     cancel: "나중에 결정하기",
     loading: "이동 중...",
     bestBadge: "BEST",
@@ -42,6 +44,7 @@ const COPY = {
   },
   en: {
     betaNotice: "Currently in Beta · Special beta pricing available",
+    preLaunchNotice: "Pre-launch · Payments open soon",
     sub: (used: number, quota: number) =>
       `You've used ${used} of ${quota} free trials this month.\nUpgrade now to continue designing names.`,
     freeLabel: "Free Trial",
@@ -49,6 +52,7 @@ const COPY = {
     perMonth: "/mo",
     startBasic: "Start Basic",
     startPremium: "Start Premium",
+    comingSoon: "Coming Soon",
     cancel: "Decide later",
     loading: "Redirecting...",
     bestBadge: "BEST",
@@ -100,6 +104,7 @@ export default function UpgradeModal({ lang, userId, email, usedCount, category,
   const headline = uiLang === "ko" ? headlineObj.ko : headlineObj.en;
 
   const handleUpgrade = async (plan: "basic" | "premium") => {
+    if (SERVICE_PRE_LAUNCH) return; // 사업자등록 전 — 결제 플로우 비활성화 (버튼도 disabled 처리됨)
     setLoading(plan);
     try {
       const res = await fetch("/api/stripe/checkout", {
@@ -169,7 +174,7 @@ export default function UpgradeModal({ lang, userId, email, usedCount, category,
           textAlign: "center",
           letterSpacing: "0.04em",
         }}>
-          ✦ {ui.betaNotice}
+          ✦ {SERVICE_PRE_LAUNCH ? ui.preLaunchNotice : ui.betaNotice}
         </div>
 
         {/* Hero */}
@@ -256,25 +261,27 @@ export default function UpgradeModal({ lang, userId, email, usedCount, category,
             <button
               type="button"
               onClick={() => handleUpgrade("basic")}
-              disabled={loading !== null}
+              disabled={SERVICE_PRE_LAUNCH || loading !== null}
               style={{
                 width: "100%",
                 padding: "12px 0",
                 borderRadius: 10,
                 border: "none",
-                background: loading === "basic"
-                  ? "rgba(91,164,212,0.5)"
-                  : "linear-gradient(135deg, #5BA4D4, #3880B0)",
+                background: SERVICE_PRE_LAUNCH
+                  ? "rgba(91,164,212,0.25)"
+                  : loading === "basic"
+                    ? "rgba(91,164,212,0.5)"
+                    : "linear-gradient(135deg, #5BA4D4, #3880B0)",
                 color: "#fff",
                 fontWeight: 700,
                 fontSize: 14,
-                cursor: loading !== null ? "not-allowed" : "pointer",
-                opacity: loading !== null && loading !== "basic" ? 0.45 : 1,
+                cursor: SERVICE_PRE_LAUNCH || loading !== null ? "not-allowed" : "pointer",
+                opacity: SERVICE_PRE_LAUNCH ? 0.6 : (loading !== null && loading !== "basic" ? 0.45 : 1),
                 transition: "opacity 0.2s",
                 letterSpacing: "0.02em",
               }}
             >
-              {loading === "basic" ? ui.loading : ui.startBasic}
+              {SERVICE_PRE_LAUNCH ? ui.comingSoon : loading === "basic" ? ui.loading : ui.startBasic}
             </button>
           </div>
 
@@ -334,26 +341,28 @@ export default function UpgradeModal({ lang, userId, email, usedCount, category,
             <button
               type="button"
               onClick={() => handleUpgrade("premium")}
-              disabled={loading !== null}
+              disabled={SERVICE_PRE_LAUNCH || loading !== null}
               style={{
                 width: "100%",
                 padding: "14px 0",
                 borderRadius: 10,
                 border: "none",
-                background: loading === "premium"
-                  ? "rgba(201,168,76,0.45)"
-                  : "linear-gradient(135deg, #C9A84C 0%, #A07828 100%)",
+                background: SERVICE_PRE_LAUNCH
+                  ? "rgba(201,168,76,0.25)"
+                  : loading === "premium"
+                    ? "rgba(201,168,76,0.45)"
+                    : "linear-gradient(135deg, #C9A84C 0%, #A07828 100%)",
                 color: "#070e28",
                 fontWeight: 900,
                 fontSize: 14,
-                cursor: loading !== null ? "not-allowed" : "pointer",
-                opacity: loading !== null && loading !== "premium" ? 0.45 : 1,
+                cursor: SERVICE_PRE_LAUNCH || loading !== null ? "not-allowed" : "pointer",
+                opacity: SERVICE_PRE_LAUNCH ? 0.6 : (loading !== null && loading !== "premium" ? 0.45 : 1),
                 transition: "opacity 0.2s",
                 letterSpacing: "0.02em",
-                boxShadow: loading !== "premium" ? "0 4px 18px rgba(201,168,76,0.30)" : "none",
+                boxShadow: !SERVICE_PRE_LAUNCH && loading !== "premium" ? "0 4px 18px rgba(201,168,76,0.30)" : "none",
               }}
             >
-              {loading === "premium" ? ui.loading : ui.startPremium}
+              {SERVICE_PRE_LAUNCH ? ui.comingSoon : loading === "premium" ? ui.loading : ui.startPremium}
             </button>
           </div>
         </div>
