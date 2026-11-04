@@ -434,6 +434,41 @@ CREATE TABLE IF NOT EXISTS public.user_emails (
 ALTER TABLE public.user_emails ENABLE ROW LEVEL SECURITY;
 -- (의도적으로 정책 없음 — service_role 전용)
 
+-- ─── 18. naming_reviews (실제 사용자 후기) ──────────────────
+-- 로그인한 사용자만 자신의 brief에 대해 후기를 작성할 수 있다.
+-- is_approved=true인 후기만 공개 조회 가능(관리자 승인 전에는 비공개).
+-- is_featured=true + is_approved=true인 후기가 메인 페이지에 노출된다.
+CREATE TABLE IF NOT EXISTS public.naming_reviews (
+  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id      UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  brief_id     UUID NOT NULL REFERENCES public.naming_briefs(id) ON DELETE CASCADE,
+  name_used    TEXT,
+  rating       INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
+  content      TEXT NOT NULL,
+  display_name TEXT,
+  country      TEXT,
+  lang         TEXT NOT NULL DEFAULT 'ko',
+  category     TEXT, -- 홈페이지 카테고리 탭(CatId)과 매핑되는 값. brief.category로부터 자동 산출.
+  is_approved  BOOLEAN NOT NULL DEFAULT false,
+  is_featured  BOOLEAN NOT NULL DEFAULT false,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (brief_id)
+);
+
+ALTER TABLE public.naming_reviews ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "naming_reviews_insert_own" ON public.naming_reviews;
+CREATE POLICY "naming_reviews_insert_own"
+  ON public.naming_reviews FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "naming_reviews_select_public" ON public.naming_reviews;
+CREATE POLICY "naming_reviews_select_public"
+  ON public.naming_reviews FOR SELECT USING (is_approved = true);
+
+CREATE INDEX IF NOT EXISTS idx_naming_reviews_user_id ON public.naming_reviews(user_id);
+CREATE INDEX IF NOT EXISTS idx_naming_reviews_is_featured ON public.naming_reviews(is_featured) WHERE is_featured = true;
+CREATE INDEX IF NOT EXISTS idx_naming_reviews_category ON public.naming_reviews(category);
+
 -- ─── 인덱스 (위에서 테이블별로 생성한 것 제외, 나머지 전체) ────────
 CREATE INDEX IF NOT EXISTS idx_naming_briefs_user_id            ON public.naming_briefs(user_id);
 CREATE INDEX IF NOT EXISTS idx_naming_briefs_status             ON public.naming_briefs(status);

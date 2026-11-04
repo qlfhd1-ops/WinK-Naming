@@ -1945,7 +1945,42 @@ function CategoryVideoCard({
 }
 
 // ── 고객 후기 데이터 (카테고리별) ────────────────────────
-type ReviewEntry = { name: string; flag: string; content: string; koreanName?: string };
+type ReviewEntry = { name: string; flag: string; content: string; koreanName?: string; rating?: number; isReal?: boolean; country?: string; dateLabel?: string };
+
+/** ISO 날짜 문자열 → "2026.10" 형식 */
+function formatReviewDate(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  return `${y}.${m}`;
+}
+
+// 실제 제출된 후기(naming_reviews) — /api/reviews/featured?grouped=1 응답 형태
+type RealReview = {
+  id: string;
+  name_used: string | null;
+  rating: number;
+  content: string;
+  display_name: string | null;
+  country: string | null;
+  lang: string;
+  category: string | null;
+  created_at: string;
+};
+
+function realReviewToEntry(r: RealReview): ReviewEntry {
+  return {
+    name: r.display_name || "Guest",
+    flag: "💬",
+    content: r.content,
+    koreanName: r.name_used || undefined,
+    rating: r.rating,
+    isReal: true,
+    country: r.country || undefined,
+    dateLabel: formatReviewDate(r.created_at),
+  };
+}
 
 const REVIEWS_BY_CAT: Record<CatId, ReviewEntry[]> = {
   "korean-name": [
@@ -2065,17 +2100,57 @@ const REVIEW_CONTENT_BY_LANG: Record<Lang, Record<CatId, string[]>> = {
   },
 };
 
-function getReviews(lang: Lang, catId: CatId): ReviewEntry[] {
+const REVIEWS_PAGE_SIZE = 6;
+
+/** 하루 단위로 바뀌는 시드값 — 가짜 후기 노출 순서를 주기적으로 로테이션하는 데 사용 */
+function getDayOfYearSeed(): number {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const diff = now.getTime() - start.getTime();
+  return Math.floor(diff / 86400000);
+}
+
+function getFakeReviews(lang: Lang, catId: CatId): ReviewEntry[] {
   const base = REVIEWS_BY_CAT[catId];
   const contents = (REVIEW_CONTENT_BY_LANG[lang] ?? REVIEW_CONTENT_BY_LANG.ko)[catId] ?? [];
-  return base.map((r, i) => ({ ...r, content: contents[i] ?? r.content }));
+  const merged = base.map((r, i) => ({ ...r, content: contents[i] ?? r.content }));
+  if (merged.length <= 1) return merged;
+  // 날짜 기반 로테이션: 매일 노출 순서가 바뀌도록 오프셋 적용
+  const offset = getDayOfYearSeed() % merged.length;
+  return [...merged.slice(offset), ...merged.slice(0, offset)];
+}
+
+/**
+ * 실제 후기를 우선 노출하고, 뒤이어 기획된(가짜) 후기를 붙인다.
+ * 한 번에 보여지는 건 페이지당 REVIEWS_PAGE_SIZE개뿐이며, 나머지는 페이지네이션으로 넘겨 본다.
+ * 실제 후기가 계속 쌓여도 전체 목록에 계속 추가되므로 데이터가 소실되지 않는다.
+ */
+function getReviews(lang: Lang, catId: CatId, realReviews: ReviewEntry[]): ReviewEntry[] {
+  const fake = getFakeReviews(lang, catId);
+  return [...realReviews, ...fake];
 }
 
 // ── 고객 후기 섹션 (카테고리 탭) ────────────────────────
 function ReviewsSection({ copy, lang }: { copy: HomeCopy; lang: Lang }) {
   const [activeTab, setActiveTab] = useState<CatId>("korean-name");
   const [fadeKey, setFadeKey] = useState(0);
+  const [page, setPage] = useState(1);
+  const [realByCategory, setRealByCategory] = useState<Record<string, ReviewEntry[]>>({});
   const serif = "var(--font-noto-serif-kr,'Noto Serif KR',serif)";
+
+  useEffect(() => {
+    fetch("/api/reviews/featured?grouped=1")
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data?.ok || !data.reviewsByCategory) return;
+        const mapped: Record<string, ReviewEntry[]> = {};
+        for (const [cat, rows] of Object.entries(data.reviewsByCategory as Record<string, RealReview[]>)) {
+          mapped[cat] = rows.map(realReviewToEntry);
+        }
+        setRealByCategory(mapped);
+      })
+      .catch(() => {});
+  }, []);
 
   const CAT_TAB_LABELS: Record<CatId, string> = {
     "korean-name": copy.cats["korean-name"].label,
@@ -2087,7 +2162,10 @@ function ReviewsSection({ copy, lang }: { copy: HomeCopy; lang: Lang }) {
     "goods":        copy.cats["goods"].label,
   };
 
-  const reviews = getReviews(lang, activeTab);
+  const allReviews = getReviews(lang, activeTab, realByCategory[activeTab] ?? []);
+  const totalPages = Math.max(1, Math.ceil(allReviews.length / REVIEWS_PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const reviews = allReviews.slice((safePage - 1) * REVIEWS_PAGE_SIZE, safePage * REVIEWS_PAGE_SIZE);
 
   return (
     <section style={{ background: "#FAFAF8", padding: "72px 0" }}>
@@ -2107,7 +2185,7 @@ function ReviewsSection({ copy, lang }: { copy: HomeCopy; lang: Lang }) {
             <button
               key={c.id}
               className={`lg-reviews-tab${activeTab === c.id ? " active" : ""}`}
-              onClick={() => { setActiveTab(c.id as CatId); setFadeKey(k => k + 1); }}
+              onClick={() => { setActiveTab(c.id as CatId); setFadeKey(k => k + 1); setPage(1); }}
             >
               {c.emoji} {CAT_TAB_LABELS[c.id as CatId]}
             </button>
@@ -2127,19 +2205,61 @@ function ReviewsSection({ copy, lang }: { copy: HomeCopy; lang: Lang }) {
             <div key={i} className="lg-review-grid-card">
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
                 <span style={{ fontSize: 28, lineHeight: 1 }}>{r.flag}</span>
-                <span style={{ fontSize: 15, fontWeight: 700, color: "#1B2A5E" }}>{r.name}</span>
+                <span style={{ fontSize: 15, fontWeight: 700, color: "#1B2A5E" }}>
+                  {r.name}{r.country ? <span style={{ fontWeight: 500, color: "#888" }}> · {r.country}</span> : null}
+                </span>
               </div>
               <div style={{ flex: 1, fontSize: 18, color: "#333333", lineHeight: 1.8, fontStyle: "italic", marginBottom: 18 }}>
                 &ldquo;{highlightContent(r.content, r.koreanName)}&rdquo;
               </div>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <div style={{ fontSize: 16, color: "#C9A84C", letterSpacing: 2 }}>★★★★★</div>
-                <div style={{ fontSize: 11, fontWeight: 700, color: "#FFF", background: "#1B2A5E", borderRadius: 20, padding: "3px 10px" }}>2026</div>
+                <div style={{ fontSize: 16, color: "#C9A84C", letterSpacing: 2 }}>{"★".repeat(r.rating ?? 5)}</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: "#FFF", background: r.isReal ? "#C9A84C" : "#1B2A5E", borderRadius: 20, padding: "3px 10px" }}>
+                  {r.dateLabel || "2026"}
+                </div>
               </div>
             </div>
             );
           })}
         </div>
+
+        {/* 페이지네이션 */}
+        {totalPages > 1 && (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 28 }}>
+            <button
+              type="button"
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={safePage <= 1}
+              style={{ width: 32, height: 32, borderRadius: 8, border: "1px solid #DDD", background: "#FFF", color: safePage <= 1 ? "#CCC" : "#1B2A5E", cursor: safePage <= 1 ? "default" : "pointer", fontSize: 14 }}
+            >
+              ‹
+            </button>
+            {Array.from({ length: totalPages }, (_, idx) => idx + 1).map(p => (
+              <button
+                key={p}
+                type="button"
+                onClick={() => setPage(p)}
+                style={{
+                  width: 32, height: 32, borderRadius: 8,
+                  border: p === safePage ? "1px solid #1B2A5E" : "1px solid #DDD",
+                  background: p === safePage ? "#1B2A5E" : "#FFF",
+                  color: p === safePage ? "#FFF" : "#555",
+                  fontSize: 13, fontWeight: 700, cursor: "pointer",
+                }}
+              >
+                {p}
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={safePage >= totalPages}
+              style={{ width: 32, height: 32, borderRadius: 8, border: "1px solid #DDD", background: "#FFF", color: safePage >= totalPages ? "#CCC" : "#1B2A5E", cursor: safePage >= totalPages ? "default" : "pointer", fontSize: 14 }}
+            >
+              ›
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );

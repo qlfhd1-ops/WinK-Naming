@@ -13,6 +13,7 @@ import { PRICING, PACKAGES, CATEGORY_PRICING, SHOW_SEAL, SHOW_NAMEPLATE } from "
 import { trackEvent } from "@/components/GoogleAnalytics";
 import UpgradeModal from "@/components/UpgradeModal";
 import PrivacyConsentModal from "@/components/PrivacyConsentModal";
+import ReviewModal, { REVIEW_BUTTON_LABEL } from "@/components/ReviewModal";
 import SealStamp from "@/components/SealStamp";
 import MultiLangNameCard from "@/components/MultiLangNameCard";
 import type { PlanId } from "@/lib/pricing";
@@ -1453,6 +1454,7 @@ export default function ResultPage() {
   const [planLoaded, setPlanLoaded] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
   const [nameCardIdx, setNameCardIdx] = useState<number | null>(null);
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
   const [userEmail, setUserEmail] = useState<string | undefined>(undefined);
@@ -2133,6 +2135,14 @@ export default function ResultPage() {
           setShowUpgradeModal(true);
         }}
         onCancel={() => setShowPrivacyModal(false)}
+      />
+    )}
+    {showReviewModal && briefId && (
+      <ReviewModal
+        lang={lang}
+        briefId={briefId}
+        nameUsed={selectedNameIndex !== null ? results[selectedNameIndex]?.name : undefined}
+        onClose={() => setShowReviewModal(false)}
       />
     )}
     {showUpgradeModal && userId && (
@@ -2841,6 +2851,28 @@ export default function ResultPage() {
               오늘 선택하신 이름은 24시간 동안 보관됩니다
             </div>
           </section>
+        )}
+
+        {/* 후기 남기기 */}
+        {selectedNameIndex !== null && results[selectedNameIndex] && briefId && userId && (
+          <div style={{ marginTop: 16, textAlign: "center" }}>
+            <button
+              type="button"
+              onClick={() => setShowReviewModal(true)}
+              style={{
+                padding: "10px 22px",
+                borderRadius: 12,
+                border: "1px solid rgba(201,168,76,0.4)",
+                background: "rgba(201,168,76,0.08)",
+                color: "rgba(230,210,150,0.95)",
+                fontSize: 13,
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              ✎ {REVIEW_BUTTON_LABEL[lang in REVIEW_BUTTON_LABEL ? (lang as keyof typeof REVIEW_BUTTON_LABEL) : "ko"]}
+            </button>
+          </div>
         )}
 
         {/* Package selection */}

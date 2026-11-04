@@ -299,6 +299,10 @@ export default function AdminPage() {
           </div>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
+          <button type="button" onClick={() => router.push("/admin/reviews")}
+            style={{ padding: "7px 16px", borderRadius: 8, border: "1px solid rgba(200,218,248,0.15)", background: "transparent", color: "rgba(200,218,248,0.65)", fontSize: 12, cursor: "pointer", fontWeight: 600 }}>
+            후기 관리
+          </button>
           <button type="button" onClick={loadStats} disabled={loading}
             style={{ padding: "7px 16px", borderRadius: 8, border: "1px solid rgba(200,218,248,0.15)", background: "transparent", color: "rgba(200,218,248,0.65)", fontSize: 12, cursor: "pointer", fontWeight: 600 }}>
             {loading ? "새로고침 중..." : "↻ 새로고침"}

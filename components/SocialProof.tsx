@@ -9,108 +9,99 @@ const UI_COPY: Record<AppLang, {
   countUnit: string;
   reviewsLabel: string;
   badges: [string, string, string];
+  emptyState: string;
+  guestFallback: string;
 }> = {
   ko: {
     countLabel: "지금까지 설계된 이름",
     countUnit: "개",
     reviewsLabel: "사용자 후기",
     badges: ["AI + 전문 작명가 검수", "개인정보 비공개 보장", "글로벌 표기 동시 설계"],
+    emptyState: "첫 번째 후기를 남겨보세요!",
+    guestFallback: "고객",
   },
   en: {
     countLabel: "Names designed so far",
     countUnit: "",
     reviewsLabel: "User Reviews",
     badges: ["AI + Expert Review", "Private & Confidential", "Global Spelling Included"],
+    emptyState: "Be the first to leave a review!",
+    guestFallback: "Guest",
   },
   ja: {
     countLabel: "これまでに設計された名前",
     countUnit: "件",
     reviewsLabel: "ユーザーレビュー",
     badges: ["AI＋専門家レビュー", "プライバシー保護", "グローバル表記対応"],
+    emptyState: "最初のレビューを投稿してみましょう！",
+    guestFallback: "ゲスト",
   },
   zh: {
     countLabel: "已设计的名字总数",
     countUnit: "个",
     reviewsLabel: "用户评价",
     badges: ["AI＋专家审核", "隐私保护", "全球写法同步设计"],
+    emptyState: "成为第一个留下评价的人吧！",
+    guestFallback: "客户",
   },
   es: {
     countLabel: "Nombres diseñados hasta ahora",
     countUnit: "",
     reviewsLabel: "Reseñas de usuarios",
     badges: ["IA + Revisión experta", "Privacidad garantizada", "Escritura global incluida"],
+    emptyState: "¡Sé el primero en dejar una reseña!",
+    guestFallback: "Invitado",
   },
   ru: {
     countLabel: "Имён разработано на сегодня",
     countUnit: "",
     reviewsLabel: "Отзывы пользователей",
     badges: ["ИИ + экспертная проверка", "Конфиденциальность", "Глобальное написание"],
+    emptyState: "Будьте первым, кто оставит отзыв!",
+    guestFallback: "Гость",
   },
   fr: {
     countLabel: "Noms conçus jusqu'à présent",
     countUnit: "",
     reviewsLabel: "Avis des utilisateurs",
     badges: ["IA + Révision experte", "Confidentialité garantie", "Orthographe mondiale"],
+    emptyState: "Soyez le premier à laisser un avis !",
+    guestFallback: "Invité",
   },
   ar: {
     countLabel: "الأسماء المصممة حتى الآن",
     countUnit: "",
     reviewsLabel: "آراء المستخدمين",
     badges: ["ذكاء اصطناعي + مراجعة خبراء", "خصوصية مضمونة", "كتابة عالمية"],
+    emptyState: "كن أول من يترك تقييماً!",
+    guestFallback: "ضيف",
   },
   hi: {
     countLabel: "अब तक डिज़ाइन किए गए नाम",
     countUnit: "",
     reviewsLabel: "उपयोगकर्ता समीक्षाएं",
     badges: ["AI + विशेषज्ञ समीक्षा", "गोपनीयता सुनिश्चित", "वैश्विक वर्तनी शामिल"],
+    emptyState: "सबसे पहले समीक्षा लिखें!",
+    guestFallback: "अतिथि",
   },
 };
 
-// ─── 더미 후기 데이터 ─────────────────────────────────────────
-const REVIEWS = [
-  {
-    name: "김지수 님",
-    tag: "아이 이름",
-    body: "AI가 한자·오행·음운까지 분석해준다는 게 놀라웠어요. 딸아이 이름으로 바로 결정했습니다.",
-    date: "2025.12",
-    stars: 5,
-  },
-  {
-    name: "박○○ 님",
-    tag: "브랜드명",
-    body: "카페 브랜드 이름을 찾고 있었는데 세 방향으로 설계해줘서 고민이 바로 해결됐어요. 주변 반응도 정말 좋아요.",
-    date: "2026.01",
-    stars: 5,
-  },
-  {
-    name: "Akira T.",
-    tag: "아이 이름 · 日本語",
-    body: "名前の意味だけでなく、漢字の画数や五行バランスまで詳しく説明してくれて感動しました。",
-    date: "2026.01",
-    stars: 5,
-  },
-  {
-    name: "Sarah K.",
-    tag: "Child Name · EN",
-    body: "I was amazed at how phonetic harmony, hanja strokes, and global usability were all considered together. Our baby's name is perfect.",
-    date: "2026.02",
-    stars: 5,
-  },
-  {
-    name: "이○○ 님",
-    tag: "개명",
-    body: "새로운 시작에 맞는 이름을 원했어요. 제 성씨와 완벽하게 어울리는 이름을 받아서 너무 만족스럽습니다.",
-    date: "2026.02",
-    stars: 5,
-  },
-  {
-    name: "李美华",
-    tag: "孩子姓名 · 中文",
-    body: "不仅给出了韩文名字，还提供了中文写法和拼音，对我们海外华人非常实用。",
-    date: "2026.03",
-    stars: 5,
-  },
-];
+interface Review {
+  id: string;
+  name_used: string | null;
+  rating: number;
+  content: string;
+  display_name: string | null;
+  country: string | null;
+  lang: string;
+  created_at: string;
+}
+
+function formatReviewDate(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
 
 const CATEGORY_LABEL: Record<string, string> = {
   child:   "아이 이름",
@@ -147,6 +138,7 @@ function useCountUp(target: number, duration = 1600): number {
 export default function SocialProof({ isLight, lang = "ko" }: { isLight: boolean; lang?: AppLang }) {
   const t = UI_COPY[lang] ?? UI_COPY.ko;
   const [totalCount, setTotalCount] = useState(0);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewIdx, setReviewIdx] = useState(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const displayCount = useCountUp(totalCount, 1800);
@@ -159,24 +151,33 @@ export default function SocialProof({ isLight, lang = "ko" }: { isLight: boolean
       .catch(() => setTotalCount(1000));
   }, []);
 
+  // 실제 후기 fetch
+  useEffect(() => {
+    fetch("/api/reviews/featured")
+      .then((r) => r.json())
+      .then((j) => { if (j.ok) setReviews(j.reviews ?? []); })
+      .catch(() => setReviews([]));
+  }, []);
+
   // 자동 슬라이드
   useEffect(() => {
+    if (reviews.length === 0) return;
     intervalRef.current = setInterval(() => {
-      setReviewIdx((i) => (i + 1) % REVIEWS.length);
+      setReviewIdx((i) => (i + 1) % reviews.length);
     }, 4500);
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, []);
+  }, [reviews.length]);
 
   const prev = () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
-    setReviewIdx((i) => (i - 1 + REVIEWS.length) % REVIEWS.length);
+    setReviewIdx((i) => (i - 1 + reviews.length) % reviews.length);
   };
   const next = () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
-    setReviewIdx((i) => (i + 1) % REVIEWS.length);
+    setReviewIdx((i) => (i + 1) % reviews.length);
   };
 
-  const review = REVIEWS[reviewIdx];
+  const review = reviews[reviewIdx];
 
   // ─── 스타일 토큰 ─────────────────────────────────────────────
   const panelBg = isLight
@@ -288,107 +289,128 @@ export default function SocialProof({ isLight, lang = "ko" }: { isLight: boolean
             >
               {t.reviewsLabel}
             </span>
-            <span
-              style={{
-                fontSize: 11,
-                color: textSoft,
-                padding: "2px 8px",
-                borderRadius: 999,
-                border: `1px solid ${isLight ? "rgba(160,120,60,0.20)" : "rgba(200,218,248,0.15)"}`,
-              }}
-            >
-              {reviewIdx + 1} / {REVIEWS.length}
-            </span>
+            {reviews.length > 0 && (
+              <span
+                style={{
+                  fontSize: 11,
+                  color: textSoft,
+                  padding: "2px 8px",
+                  borderRadius: 999,
+                  border: `1px solid ${isLight ? "rgba(160,120,60,0.20)" : "rgba(200,218,248,0.15)"}`,
+                }}
+              >
+                {reviewIdx + 1} / {reviews.length}
+              </span>
+            )}
           </div>
 
           {/* 화살표 */}
-          <div style={{ display: "flex", gap: 6 }}>
-            {(["←", "→"] as const).map((arrow, idx) => (
-              <button
-                key={arrow}
-                type="button"
-                onClick={idx === 0 ? prev : next}
-                aria-label={idx === 0 ? "이전 후기" : "다음 후기"}
-                style={{
-                  width: 30, height: 30,
-                  borderRadius: "50%",
-                  border: `1px solid ${isLight ? "rgba(160,120,60,0.25)" : "rgba(200,218,248,0.18)"}`,
-                  background: "transparent",
-                  color: textSoft,
-                  fontSize: 14,
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  lineHeight: 1,
-                }}
-              >
-                {arrow}
-              </button>
-            ))}
-          </div>
+          {reviews.length > 1 && (
+            <div style={{ display: "flex", gap: 6 }}>
+              {(["←", "→"] as const).map((arrow, idx) => (
+                <button
+                  key={arrow}
+                  type="button"
+                  onClick={idx === 0 ? prev : next}
+                  aria-label={idx === 0 ? "이전 후기" : "다음 후기"}
+                  style={{
+                    width: 30, height: 30,
+                    borderRadius: "50%",
+                    border: `1px solid ${isLight ? "rgba(160,120,60,0.25)" : "rgba(200,218,248,0.18)"}`,
+                    background: "transparent",
+                    color: textSoft,
+                    fontSize: 14,
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    lineHeight: 1,
+                  }}
+                >
+                  {arrow}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* 별점 */}
-        <div style={{ color: goldColor, fontSize: 13, marginBottom: 10, letterSpacing: 2 }}>
-          {"★".repeat(review.stars)}
-        </div>
+        {review ? (
+          <>
+            {/* 별점 */}
+            <div style={{ color: goldColor, fontSize: 13, marginBottom: 10, letterSpacing: 2 }}>
+              {"★".repeat(review.rating)}
+            </div>
 
-        {/* 후기 본문 */}
-        <p
-          style={{
-            fontSize: 15,
-            lineHeight: 1.82,
-            color: textMain,
-            margin: "0 0 14px",
-            minHeight: 60,
-          }}
-        >
-          &ldquo;{review.body}&rdquo;
-        </p>
+            {/* 후기 본문 */}
+            <p
+              style={{
+                fontSize: 15,
+                lineHeight: 1.82,
+                color: textMain,
+                margin: "0 0 14px",
+                minHeight: 60,
+              }}
+            >
+              &ldquo;{review.content}&rdquo;
+            </p>
 
-        {/* 하단: 이름 + 태그 + 날짜 */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            flexWrap: "wrap",
-          }}
-        >
-          <span style={{ fontSize: 13, fontWeight: 700, color: textMain }}>
-            {review.name}
-          </span>
-          <span
+            {/* 하단: 이름 + 태그 + 날짜 */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                flexWrap: "wrap",
+              }}
+            >
+              <span style={{ fontSize: 13, fontWeight: 700, color: textMain }}>
+                {review.display_name || t.guestFallback}
+              </span>
+              {(review.name_used || review.country) && (
+                <span
+                  style={{
+                    fontSize: 11,
+                    padding: "2px 10px",
+                    borderRadius: 999,
+                    background: isLight ? "rgba(201,168,76,0.1)" : "rgba(201,168,76,0.1)",
+                    border: `1px solid ${isLight ? "rgba(160,120,60,0.22)" : "rgba(201,168,76,0.28)"}`,
+                    color: isLight ? "rgba(120,80,10,0.8)" : goldColor,
+                    fontWeight: 600,
+                  }}
+                >
+                  {review.name_used || review.country}
+                </span>
+              )}
+              <span style={{ fontSize: 11, color: textSoft, marginLeft: "auto" }}>
+                {formatReviewDate(review.created_at)}
+              </span>
+            </div>
+
+            {/* 진행 바 */}
+            <div
+              style={{
+                position: "absolute",
+                bottom: 0, left: 0,
+                height: 2,
+                width: `${((reviewIdx + 1) / reviews.length) * 100}%`,
+                background: `linear-gradient(90deg, ${goldColor}, rgba(201,168,76,0.4))`,
+                transition: "width 0.4s ease",
+                borderRadius: "0 2px 0 0",
+              }}
+            />
+          </>
+        ) : (
+          <div
             style={{
-              fontSize: 11,
-              padding: "2px 10px",
-              borderRadius: 999,
-              background: isLight ? "rgba(201,168,76,0.1)" : "rgba(201,168,76,0.1)",
-              border: `1px solid ${isLight ? "rgba(160,120,60,0.22)" : "rgba(201,168,76,0.28)"}`,
-              color: isLight ? "rgba(120,80,10,0.8)" : goldColor,
-              fontWeight: 600,
+              padding: "24px 0",
+              textAlign: "center",
+              fontSize: 14,
+              color: textSoft,
             }}
           >
-            {review.tag}
-          </span>
-          <span style={{ fontSize: 11, color: textSoft, marginLeft: "auto" }}>
-            {review.date}
-          </span>
-        </div>
-
-        {/* 진행 바 */}
-        <div
-          style={{
-            position: "absolute",
-            bottom: 0, left: 0,
-            height: 2,
-            width: `${((reviewIdx + 1) / REVIEWS.length) * 100}%`,
-            background: `linear-gradient(90deg, ${goldColor}, rgba(201,168,76,0.4))`,
-            transition: "width 0.4s ease",
-            borderRadius: "0 2px 0 0",
-          }}
-        />
+            {t.emptyState}
+          </div>
+        )}
       </div>
     </div>
   );
