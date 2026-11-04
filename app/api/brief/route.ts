@@ -66,6 +66,7 @@ export async function POST(req: Request) {
     const results = body?.results as ResultRow[] | undefined;
     const userId = typeof body?.userId === "string" ? body.userId : null;
     const leadBriefId = typeof body?.leadBriefId === "string" ? body.leadBriefId : null;
+    const sessionToken = typeof body?.sessionToken === "string" ? body.sessionToken : null;
 
     if (!brief || !brief.purpose || !brief.styleKeywords) {
       return NextResponse.json(
@@ -102,6 +103,7 @@ export async function POST(req: Request) {
       guest_email: brief.guestEmail || null,
       status: "completed",
       updated_at: new Date().toISOString(),
+      ...(sessionToken ? { session_token: sessionToken } : {}),
     };
 
     let briefRow: { id: string } | null = null;
@@ -143,6 +145,7 @@ export async function POST(req: Request) {
     const resultRows = results.map((item) => ({
       brief_id: briefRow.id,
       user_id: userId,
+      session_token: sessionToken,
       rank_order: Number(item.rank_order) || 1,
       name: item.name,
       english: item.english || null,

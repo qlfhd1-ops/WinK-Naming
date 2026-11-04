@@ -15,6 +15,7 @@ type DirectOrderBody = {
   customer: { name: string; email: string };
   userId?: string | null;
   lang?: string;
+  sessionToken?: string | null;
 };
 
 const PRODUCT_META: Record<ProductType, { title: string; description: string; price: number }> = {
@@ -55,6 +56,7 @@ export async function POST(req: Request) {
     const customerEmail = body?.customer?.email?.trim() ?? "";
     const userId = body?.userId ?? null;
     const lang = body?.lang ?? "ko";
+    const sessionToken = typeof body?.sessionToken === "string" ? body.sessionToken : null;
 
     if (!name) {
       return NextResponse.json({ ok: false, error: "이름이 필요합니다." }, { status: 400 });
@@ -94,6 +96,7 @@ export async function POST(req: Request) {
         total_amount: total,
         currency: "KRW",
         status: "pending",
+        session_token: sessionToken,
       })
       .select("id")
       .single();

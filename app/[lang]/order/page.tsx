@@ -5,6 +5,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { AppLang, isSupportedLang } from "@/lib/lang-config";
 import { createClient } from "@/lib/supabase/browser";
 import { PRICING, SERVICE_PRE_LAUNCH } from "@/lib/pricing";
+import { getSessionToken } from "@/lib/session-token";
 import SealStamp from "@/components/SealStamp";
 
 // ─── Types ───────────────────────────────────────────────
@@ -1316,6 +1317,7 @@ export default function OrderPage() {
           },
           userId,
           lang,
+          sessionToken: userId ? undefined : getSessionToken(),
         }),
       });
 

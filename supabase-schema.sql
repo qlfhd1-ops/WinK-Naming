@@ -128,8 +128,12 @@ CREATE TABLE IF NOT EXISTS public.naming_briefs (
   created_at                 TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at                 TIMESTAMPTZ NOT NULL DEFAULT now(),
   guest_email                TEXT,
-  status                     TEXT NOT NULL DEFAULT 'completed'
+  status                     TEXT NOT NULL DEFAULT 'completed',
+  session_token              TEXT
 );
+
+-- 기존 DB에 이미 테이블이 있던 경우를 위한 재실행 안전 컬럼 추가
+ALTER TABLE public.naming_briefs ADD COLUMN IF NOT EXISTS session_token TEXT;
 
 ALTER TABLE public.naming_briefs ENABLE ROW LEVEL SECURITY;
 
@@ -167,8 +171,11 @@ CREATE TABLE IF NOT EXISTS public.naming_results (
   brand_risk         TEXT,
   caution            TEXT,
   score              INTEGER NOT NULL DEFAULT 0,
-  created_at         TIMESTAMPTZ NOT NULL DEFAULT now()
+  created_at         TIMESTAMPTZ NOT NULL DEFAULT now(),
+  session_token      TEXT
 );
+
+ALTER TABLE public.naming_results ADD COLUMN IF NOT EXISTS session_token TEXT;
 
 ALTER TABLE public.naming_results ENABLE ROW LEVEL SECURITY;
 
@@ -209,8 +216,11 @@ CREATE TABLE IF NOT EXISTS public.naming_orders (
   total_amount   INTEGER NOT NULL DEFAULT 0,
   currency       TEXT NOT NULL DEFAULT 'KRW',
   status         TEXT NOT NULL DEFAULT 'pending',
-  created_at     TIMESTAMPTZ NOT NULL DEFAULT now()
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+  session_token  TEXT
 );
+
+ALTER TABLE public.naming_orders ADD COLUMN IF NOT EXISTS session_token TEXT;
 
 ALTER TABLE public.naming_orders ENABLE ROW LEVEL SECURITY;
 
@@ -433,5 +443,13 @@ CREATE INDEX IF NOT EXISTS idx_naming_results_user_id           ON public.naming
 CREATE INDEX IF NOT EXISTS idx_naming_package_selections_brief_id ON public.naming_package_selections(brief_id);
 CREATE INDEX IF NOT EXISTS idx_naming_orders_user_id            ON public.naming_orders(user_id);
 CREATE INDEX IF NOT EXISTS idx_naming_order_items_order_id      ON public.naming_order_items(order_id);
+
+-- 비회원 데이터를 매직링크 로그인 후 병합하기 위한 session_token 인덱스
+CREATE INDEX IF NOT EXISTS naming_briefs_session_token_idx
+  ON public.naming_briefs(session_token) WHERE session_token IS NOT NULL;
+CREATE INDEX IF NOT EXISTS naming_results_session_token_idx
+  ON public.naming_results(session_token) WHERE session_token IS NOT NULL;
+CREATE INDEX IF NOT EXISTS naming_orders_session_token_idx
+  ON public.naming_orders(session_token) WHERE session_token IS NOT NULL;
 CREATE UNIQUE INDEX IF NOT EXISTS user_carts_user_id_idx        ON public.user_carts(user_id);
 CREATE UNIQUE INDEX IF NOT EXISTS user_shortlists_user_id_idx   ON public.user_shortlists(user_id);

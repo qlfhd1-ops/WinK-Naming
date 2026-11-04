@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/browser";
 import { AppLang, isSupportedLang } from "@/lib/lang-config";
 import { addCartItem } from "@/lib/cart";
 import { addToShortlist, isInShortlist } from "@/lib/shortlist";
+import { getSessionToken } from "@/lib/session-token";
 import NameGenerationScene from "@/components/NameGenerationScene";
 import { PRICING, PACKAGES, CATEGORY_PRICING, SHOW_SEAL, SHOW_NAMEPLATE } from "@/lib/pricing";
 import { trackEvent } from "@/components/GoogleAnalytics";
@@ -1590,7 +1591,7 @@ export default function ResultPage() {
         const res = await fetch("/api/brief/start", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ brief, userId: uid }),
+          body: JSON.stringify({ brief, userId: uid, sessionToken: uid ? undefined : getSessionToken() }),
         });
         const json = await res.json();
         if (res.ok && json?.ok) setLeadBriefId(String(json.briefId ?? ""));
@@ -1755,7 +1756,13 @@ export default function ResultPage() {
         const res = await fetch("/api/brief", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ brief, results: resultRows, userId, leadBriefId: leadBriefId || undefined }),
+          body: JSON.stringify({
+            brief,
+            results: resultRows,
+            userId,
+            leadBriefId: leadBriefId || undefined,
+            sessionToken: userId ? undefined : getSessionToken(),
+          }),
         });
         const json = await res.json();
         if (!res.ok || !json?.ok) throw new Error(json?.error || ui.saveFailed);

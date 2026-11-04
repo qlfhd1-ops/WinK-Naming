@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/browser";
 import { AppLang, isSupportedLang } from "@/lib/lang-config";
+import { getSessionToken, clearSessionToken } from "@/lib/session-token";
 
 /**
  * GET /auth/confirm
@@ -105,7 +106,7 @@ export default function AuthConfirmPage() {
     setErrorMsg("");
 
     const supabase = createClient();
-    const { error } = await supabase.auth.verifyOtp({
+    const { data, error } = await supabase.auth.verifyOtp({
       token_hash: params.token_hash,
       type: params.type as "magiclink" | "email",
     });
@@ -115,6 +116,24 @@ export default function AuthConfirmPage() {
       setStatus("error");
       setErrorMsg(ui.errorDefault);
       return;
+    }
+
+    // 로그인 전 게스트 상태에서 생성한 이름 결과/주문이 있다면
+    // session_token으로 찾아 방금 로그인한 계정에 연결한다.
+    try {
+      const sessionToken = getSessionToken();
+      const accessToken = data?.session?.access_token;
+      if (sessionToken && accessToken) {
+        await fetch("/api/auth/merge-session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sessionToken, accessToken }),
+        });
+        clearSessionToken();
+      }
+    } catch (mergeError) {
+      // 병합 실패는 로그인 자체를 막지 않는다 — 그냥 넘어간다.
+      console.error("[auth/confirm] merge-session error:", mergeError);
     }
 
     window.location.href = toCanonicalDest(params.redirect_to);

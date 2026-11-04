@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/browser";
 import { AppLang, isSupportedLang } from "@/lib/lang-config";
 import { clearCart, getCartItems, type CartItem } from "@/lib/cart";
 import { SERVICE_PRE_LAUNCH } from "@/lib/pricing";
+import { getSessionToken } from "@/lib/session-token";
 
 // ─── Types ───────────────────────────────────────────────────
 type CustomerForm = {
@@ -679,6 +680,7 @@ export default function CheckoutPage() {
           total,
           userId,
           lang,
+          sessionToken: userId ? undefined : getSessionToken(),
         }),
       });
 

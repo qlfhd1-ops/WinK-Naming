@@ -45,6 +45,7 @@ export async function POST(req: Request) {
     const body = await req.json();
     const brief = body?.brief as BriefPayload | undefined;
     const userId = typeof body?.userId === "string" ? body.userId : null;
+    const sessionToken = typeof body?.sessionToken === "string" ? body.sessionToken : null;
 
     if (!brief || !brief.purpose || !brief.styleKeywords) {
       return NextResponse.json(
@@ -73,6 +74,7 @@ export async function POST(req: Request) {
       needs_giftcard_package: brief.needsGiftCardPackage,
       guest_email: brief.guestEmail || null,
       status: "started",
+      session_token: sessionToken,
     };
 
     const { data: briefRow, error: briefError } = await (supabase as any)

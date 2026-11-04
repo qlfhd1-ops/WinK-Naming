@@ -25,6 +25,7 @@ type RequestBody = {
   total?: number;
   userId?: string | null;
   lang?: string;
+  sessionToken?: string | null;
 };
 
 const SUPPORTED_LANGS = new Set(["ko", "en", "ja", "zh", "es"]);
@@ -90,6 +91,7 @@ export async function POST(req: Request) {
     const items = Array.isArray(body?.items) ? body.items : [];
     const total = Number(body?.total ?? 0);
     const userId = typeof body?.userId === "string" ? body.userId : null;
+    const sessionToken = typeof body?.sessionToken === "string" ? body.sessionToken : null;
     const requestLang = normalizeLang(body?.lang);
 
     const customerName = customer?.name?.trim() || "";
@@ -156,6 +158,7 @@ export async function POST(req: Request) {
         total_amount: total,
         currency: "KRW",
         status: "pending",
+        session_token: sessionToken,
       })
       .select("id")
       .single();
