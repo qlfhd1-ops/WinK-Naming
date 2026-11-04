@@ -120,6 +120,8 @@ const COPY = {
     doorplateDesc: "공간에 이름의 의미를 담는 패키지",
     giftCard: "이름 선물 카드",
     giftCardDesc: "이름을 선물처럼 전달하는 카드형 결과물",
+    priceFree: "무료",
+    priceComingSoon: "준비중",
     trustTitle: "마지막 확인",
     trustBody1: "이 결과는 고객님이 입력하신 내용을 바탕으로 설계한 추천안입니다. 이름이 마음에 들지 않으면 패키지를 선택하지 않고 다시 설계하실 수 있습니다.",
     trustBody2: "브랜드명·상호명으로 확정하실 경우에는 최종 상표, 도메인, 법률 검토가 별도로 필요합니다.",
@@ -263,6 +265,8 @@ const COPY = {
     doorplateDesc: "A package that brings the name's meaning into your space",
     giftCard: "Name Gift Card",
     giftCardDesc: "A card-format result to gift the name",
+    priceFree: "Free",
+    priceComingSoon: "Coming Soon",
     trustTitle: "Final Notes",
     trustBody1: "These are design proposals based on your inputs. If none feel right, you can redesign without choosing any package.",
     trustBody2: "For brand or business use, separate trademark, domain, and legal review is required.",
@@ -406,6 +410,8 @@ const COPY = {
     doorplateDesc: "将名字意义融入空间的配套",
     giftCard: "姓名礼品卡",
     giftCardDesc: "以卡片形式赠送名字的产品",
+    priceFree: "免费",
+    priceComingSoon: "敬请期待",
     trustTitle: "最终确认",
     trustBody1: "本结果是基于您输入内容设计的推荐方案，若不满意可不选配套，重新设计。",
     trustBody2: "若作为品牌或商号名称，需另行进行商标、域名及法律审查。",
@@ -549,6 +555,8 @@ const COPY = {
     doorplateDesc: "空間に名前の意味を込めるパッケージ",
     giftCard: "ネーミングギフトカード",
     giftCardDesc: "名前をギフトとして贈るカード型商品",
+    priceFree: "無料",
+    priceComingSoon: "近日公開",
     trustTitle: "最終確認",
     trustBody1: "これはお客様の入力に基づいて設計した提案です。気に入らない場合はパッケージを選ばずに再設計できます。",
     trustBody2: "ブランド名・商号として確定する場合は、商標・ドメイン・法的審査が別途必要です。",
@@ -692,6 +700,8 @@ const COPY = {
     doorplateDesc: "Un paquete que lleva el significado del nombre a tu espacio",
     giftCard: "Tarjeta regalo de nombre",
     giftCardDesc: "Un resultado en formato tarjeta para regalar el nombre",
+    priceFree: "Gratis",
+    priceComingSoon: "Próximamente",
     trustTitle: "Notas finales",
     trustBody1: "Estas son propuestas de diseño basadas en sus entradas. Si ninguna le convence, puede rediseñar sin elegir ningún paquete.",
     trustBody2: "Para uso como marca o nombre comercial, se requiere revisión separada de marcas, dominios y aspectos legales.",
@@ -835,6 +845,8 @@ const COPY = {
     doorplateDesc: "Пакет, привносящий смысл имени в ваше пространство",
     giftCard: "Подарочная карточка с именем",
     giftCardDesc: "Результат в формате карточки для подарка",
+    priceFree: "Бесплатно",
+    priceComingSoon: "Скоро",
     trustTitle: "Финальные заметки",
     trustBody1: "Это дизайн-предложения на основе ваших данных. Если ни одно не подходит, можно перепроектировать без выбора пакета.",
     trustBody2: "Для использования как бренд или торговое наименование требуется отдельная проверка товарного знака, домена и юридических аспектов.",
@@ -978,6 +990,8 @@ const COPY = {
     doorplateDesc: "Un forfait qui apporte la signification du nom dans votre espace",
     giftCard: "Carte cadeau de nom",
     giftCardDesc: "Un résultat en format carte pour offrir le nom",
+    priceFree: "Gratuit",
+    priceComingSoon: "Bientôt disponible",
     trustTitle: "Notes finales",
     trustBody1: "Ce sont des propositions de design basées sur vos saisies. Si aucune ne convient, vous pouvez reconcevoir sans choisir de forfait.",
     trustBody2: "Pour une utilisation comme marque ou raison sociale, une vérification séparée des marques, domaines et aspects juridiques est requise.",
@@ -1121,6 +1135,8 @@ const COPY = {
     doorplateDesc: "حزمة تجلب معنى الاسم إلى مساحتك",
     giftCard: "بطاقة هدية الاسم",
     giftCardDesc: "نتيجة بصيغة بطاقة لإهداء الاسم",
+    priceFree: "مجاني",
+    priceComingSoon: "قريباً",
     trustTitle: "ملاحظات نهائية",
     trustBody1: "هذه مقترحات تصميم بناءً على مدخلاتك. إذا لم تناسبك أي منها، يمكنك إعادة التصميم دون اختيار حزمة.",
     trustBody2: "للاستخدام كعلامة تجارية أو اسم تجاري، يلزم إجراء مراجعة منفصلة للعلامات التجارية والنطاقات والجوانب القانونية.",
@@ -1264,6 +1280,8 @@ const COPY = {
     doorplateDesc: "नाम का अर्थ आपके स्थान में लाने वाला पैकेज",
     giftCard: "नाम उपहार कार्ड",
     giftCardDesc: "नाम उपहार देने के लिए कार्ड प्रारूप में परिणाम",
+    priceFree: "मुफ़्त",
+    priceComingSoon: "जल्द आ रहा है",
     trustTitle: "अंतिम नोट्स",
     trustBody1: "ये आपके इनपुट के आधार पर डिज़ाइन प्रस्ताव हैं। यदि कोई पसंद न आए तो बिना पैकेज चुने पुनः डिज़ाइन कर सकते हैं।",
     trustBody2: "ब्रांड या व्यवसाय नाम के रूप में उपयोग के लिए अलग ट्रेडमार्क, डोमेन और कानूनी समीक्षा आवश्यक है।",
@@ -1403,9 +1421,9 @@ function TrustPill({ text }: { text: string }) {
 }
 
 function PackageCard({
-  title, desc, price, selected, disabled, onClick, selectedText,
+  title, desc, priceLabel, selected, disabled, onClick, selectedText,
 }: {
-  title: string; desc: string; price: number;
+  title: string; desc: string; priceLabel: string;
   selected: boolean; disabled: boolean;
   onClick: () => void; selectedText: string;
 }) {
@@ -1419,7 +1437,7 @@ function PackageCard({
       {selected && <span className="wink-category-badge">{selectedText}</span>}
       <div className="wink-card-title" style={{ marginBottom: 8 }}>{title}</div>
       <div className="wink-card-desc" style={{ marginBottom: 10 }}>{desc}</div>
-      <div className="wink-score-pill">₩{price.toLocaleString()}</div>
+      <div className="wink-score-pill">{priceLabel}</div>
     </button>
   );
 }
@@ -2039,9 +2057,9 @@ export default function ResultPage() {
 
   // Package order: 이름 선물카드 → 인장/도장 → 문패 (카테고리에 따라 필터)
   const allPackageCards = [
-    { id: "giftcard" as PackageType, title: ui.giftCard, desc: ui.giftCardDesc, price: packagePrice("giftcard", category) },
-    { id: "stamp" as PackageType, title: ui.stamp, desc: ui.stampDesc, price: packagePrice("stamp") },
-    { id: "doorplate" as PackageType, title: ui.doorplate, desc: ui.doorplateDesc, price: packagePrice("doorplate") },
+    { id: "giftcard" as PackageType, title: ui.giftCard, desc: ui.giftCardDesc, price: packagePrice("giftcard", category), priceLabel: ui.priceFree },
+    { id: "stamp" as PackageType, title: ui.stamp, desc: ui.stampDesc, price: packagePrice("stamp"), priceLabel: ui.priceComingSoon },
+    { id: "doorplate" as PackageType, title: ui.doorplate, desc: ui.doorplateDesc, price: packagePrice("doorplate"), priceLabel: ui.priceComingSoon },
   ];
   const packageCards = allPackageCards.filter((pkg) => {
     if (pkg.id === "stamp" && !SHOW_SEAL[category]) return false;
@@ -2891,7 +2909,7 @@ export default function ResultPage() {
                 key={pkg.id}
                 title={pkg.title}
                 desc={pkg.desc}
-                price={pkg.price}
+                priceLabel={pkg.priceLabel}
                 selected={selectedPackage === pkg.id}
                 selectedText={ui.selected}
                 disabled={isSavingPackage || selectedNameIndex === null}
