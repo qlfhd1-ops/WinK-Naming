@@ -40,11 +40,13 @@ type DashStats = {
 type LeadRow = {
   id: string;
   created_at: string;
+  updated_at: string;
   guest_email: string | null;
   category: string;
   lang: string;
   status: string;
   user_id: string | null;
+  target_country: string | null;
 };
 const LEAD_STATUS_LABEL: Record<string, string> = { completed: "완료", started: "이탈(미완료)" };
 
@@ -552,19 +554,19 @@ export default function AdminPage() {
                     <>
                       <div style={{
                         display: "grid",
-                        gridTemplateColumns: "110px 1fr 100px 60px 90px",
+                        gridTemplateColumns: "95px 1fr 70px 80px 100px 90px",
                         gap: 8, padding: "6px 10px",
                         borderBottom: "1px solid rgba(255,255,255,0.06)",
                         marginBottom: 4,
                       }}>
-                        {["날짜", "이메일", "카테고리", "언어", "상태"].map((h) => (
+                        {["유입일", "이메일", "국적", "카테고리", "마지막 활동", "상태"].map((h) => (
                           <div key={h} style={{ fontSize: 10, fontWeight: 700, color: "rgba(200,218,248,0.4)", letterSpacing: "0.06em", textTransform: "uppercase" }}>{h}</div>
                         ))}
                       </div>
                       <div style={{ display: "flex", flexDirection: "column", gap: 3, maxHeight: 360, overflowY: "auto" }}>
                         {leads.map((lead) => (
                           <div key={lead.id} style={{
-                            display: "grid", gridTemplateColumns: "110px 1fr 100px 60px 90px", gap: 8, alignItems: "center",
+                            display: "grid", gridTemplateColumns: "95px 1fr 70px 80px 100px 90px", gap: 8, alignItems: "center",
                             padding: "8px 10px", borderRadius: 9,
                             background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)",
                           }}>
@@ -572,8 +574,11 @@ export default function AdminPage() {
                             <div style={{ fontSize: 12, color: "#f0f5ff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                               {lead.guest_email ?? "—"}
                             </div>
+                            <div style={{ fontSize: 11, color: "rgba(200,218,248,0.6)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                              {lead.target_country || "—"}
+                            </div>
                             <div style={{ fontSize: 11, color: "rgba(200,218,248,0.6)" }}>{CATEGORY_LABEL[lead.category] ?? lead.category}</div>
-                            <div style={{ fontSize: 11, color: "rgba(200,218,248,0.45)" }}>{lead.lang}</div>
+                            <div style={{ fontSize: 11, color: "rgba(200,218,248,0.45)" }}>{fmtDate(lead.updated_at)}</div>
                             <div style={{
                               fontSize: 11, fontWeight: 700,
                               color: lead.status === "completed" ? "rgba(100,210,120,0.9)" : "rgba(255,150,150,0.9)",

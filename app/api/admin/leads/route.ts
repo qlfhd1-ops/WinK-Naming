@@ -66,7 +66,10 @@ export async function GET(req: Request) {
 
   let query = supabase
     .from("naming_briefs")
-    .select("id, created_at, guest_email, category, lang, status, user_id", { count: "exact" })
+    .select(
+      "id, created_at, updated_at, guest_email, category, lang, status, user_id, target_country",
+      { count: "exact" }
+    )
     .order("created_at", { ascending: false })
     .range(from, to);
 
