@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { LANG_CONFIG, type AppLang, isSupportedLang } from "@/lib/lang-config";
 import { Sound } from "@/lib/sound";
 import { createClient } from "@/lib/supabase/browser";
+import WinkMark from "@/components/WinkMark";
 
 type ThemeMode = "light" | "dark";
 
@@ -184,11 +185,8 @@ export default function AppShell({
               cursor: "pointer",
             }}
           >
-            <span className="wink-brand-mark">
-              <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="16" cy="16" r="16" fill="#C0392B"/>
-                <text x="16" y="21" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">W</text>
-              </svg>
+            <span className="wink-brand-mark" style={{ background: "transparent", border: "none", boxShadow: "none" }}>
+              <WinkMark size={40} />
             </span>
 
             <span className="wink-brand-text">

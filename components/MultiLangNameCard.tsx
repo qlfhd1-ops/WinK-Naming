@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { toPng } from "html-to-image";
+import WinkMark from "@/components/WinkMark";
+import { PLAQUES, PLAQUE_KEYS, LIGHT_PLAQUE_KEYS, OHAENG_COLORS, type PlaqueKey } from "@/lib/plaques";
 
 export interface NameCardData {
   name: string;
@@ -27,6 +29,7 @@ export default function MultiLangNameCard({ data, lang = "ko", onClose }: Props)
   const overlayRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [plaqueKey, setPlaqueKey] = useState<PlaqueKey>("giwa");
   // closing: true → opacity 0 트랜지션 시작, onTransitionEnd에서 onClose() 호출
   const [closing, setClosing] = useState(false);
   // 중복 호출 방지
@@ -34,6 +37,13 @@ export default function MultiLangNameCard({ data, lang = "ko", onClose }: Props)
 
   const isKo = lang === "ko";
   const koreanRomanized = data.english || data.name;
+  const plaque = PLAQUES[plaqueKey];
+  const isLight = LIGHT_PLAQUE_KEYS.includes(plaqueKey);
+  const textPrimary = isLight ? "#1D1B18" : "#F3EEE4";
+  const textSecondary = isLight ? "rgba(29,27,24,0.65)" : "rgba(243,238,228,0.65)";
+  const panelBg = isLight ? "rgba(29,27,24,0.045)" : "rgba(255,255,255,0.04)";
+  const panelBorder = isLight ? "rgba(29,27,24,0.10)" : "rgba(255,255,255,0.08)";
+  const panelHeaderBg = isLight ? "rgba(29,27,24,0.05)" : `${plaque.ink}14`;
 
   // 마운트 시 body 스크롤 잠금, 언마운트 시 복원
   useEffect(() => {
@@ -76,7 +86,7 @@ export default function MultiLangNameCard({ data, lang = "ko", onClose }: Props)
       const dataUrl = await toPng(cardRef.current, {
         cacheBust: true,
         pixelRatio: 3,
-        backgroundColor: "#0B1634",
+        backgroundColor: plaqueKey === "sagye" ? "#F0F8FF" : isLight ? "#FBF8F2" : "#0B1634",
       });
       const link = document.createElement("a");
       link.download = `wink_namecard_${data.name}.png`;
@@ -150,6 +160,42 @@ export default function MultiLangNameCard({ data, lang = "ko", onClose }: Props)
         }}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* ── 카드 스타일 선택 ── */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8, width: "100%" }}>
+          {PLAQUE_KEYS.map((key) => {
+            const p = PLAQUES[key];
+            const active = key === plaqueKey;
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setPlaqueKey(key)}
+                style={{
+                  padding: "8px 2px",
+                  borderRadius: 10,
+                  background: active ? p.frame : "rgba(255,255,255,0.08)",
+                  border: active ? `1px solid ${p.frame}` : "1px solid rgba(255,255,255,0.14)",
+                  color: active ? (key === "kkot" ? "#FFFFFF" : p.ink) : "rgba(230,230,230,0.65)",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 4,
+                  transition: "all 0.15s",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                <span style={{ fontSize: 12, flexShrink: 0 }}>{p.badge}</span>
+                {p.label}
+              </button>
+            );
+          })}
+        </div>
+
         {/* ── 카드 본체 (다운로드 대상) ── */}
         <div
           ref={cardRef}
@@ -157,49 +203,69 @@ export default function MultiLangNameCard({ data, lang = "ko", onClose }: Props)
             width: "100%",
             borderRadius: 24,
             overflow: "hidden",
-            background: "linear-gradient(160deg, #1B2A5E 0%, #0B1634 60%, #0d1a40 100%)",
-            border: "1px solid rgba(201,168,76,0.30)",
-            boxShadow: "0 32px 80px rgba(0,0,0,0.55), 0 0 0 1px rgba(201,168,76,0.12)",
+            position: "relative",
+            background: plaque.bg,
+            border: `1px solid ${plaque.line}`,
+            boxShadow: "0 32px 80px rgba(0,0,0,0.45), 0 0 0 1px rgba(0,0,0,0.08)",
             fontFamily: "'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif",
           }}
         >
-          {/* 상단 골드 라인 */}
-          <div style={{ height: 3, background: "linear-gradient(90deg, transparent, #C9A84C, transparent)" }} />
+          {/* 질감 패턴 오버레이 */}
+          {plaque.pattern !== "none" && (
+            <div aria-hidden style={{ position: "absolute", inset: 0, backgroundImage: plaque.pattern, pointerEvents: "none" }} />
+          )}
 
-          {/* 브랜드 헤더 */}
+          {/* 상단 라인 */}
+          <div style={{ height: 3, background: `linear-gradient(90deg, transparent, ${plaque.frame}, transparent)`, position: "relative" }} />
+
+          {/* 브랜드 헤더: 좌측 WINK Mark / 우측 한자 배지 */}
           <div style={{
-            padding: "20px 28px 0",
+            padding: "18px 24px 0",
             display: "flex", justifyContent: "space-between", alignItems: "center",
+            position: "relative",
           }}>
-            <div style={{ fontSize: 10, letterSpacing: "0.2em", color: "rgba(201,168,76,0.65)", fontWeight: 700, textTransform: "uppercase" }}>
-              WINK NAMING
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <WinkMark size={24} />
+              <div style={{ fontSize: 10, letterSpacing: "0.18em", color: plaque.sub, fontWeight: 700, textTransform: "uppercase" }}>
+                WINK NAMING
+              </div>
             </div>
-            <div style={{ fontSize: 10, color: "rgba(201,168,76,0.45)", letterSpacing: "0.1em" }}>
-              Name Card
+            <div style={{
+              width: 32, height: 32, borderRadius: 8,
+              background: plaque.frame, color: "#F3EEE4",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 16, fontWeight: 700, flexShrink: 0,
+            }}>
+              {plaque.badge}
             </div>
           </div>
 
           {/* 메인 이름 */}
-          <div style={{ padding: "24px 28px 0", textAlign: "center" }}>
+          <div style={{ padding: "22px 28px 0", textAlign: "center", position: "relative" }}>
             <div style={{
               fontSize: "clamp(52px, 13vw, 80px)",
               fontWeight: 900,
-              color: "#fff",
+              color: plaque.ink,
               letterSpacing: "0.08em",
               lineHeight: 1.1,
-              textShadow: "0 2px 32px rgba(201,168,76,0.18)",
+              textShadow: isLight ? "none" : `0 2px 32px ${plaque.ink}2e`,
               fontFamily: "serif",
             }}>
               {data.name}
             </div>
+            {koreanRomanized && koreanRomanized !== data.name && (
+              <div style={{ fontSize: 13, color: plaque.sub, fontWeight: 600, letterSpacing: "0.12em", marginTop: 6 }}>
+                {koreanRomanized}
+              </div>
+            )}
 
             {data.hanja && (
-              <div style={{ marginTop: 10 }}>
-                <div style={{ fontSize: 22, letterSpacing: "0.18em", color: "rgba(201,168,76,0.88)", fontFamily: "serif" }}>
+              <div style={{ marginTop: 14 }}>
+                <div style={{ fontSize: 22, letterSpacing: "0.18em", color: plaque.sub, fontFamily: "serif" }}>
                   {data.hanja}
                 </div>
                 {data.hanja_meaning && (
-                  <div style={{ fontSize: 11, color: "rgba(201,168,76,0.50)", marginTop: 4, letterSpacing: "0.06em" }}>
+                  <div style={{ fontSize: 11, color: textSecondary, marginTop: 4, letterSpacing: "0.06em" }}>
                     {data.hanja_meaning}
                   </div>
                 )}
@@ -208,14 +274,14 @@ export default function MultiLangNameCard({ data, lang = "ko", onClose }: Props)
 
             <div style={{
               margin: "20px auto", height: 1, width: 80,
-              background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.6), transparent)",
+              background: `linear-gradient(90deg, transparent, ${plaque.line}, transparent)`,
             }} />
 
             {data.meaning && (
               <div style={{
-                fontSize: 13, color: "rgba(210,222,245,0.80)",
+                fontSize: 13, color: textPrimary,
                 lineHeight: 1.7, fontStyle: "italic",
-                padding: "0 8px", marginBottom: 24,
+                padding: "0 8px", marginBottom: 22, opacity: 0.88,
               }}>
                 &ldquo;{data.meaning.length > 60 ? data.meaning.slice(0, 58) + "…" : data.meaning}&rdquo;
               </div>
@@ -223,17 +289,17 @@ export default function MultiLangNameCard({ data, lang = "ko", onClose }: Props)
           </div>
 
           {/* 다국어 발음 그리드 */}
-          <div style={{ padding: "0 20px 24px" }}>
+          <div style={{ padding: "0 20px 18px", position: "relative" }}>
             <div style={{
-              background: "rgba(0,0,0,0.28)", borderRadius: 16,
-              border: "1px solid rgba(201,168,76,0.15)", overflow: "hidden",
+              background: panelBg, borderRadius: 16,
+              border: `1px solid ${panelBorder}`, overflow: "hidden",
             }}>
               <div style={{
                 padding: "10px 16px",
-                background: "rgba(201,168,76,0.08)",
-                borderBottom: "1px solid rgba(201,168,76,0.12)",
+                background: panelHeaderBg,
+                borderBottom: `1px solid ${panelBorder}`,
                 fontSize: 10, letterSpacing: "0.15em",
-                color: "rgba(201,168,76,0.70)", fontWeight: 700, textTransform: "uppercase",
+                color: plaque.sub, fontWeight: 700, textTransform: "uppercase",
               }}>
                 {isKo ? "다국어 발음" : "Global Pronunciation"}
               </div>
@@ -247,16 +313,16 @@ export default function MultiLangNameCard({ data, lang = "ko", onClose }: Props)
                 <div key={row.label} style={{
                   display: "flex", alignItems: "center", gap: 12,
                   padding: "12px 16px",
-                  borderBottom: i < arr.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none",
+                  borderBottom: i < arr.length - 1 ? `1px solid ${panelBorder}` : "none",
                 }}>
                   <span style={{ fontSize: 18, flexShrink: 0, width: 24, textAlign: "center" }}>{row.flag}</span>
-                  <span style={{ fontSize: 11, color: "rgba(201,168,76,0.60)", fontWeight: 600, width: 52, flexShrink: 0, letterSpacing: "0.04em" }}>
+                  <span style={{ fontSize: 11, color: plaque.sub, fontWeight: 600, width: 52, flexShrink: 0, letterSpacing: "0.04em" }}>
                     {row.label}
                   </span>
                   <div style={{ flex: 1 }}>
-                    <span style={{ fontSize: 15, fontWeight: 700, color: "#f0f4ff" }}>{row.main}</span>
+                    <span style={{ fontSize: 15, fontWeight: 700, color: textPrimary }}>{row.main}</span>
                     {row.sub && (
-                      <span style={{ marginLeft: 8, fontSize: 12, color: "rgba(201,168,76,0.70)", fontStyle: "italic" }}>
+                      <span style={{ marginLeft: 8, fontSize: 12, color: plaque.sub, fontStyle: "italic" }}>
                         {row.sub}
                       </span>
                     )}
@@ -266,27 +332,52 @@ export default function MultiLangNameCard({ data, lang = "ko", onClose }: Props)
             </div>
           </div>
 
-          {/* 하단 */}
-          <div style={{
-            padding: "14px 28px 20px", display: "flex",
-            justifyContent: "space-between", alignItems: "center",
-            borderTop: "1px solid rgba(201,168,76,0.10)",
-          }}>
-            <div style={{ fontSize: 10, color: "rgba(201,168,76,0.40)", letterSpacing: "0.12em" }}>
-              wink-naming.com
+          {/* 오행 밸런스 미니 바 */}
+          <div style={{ padding: "0 28px 14px", position: "relative" }}>
+            <div style={{ fontSize: 9, letterSpacing: "0.14em", color: textSecondary, marginBottom: 6, textTransform: "uppercase" }}>
+              {isKo ? "오행 밸런스 · 목화토금수" : "Five Elements Balance"}
             </div>
-            {data.score && (
-              <div style={{
-                fontSize: 10, color: "rgba(201,168,76,0.55)",
-                background: "rgba(201,168,76,0.10)", border: "1px solid rgba(201,168,76,0.22)",
-                borderRadius: 99, padding: "3px 10px", fontWeight: 700, letterSpacing: "0.06em",
-              }}>
-                ✦ {data.score}
-              </div>
-            )}
+            <div style={{ display: "flex", gap: 3, height: 5, borderRadius: 4, overflow: "hidden" }}>
+              {Object.values(OHAENG_COLORS).map((c) => (
+                <div key={c} style={{ flex: 1, background: c, opacity: 0.85 }} />
+              ))}
+            </div>
           </div>
 
-          <div style={{ height: 3, background: "linear-gradient(90deg, transparent, #C9A84C, transparent)" }} />
+          {/* 하단: QR 영역(예약) + 브랜드 */}
+          <div style={{
+            padding: "10px 28px 20px", display: "flex",
+            justifyContent: "space-between", alignItems: "center",
+            borderTop: `1px solid ${panelBorder}`,
+            position: "relative",
+          }}>
+            <div style={{
+              width: 38, height: 38, borderRadius: 8,
+              border: `1px dashed ${plaque.line}`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 8, color: textSecondary, letterSpacing: "0.04em",
+            }}>
+              QR
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <div style={{ fontSize: 10, color: plaque.sub, letterSpacing: "0.12em" }}>
+                wink-naming.com
+              </div>
+              {data.score && (
+                <div style={{
+                  marginTop: 4,
+                  fontSize: 10, color: plaque.sub,
+                  background: panelBg, border: `1px solid ${panelBorder}`,
+                  borderRadius: 99, padding: "3px 10px", fontWeight: 700, letterSpacing: "0.06em",
+                  display: "inline-block",
+                }}>
+                  ✦ {data.score}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div style={{ height: 3, background: `linear-gradient(90deg, transparent, ${plaque.frame}, transparent)`, position: "relative" }} />
         </div>
 
         {/* ── 버튼 영역 ── */}

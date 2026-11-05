@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { SERVICE_PRE_LAUNCH } from "@/lib/pricing";
+import WinkMark from "@/components/WinkMark";
 
 const LANG_KEY = "wink.naming.preferred-lang";
 const LANGS = ["ko","en","ja","zh","es","ru","fr","ar","hi"] as const;
@@ -1061,53 +1062,32 @@ const GUIDE_BY_LANG: Record<Lang, GuideCopy> = {
   },
 };
 
-const MARQUEE_BY_LANG: Record<Lang, { text: string; color: string }[]> = {
-  ko: [
-    { text: "🏆 2026 남자이름 1위 도윤 ✦ 2위 도현 ✦ 3위 하준 ✦ 4위 서준 ✦ 5위 이준 ✦ 6위 시우 ✦ 7위 주원 ✦ 8위 지호 ✦ 9위 준서 ✦ 10위 윤우 ✦ 🌸 여자이름 1위 서윤 ✦ 2위 하린 ✦ 3위 하윤 ✦ 4위 아린 ✦ 5위 서아 ✦ 6위 지아 ✦ 7위 서하 ✦ 8위 아윤 ✦ 9위 윤서 ✦ 10위 설아 ✦ ", color: "#C9A84C" },
-    { text: "💬 Jake(미국) 태권도 사범님 덕분에 알게 된 윙크네이밍, 난 운이 좋다! ✦ ", color: "#FFFFFF" },
-    { text: "💬 Anna(독일) 한국 도착 후 가장 먼저 한국 이름 만들기. 친구들에게 윙크네이밍 추천 중! ✦ ", color: "#FFFFFF" },
-  ],
-  en: [
-    { text: "🏆 2026 남자이름 1위 도윤 ✦ 2위 도현 ✦ 3위 하준 ✦ 4위 서준 ✦ 5위 이준 ✦ 6위 시우 ✦ 7위 주원 ✦ 8위 지호 ✦ 9위 준서 ✦ 10위 윤우 ✦ 🌸 여자이름 1위 서윤 ✦ 2위 하린 ✦ 3위 하윤 ✦ 4위 아린 ✦ 5위 서아 ✦ 6위 지아 ✦ 7위 서하 ✦ 8위 아윤 ✦ 9위 윤서 ✦ 10위 설아 ✦ ", color: "#C9A84C" },
-    { text: "💬 Jake (USA) My taekwondo master introduced me to Wink Naming — I'm so lucky! ✦ ", color: "#FFFFFF" },
-    { text: "💬 Anna (Germany) First thing in Korea: getting a Korean name. Recommending Wink Naming to everyone! ✦ ", color: "#FFFFFF" },
-  ],
-  ja: [
-    { text: "🏆 2026 남자이름 1위 도윤 ✦ 2위 도현 ✦ 3위 하준 ✦ 4위 서준 ✦ 5위 이준 ✦ 6위 시우 ✦ 7위 주원 ✦ 8위 지호 ✦ 9위 준서 ✦ 10위 윤우 ✦ 🌸 여자이름 1위 서윤 ✦ 2위 하린 ✦ 3위 하윤 ✦ 4위 아린 ✦ 5위 서아 ✦ 6위 지아 ✦ 7위 서하 ✦ 8위 아윤 ✦ 9위 윤서 ✦ 10위 설아 ✦ ", color: "#C9A84C" },
-    { text: "💬 Jake（アメリカ）テコンドーの師範のおかげでWinkNamingと出会いました。本当にラッキー！ ✦ ", color: "#FFFFFF" },
-    { text: "💬 Anna（ドイツ）韓国到着後まず最初に韓国名を作りました。友達みんなにWinkNamingを勧めています！ ✦ ", color: "#FFFFFF" },
-  ],
-  zh: [
-    { text: "🏆 2026 남자이름 1위 도윤 ✦ 2위 도현 ✦ 3위 하준 ✦ 4위 서준 ✦ 5위 이준 ✦ 6위 시우 ✦ 7위 주원 ✦ 8위 지호 ✦ 9위 준서 ✦ 10위 윤우 ✦ 🌸 여자이름 1위 서윤 ✦ 2위 하린 ✦ 3위 하윤 ✦ 4위 아린 ✦ 5위 서아 ✦ 6위 지아 ✦ 7위 서하 ✦ 8위 아윤 ✦ 9위 윤서 ✦ 10위 설아 ✦ ", color: "#C9A84C" },
-    { text: "💬 Jake（美国）因跆拳道教练认识了WinkNaming，我真是太幸运了！ ✦ ", color: "#FFFFFF" },
-    { text: "💬 Anna（德国）到达韩国后第一件事就是取韩国名字，正在向朋友们推荐WinkNaming！ ✦ ", color: "#FFFFFF" },
-  ],
-  es: [
-    { text: "🏆 2026 남자이름 1위 도윤 ✦ 2위 도현 ✦ 3위 하준 ✦ 4위 서준 ✦ 5위 이준 ✦ 6위 시우 ✦ 7위 주원 ✦ 8위 지호 ✦ 9위 준서 ✦ 10위 윤우 ✦ 🌸 여자이름 1위 서윤 ✦ 2위 하린 ✦ 3위 하윤 ✦ 4위 아린 ✦ 5위 서아 ✦ 6위 지아 ✦ 7위 서하 ✦ 8위 아윤 ✦ 9위 윤서 ✦ 10위 설아 ✦ ", color: "#C9A84C" },
-    { text: "💬 Jake (EE.UU.) Mi maestro de taekwondo me presentó Wink Naming — ¡qué suerte tengo! ✦ ", color: "#FFFFFF" },
-    { text: "💬 Anna (Alemania) Lo primero en Corea: conseguir un nombre coreano. ¡Recomendando Wink Naming a todos! ✦ ", color: "#FFFFFF" },
-  ],
-  fr: [
-    { text: "🏆 2026 남자이름 1위 도윤 ✦ 2위 도현 ✦ 3위 하준 ✦ 4위 서준 ✦ 5위 이준 ✦ 6위 시우 ✦ 7위 주원 ✦ 8위 지호 ✦ 9위 준서 ✦ 10위 윤우 ✦ 🌸 여자이름 1위 서윤 ✦ 2위 하린 ✦ 3위 하윤 ✦ 4위 아린 ✦ 5위 서아 ✦ 6위 지아 ✦ 7위 서하 ✦ 8위 아윤 ✦ 9위 윤서 ✦ 10위 설아 ✦ ", color: "#C9A84C" },
-    { text: "💬 Jake (États-Unis) Mon maître de taekwondo m'a fait découvrir Wink Naming — quelle chance ! ✦ ", color: "#FFFFFF" },
-    { text: "💬 Anna (Allemagne) Première chose en Corée : créer un prénom coréen. Je recommande Wink Naming à tous ! ✦ ", color: "#FFFFFF" },
-  ],
-  ru: [
-    { text: "🏆 2026 남자이름 1위 도윤 ✦ 2위 도현 ✦ 3위 하준 ✦ 4위 서준 ✦ 5위 이준 ✦ 6위 시우 ✦ 7위 주원 ✦ 8위 지호 ✦ 9위 준서 ✦ 10위 윤우 ✦ 🌸 여자이름 1위 서윤 ✦ 2위 하린 ✦ 3위 하윤 ✦ 4위 아린 ✦ 5위 서아 ✦ 6위 지아 ✦ 7위 서하 ✦ 8위 아윤 ✦ 9위 윤서 ✦ 10위 설아 ✦ ", color: "#C9A84C" },
-    { text: "💬 Jake (США) Тренер по тхэквондо познакомил меня с Wink Naming — мне так повезло! ✦ ", color: "#FFFFFF" },
-    { text: "💬 Anna (Германия) Первое в Корее: создать корейское имя. Рекомендую Wink Naming всем! ✦ ", color: "#FFFFFF" },
-  ],
-  ar: [
-    { text: "🏆 2026 남자이름 1위 도윤 ✦ 2위 도현 ✦ 3위 하준 ✦ 4위 서준 ✦ 5위 이준 ✦ 6위 시우 ✦ 7위 주원 ✦ 8위 지호 ✦ 9위 준서 ✦ 10위 윤우 ✦ 🌸 여자이름 1위 서윤 ✦ 2위 하린 ✦ 3위 하윤 ✦ 4위 아린 ✦ 5위 서아 ✦ 6위 지아 ✦ 7위 서하 ✦ 8위 아윤 ✦ 9위 윤서 ✦ 10위 설아 ✦ ", color: "#C9A84C" },
-    { text: "💬 Jake (أمريكا) أستاذ التايكوندو عرّفني بـ Wink Naming — ما أحظاني! ✦ ", color: "#FFFFFF" },
-    { text: "💬 Anna (ألمانيا) أول ما فعلته في كوريا: الحصول على اسم كوري. أنصح الجميع بـ Wink Naming! ✦ ", color: "#FFFFFF" },
-  ],
-  hi: [
-    { text: "🏆 2026 남자이름 1위 도윤 ✦ 2위 도현 ✦ 3위 하준 ✦ 4위 서준 ✦ 5위 이준 ✦ 6위 시우 ✦ 7위 주원 ✦ 8위 지호 ✦ 9위 준서 ✦ 10위 윤우 ✦ 🌸 여자이름 1위 서윤 ✦ 2위 하린 ✦ 3위 하윤 ✦ 4위 아린 ✦ 5위 서아 ✦ 6위 지아 ✦ 7위 서하 ✦ 8위 아윤 ✦ 9위 윤서 ✦ 10위 설아 ✦ ", color: "#C9A84C" },
-    { text: "💬 Jake (अमेरिका) ताइक्वांडो गुरु की वजह से Wink Naming से परिचय हुआ — मैं कितना भाग्यशाली हूँ! ✦ ", color: "#FFFFFF" },
-    { text: "💬 Anna (जर्मनी) कोरिया में पहला काम: कोरियाई नाम बनवाना। सभी को Wink Naming की सिफ़ारिश! ✦ ", color: "#FFFFFF" },
-  ],
+const MARQUEE_BOY_NAMES = "도윤 · 도현 · 하준 · 서준 · 이준 · 시우 · 주원 · 지호 · 준서 · 윤우";
+const MARQUEE_GIRL_NAMES = "서윤 · 하린 · 하윤 · 아린 · 서아 · 지아 · 서하 · 아윤 · 윤서 · 설아";
+
+const MARQUEE_LABELS: Record<Lang, { boy: string; girl: string; source: string }> = {
+  ko: { boy: "인기 남자이름 TOP 10", girl: "인기 여자이름 TOP 10", source: "(출처: 대법원 전자가족관계등록시스템)" },
+  en: { boy: "Popular Boy Names TOP 10", girl: "Popular Girl Names TOP 10", source: "(Source: Supreme Court Electronic Family Registration System)" },
+  ja: { boy: "人気の男の子の名前TOP10", girl: "人気の女の子の名前TOP10", source: "(出典：大法院電子家族関係登録システム)" },
+  zh: { boy: "热门男孩名字TOP10", girl: "热门女孩名字TOP10", source: "(来源：大法院电子家族关系登记系统)" },
+  es: { boy: "Top 10 Nombres de Niño", girl: "Top 10 Nombres de Niña", source: "(Fuente: Sistema Electrónico de Registro Familiar de la Corte Suprema)" },
+  fr: { boy: "Top 10 Prénoms de Garçon", girl: "Top 10 Prénoms de Fille", source: "(Source : Système électronique d'enregistrement familial de la Cour suprême)" },
+  ru: { boy: "Топ-10 имён мальчиков", girl: "Топ-10 имён девочек", source: "(Источник: Электронная система регистрации семей Верховного суда)" },
+  ar: { boy: "أفضل 10 أسماء للأولاد", girl: "أفضل 10 أسماء للبنات", source: "(المصدر: نظام التسجيل الأسري الإلكتروني للمحكمة العليا)" },
+  hi: { boy: "टॉप 10 लड़कों के नाम", girl: "टॉप 10 लड़कियों के नाम", source: "(स्रोत: सर्वोच्च न्यायालय इलेक्ट्रॉनिक पारिवारिक पंजीकरण प्रणाली)" },
 };
+
+const MARQUEE_BY_LANG: Record<Lang, { text: string; color: string }[]> = Object.fromEntries(
+  (Object.keys(MARQUEE_LABELS) as Lang[]).map((l) => {
+    const { boy, girl, source } = MARQUEE_LABELS[l];
+    return [
+      l,
+      [
+        { text: `🏆 ${boy} — ${MARQUEE_BOY_NAMES}  🌸 ${girl} — ${MARQUEE_GIRL_NAMES}  ${source} ✦ `, color: "#C9A84C" },
+      ],
+    ];
+  })
+) as Record<Lang, { text: string; color: string }[]>;
 
 const INFO_TABS_BY_LANG: Record<Lang, { id: string; label: string }[]> = {
   ko: [
@@ -1177,6 +1157,60 @@ const INFO_TABS_BY_LANG: Record<Lang, { id: string; label: string }[]> = {
 
 const INFO_TABS = INFO_TABS_BY_LANG.ko;
 type InfoTabId = "rank" | "saju" | "sejong" | "culture" | "tips";
+
+// ── WINK METHOD 섹션 데이터 (최소 en/ko 지원, 그 외 언어는 en으로 대체) ──
+type MethodItem = { num: string; hanja: string; titleKo: string; titleEn: string; desc: string };
+type MethodCopy = {
+  kicker: string;
+  headline: string;
+  desc: string;
+  sourceRows: { label: string; value: string }[];
+  items: MethodItem[];
+};
+
+const METHOD_BY_LANG: Record<"ko" | "en", MethodCopy> = {
+  ko: {
+    kicker: "THE WINK METHOD · 작명 원리",
+    headline: "No 아무개 names.",
+    desc: "윙크 네이밍은 음령·자원·수리·사주 네 가지 성명학 이론과 대법원 인명용 한자, 그리고 당신의 언어까지 모두 통과한 이름만 제안합니다.",
+    sourceRows: [
+      { label: "음령오행 이론", value: "훈민정음 해례본 (1446)" },
+      { label: "인명용 한자", value: "대법원 인명용 한자 8,319자" },
+      { label: "수리성명학", value: "81수리 · 원형이정 4격" },
+    ],
+    items: [
+      { num: "01", hanja: "音靈", titleKo: "음령오행", titleEn: "Sound Elements", desc: "이름의 음운이 지닌 소리의 오행(五行) 에너지를 분석해 발음이 주는 기운의 균형을 맞춥니다." },
+      { num: "02", hanja: "字源", titleKo: "자원오행", titleEn: "Character Elements", desc: "한자의 구성 요소(자원)가 지닌 오행 속성을 반영해 이름에 담긴 의미의 기운을 설계합니다." },
+      { num: "03", hanja: "數理", titleKo: "수리성명학", titleEn: "Stroke Numerology", desc: "한자 획수의 조합(원형이정 4격)을 계산해 숫자가 지닌 길흉의 기운까지 고려합니다." },
+      { num: "04", hanja: "四柱", titleKo: "사주 보완", titleEn: "Birth-Chart Balance", desc: "태어난 연월일시의 사주팔자를 분석해 부족한 오행을 이름으로 보완합니다." },
+      { num: "05", hanja: "人名", titleKo: "인명용 한자", titleEn: "Official Name Hanja", desc: "대법원이 고시한 인명용 한자 범위 내에서만 선정해 법적으로 유효한 이름을 보장합니다." },
+      { num: "06", hanja: "發音", titleKo: "글로벌 발음", titleEn: "Your-Language Check", desc: "영어 등 사용자의 모국어로 발음했을 때 어색하거나 부정적인 뜻이 없는지 교차 검증합니다." },
+    ],
+  },
+  en: {
+    kicker: "THE WINK METHOD",
+    headline: "No 아무개 names.",
+    desc: "Wink Naming only proposes names that pass through four classical naming theories — sound, character, numerology, and birth-chart balance — plus the Supreme Court's official hanja list and a check in your own language.",
+    sourceRows: [
+      { label: "Sound-Element Theory", value: "Hunminjeongeum Haerye (1446)" },
+      { label: "Official Name Hanja", value: "Supreme Court's 8,319 registered hanja" },
+      { label: "Stroke Numerology", value: "81-Number System · Won-Hyeong-Yi-Jeong" },
+    ],
+    items: [
+      { num: "01", hanja: "音靈", titleKo: "음령오행", titleEn: "Sound Elements", desc: "Analyzes the five-element energy carried by each syllable's sound, balancing the energy conveyed by pronunciation." },
+      { num: "02", hanja: "字源", titleKo: "자원오행", titleEn: "Character Elements", desc: "Reflects the five-element properties in a hanja's root components to design the energy of meaning embedded in the name." },
+      { num: "03", hanja: "數理", titleKo: "수리성명학", titleEn: "Stroke Numerology", desc: "Calculates the combination of hanja stroke counts (the four Won-Hyeong-Yi-Jeong formations) to weigh the fortune implied by numbers." },
+      { num: "04", hanja: "四柱", titleKo: "사주 보완", titleEn: "Birth-Chart Balance", desc: "Analyzes the four pillars of the birth date and time to supplement any lacking five elements through the name." },
+      { num: "05", hanja: "人名", titleKo: "인명용 한자", titleEn: "Official Name Hanja", desc: "Selects characters strictly within the Supreme Court's officially registered name-hanja list to guarantee a legally valid name." },
+      { num: "06", hanja: "發音", titleKo: "글로벌 발음", titleEn: "Your-Language Check", desc: "Cross-checks the name's pronunciation in your own language (e.g. English) to avoid awkward or unintended meanings." },
+    ],
+  },
+};
+
+const METHOD_NAV_LABEL: Record<Lang, string> = {
+  ko: "작명원리", en: "Method", ja: "作名原理", zh: "起名原理",
+  es: "Método", fr: "Méthode", ru: "Метод", ar: "المنهج", hi: "विधि",
+};
 
 type InfoCard = { title: string; body: string; highlight?: string };
 type InfoCardSet = Record<InfoTabId, InfoCard[]>;
@@ -1821,11 +1855,23 @@ function BigNameCard({ card, accent, bg, lang }: { card: AnyCard; accent: string
       <div style={{ position: "absolute", inset: 0, opacity: 0.04 }} aria-hidden="true">
         <DanchingBg />
       </div>
+      {/* 기와(瓦) 질감 오버레이 */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute", inset: 0,
+          backgroundImage: "repeating-linear-gradient(0deg, rgba(255,255,255,.025) 0 1px, transparent 1px 8px)",
+          pointerEvents: "none",
+        }}
+      />
       <div className="lg-big-name-card-inner">
         {/* 왼쪽: 큰 이름 */}
         <div className="lg-big-name-left">
-          <div style={{ fontSize: 10, color: accent, letterSpacing: "0.16em", textTransform: "uppercase", marginBottom: 14, fontWeight: 700 }}>
-            {badge}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+            <WinkMark size={18} />
+            <div style={{ fontSize: 10, color: accent, letterSpacing: "0.16em", textTransform: "uppercase", fontWeight: 700 }}>
+              {badge}
+            </div>
           </div>
           <div style={{ fontSize: "clamp(36px,6vw,72px)", fontWeight: 900, color: "#FFFFFF", fontFamily: serif, letterSpacing: "0.12em", lineHeight: 1 }}>
             {name}
@@ -1944,9 +1990,7 @@ function CategoryVideoCard({
   );
 }
 
-// ── 고객 후기 데이터 (카테고리별) ────────────────────────
-type ReviewEntry = { name: string; flag: string; content: string; koreanName?: string; rating?: number; isReal?: boolean; country?: string; dateLabel?: string };
-
+// ── 고객 후기 데이터 (실제 DB 후기 전용 — 가짜/하드코딩 후기 없음) ──
 /** ISO 날짜 문자열 → "2026.10" 형식 */
 function formatReviewDate(iso: string): string {
   const d = new Date(iso);
@@ -1956,7 +2000,7 @@ function formatReviewDate(iso: string): string {
   return `${y}.${m}`;
 }
 
-// 실제 제출된 후기(naming_reviews) — /api/reviews/featured?grouped=1 응답 형태
+// 실제 제출된 후기(naming_reviews) — /api/reviews/featured 응답 형태
 type RealReview = {
   id: string;
   name_used: string | null;
@@ -1967,205 +2011,95 @@ type RealReview = {
   lang: string;
   category: string | null;
   created_at: string;
+  reply: { content: string; created_at: string } | null;
 };
 
-function realReviewToEntry(r: RealReview): ReviewEntry {
-  return {
-    name: r.display_name || "Guest",
-    flag: "💬",
-    content: r.content,
-    koreanName: r.name_used || undefined,
-    rating: r.rating,
-    isReal: true,
-    country: r.country || undefined,
-    dateLabel: formatReviewDate(r.created_at),
-  };
-}
-
-const REVIEWS_BY_CAT: Record<CatId, ReviewEntry[]> = {
-  "korean-name": [
-    { name: "Emma", flag: "🇺🇸", koreanName: "이하늘", content: "2026년 이하늘이라는 한국이름이 생겼어요. 고마워요 윙크네이밍!" },
-    { name: "Yuki", flag: "🇯🇵", koreanName: "박서연", content: "2026년 박서연이라는 한국이름이 생겼어요. 한국 친구들이 너무 좋아해요!" },
-    { name: "Lucas", flag: "🇧🇷", koreanName: "강도윤", content: "2026년 강도윤이 되었습니다. 나의 부캐릭터는 이제 한국인이에요!" },
-    { name: "Jake", flag: "🇺🇸", koreanName: "수지", content: "태권도 사범님께서 승급 기념으로 한국이름을 만들어 주셨다. 그렇게 알게 된 윙크 네이밍. 난 정말 운이 좋다!" },
-    { name: "Anna", flag: "🇩🇪", koreanName: "선희", content: "한국에 도착해서 가장 먼저 한 것이 한국 이름 만들기였다. 덕분에 즐겁고 의미있는 여행을 했다. 친구들에게 윙크네이밍을 추천하고 있다!" },
-  ],
-  "child": [
-    { name: "김지현", flag: "🇰🇷", content: "2026년 딸 이름 서윤이로 지었어요. 음양오행까지 고려해줘서 믿음이 갔어요!" },
-    { name: "박민준", flag: "🇰🇷", content: "2026년 아들 도현이 이름 여기서 결정했어요. 사주까지 맞춰줘서 감사해요!" },
-  ],
-  "self": [
-    { name: "이다온", flag: "🇰🇷", content: "2026년 새로운 시작을 다짐하며 다온으로 개명했어요. 성씨와의 조화까지 신경써줘서 만족스러워요!" },
-    { name: "정유안", flag: "🇰🇷", content: "2026년 인생의 전환점에서 유안이라는 이름을 얻었어요. 의미까지 꼼꼼히 설명해주셔서 좋았어요!" },
-  ],
-  "stage": [
-    { name: "루하", flag: "🇰🇷", content: "2026년 활동명 루하로 데뷔했어요. 부르기 쉽고 기억에 잘 남는다는 얘기를 많이 들어요!" },
-    { name: "이든", flag: "🇰🇷", content: "2026년 크리에이터 활동명 이든을 지었어요. 해외 팬들도 발음하기 쉬워서 좋아해요!" },
-  ],
-  "pet": [
-    { name: "Sophie", flag: "🇫🇷", content: "2026년 반려견에게 사랑이라는 이름을 지어줬어요. 너무 예쁜 이름이에요!" },
-    { name: "Wang Lei", flag: "🇨🇳", content: "2026년 고양이 이름을 하늘이로 지었어요. 한국어로 sky라는 뜻이래요!" },
-  ],
-  "foreign": [
-    { name: "이서연", flag: "🇰🇷", content: "2026년 활동명으로 Luna라는 이름을 받았어요. 해외 SNS에서 반응이 좋아요!" },
-    { name: "최도윤", flag: "🇰🇷", content: "2026년 영어이름 Ethan을 만들었어요. 발음도 좋고 의미도 마음에 들어요!" },
-  ],
-  "goods": [
-    { name: "Maria", flag: "🇪🇸", content: "2026년 도장까지 주문했어요. 한국 전통 매듭 목걸이 너무 예뻐요!" },
-    { name: "Tanaka", flag: "🇯🇵", content: "2026년 이름카드 QR코드 보여줬더니 친구들이 신기해했어요!" },
-  ],
+const REVIEWS_UI_BY_LANG: Record<Lang, {
+  bestBadge: string;
+  teamReply: string;
+  loadMore: string;
+  emptyTitle: string;
+  emptyDesc: string;
+  emptyCta: string;
+  guestFallback: string;
+}> = {
+  ko: { bestBadge: "베스트 후기", teamReply: "운영자 답변", loadMore: "더보기", emptyTitle: "첫 번째 후기의 주인공이 되어보세요!", emptyDesc: "아직 등록된 후기가 없어요. 이름을 만들고 가장 먼저 이야기를 들려주세요.", emptyCta: "이름 만들기 시작", guestFallback: "게스트" },
+  en: { bestBadge: "Best Reviews", teamReply: "Team Reply", loadMore: "Load More", emptyTitle: "Be the first to share your story!", emptyDesc: "No reviews yet. Create your name and be the first to tell your story.", emptyCta: "Start Naming", guestFallback: "Guest" },
+  ja: { bestBadge: "ベストレビュー", teamReply: "運営者からの返信", loadMore: "もっと見る", emptyTitle: "最初のレビューを投稿してみましょう！", emptyDesc: "まだレビューがありません。名前を作って最初のストーリーを共有してください。", emptyCta: "名前を作る", guestFallback: "ゲスト" },
+  zh: { bestBadge: "精选评价", teamReply: "官方回复", loadMore: "加载更多", emptyTitle: "成为第一个留下评价的人吧！", emptyDesc: "目前还没有评价。创建您的名字，成为第一个分享故事的人。", emptyCta: "开始起名", guestFallback: "客户" },
+  es: { bestBadge: "Mejores reseñas", teamReply: "Respuesta del equipo", loadMore: "Cargar más", emptyTitle: "¡Sé el primero en compartir tu historia!", emptyDesc: "Aún no hay reseñas. Crea tu nombre y sé el primero en contar tu historia.", emptyCta: "Empezar", guestFallback: "Invitado" },
+  ru: { bestBadge: "Лучшие отзывы", teamReply: "Ответ команды", loadMore: "Показать ещё", emptyTitle: "Будьте первым, кто поделится своей историей!", emptyDesc: "Пока нет отзывов. Создайте имя и поделитесь своей историей первым.", emptyCta: "Начать", guestFallback: "Гость" },
+  fr: { bestBadge: "Meilleurs avis", teamReply: "Réponse de l'équipe", loadMore: "Charger plus", emptyTitle: "Soyez le premier à partager votre histoire !", emptyDesc: "Pas encore d'avis. Créez votre prénom et soyez le premier à raconter votre histoire.", emptyCta: "Commencer", guestFallback: "Invité" },
+  ar: { bestBadge: "أفضل التقييمات", teamReply: "رد الفريق", loadMore: "عرض المزيد", emptyTitle: "كن أول من يشارك قصته!", emptyDesc: "لا توجد تقييمات حتى الآن. أنشئ اسمك وكن أول من يروي قصته.", emptyCta: "ابدأ الآن", guestFallback: "ضيف" },
+  hi: { bestBadge: "सर्वश्रेष्ठ समीक्षाएं", teamReply: "टीम का जवाब", loadMore: "और देखें", emptyTitle: "सबसे पहले अपनी कहानी साझा करें!", emptyDesc: "अभी तक कोई समीक्षा नहीं है। अपना नाम बनाएं और सबसे पहले अपनी कहानी बताएं।", emptyCta: "शुरू करें", guestFallback: "अतिथि" },
 };
 
-const REVIEW_CONTENT_BY_LANG: Record<Lang, Record<CatId, string[]>> = {
-  ko: {
-    "korean-name": ["2026년 이하늘이라는 한국이름이 생겼어요. 고마워요 윙크네이밍!", "2026년 박서연이라는 한국이름이 생겼어요. 한국 친구들이 너무 좋아해요!", "2026년 강도윤이 되었습니다. 나의 부캐릭터는 이제 한국인이에요!", "태권도 사범님께서 승급 기념으로 한국이름을 만들어 주셨다. 그렇게 알게 된 윙크 네이밍. 난 정말 운이 좋다!", "한국에 도착해서 가장 먼저 한 것이 한국 이름 만들기였다. 덕분에 즐겁고 의미있는 여행을 했다. 친구들에게 윙크네이밍을 추천하고 있다!"],
-    "child": ["2026년 딸 이름 서윤이로 지었어요. 음양오행까지 고려해줘서 믿음이 갔어요!", "2026년 아들 도현이 이름 여기서 결정했어요. 사주까지 맞춰줘서 감사해요!"],
-    "self": ["2026년 새로운 시작을 다짐하며 다온으로 개명했어요. 성씨와의 조화까지 신경써줘서 만족스러워요!", "2026년 인생의 전환점에서 유안이라는 이름을 얻었어요. 의미까지 꼼꼼히 설명해주셔서 좋았어요!"],
-    "stage": ["2026년 활동명 루하로 데뷔했어요. 부르기 쉽고 기억에 잘 남는다는 얘기를 많이 들어요!", "2026년 크리에이터 활동명 이든을 지었어요. 해외 팬들도 발음하기 쉬워서 좋아해요!"],
-    "pet": ["2026년 반려견에게 사랑이라는 이름을 지어줬어요. 너무 예쁜 이름이에요!", "2026년 고양이 이름을 하늘이로 지었어요. 한국어로 sky라는 뜻이래요!"],
-    "foreign": ["2026년 활동명으로 Luna라는 이름을 받았어요. 해외 SNS에서 반응이 좋아요!", "2026년 영어이름 Ethan을 만들었어요. 발음도 좋고 의미도 마음에 들어요!"],
-    "goods": ["2026년 도장까지 주문했어요. 한국 전통 매듭 목걸이 너무 예뻐요!", "2026년 이름카드 QR코드 보여줬더니 친구들이 신기해했어요!"],
-  },
-  en: {
-    "korean-name": ["In 2026 I got my Korean name, Lee Haneul. Thank you Wink Naming!", "In 2026 I got Park Seoyeon as my Korean name. My Korean friends absolutely love it!", "In 2026 I became Kang Doyun. My alter ego is now officially Korean!", "My taekwondo master gave me a Korean name to celebrate my belt promotion. That's how I found Wink Naming. I'm so lucky!", "The first thing I did when I arrived in Korea was get a Korean name. It made my trip so joyful and meaningful. I'm recommending Wink Naming to all my friends!"],
-    "child": ["In 2026 I named my daughter Seoyun. I trusted them because they considered yin-yang and the five elements!", "In 2026 I decided on the name Dohyun for my son here. Thank you for considering his saju too!"],
-    "self": ["In 2026 I renamed myself Da-on to mark a fresh start. I loved how they matched it with my surname!", "In 2026 I found the name Yu-an at a turning point in my life. They explained the meaning so carefully!"],
-    "stage": ["In 2026 I debuted with the stage name Ru-ha. People say it's easy to say and hard to forget!", "In 2026 I got the creator name Eden. My overseas fans find it easy to pronounce too!"],
-    "pet": ["In 2026 I named my dog Sarangi (Love). Such a beautiful name!", "In 2026 I named my cat Haneul. They told me it means 'sky' in Korean!"],
-    "foreign": ["In 2026 I got the stage name Luna. The response on overseas social media has been amazing!", "In 2026 I created the English name Ethan. I love both the pronunciation and the meaning!"],
-    "goods": ["In 2026 I even ordered a stamp. The Korean traditional knot necklace is so beautiful!", "In 2026 when I showed the name card QR code, my friends were so amazed!"],
-  },
-  ja: {
-    "korean-name": ["2026年に「이하늘」という韓国名ができました。ありがとうWinkNaming！", "2026年に「박서연」という韓国名をもらいました。韓国の友達に大好評です！", "2026年に「강도윤」になりました。私の副キャラはもう韓国人です！", "テコンドーの師範が昇段記念に韓国名を作ってくれました。それがWinkNamingとの出会い。本当にラッキーです！", "韓国に着いてまず最初にしたことは韓国名を作ることでした。おかげで楽しく意味ある旅ができました。友達にもWinkNamingを勧めています！"],
-    "child": ["2026年に娘の名前を서윤にしました。陰陽五行まで考えてくれて安心でした！", "2026年に息子の도현という名前をここで決めました。四柱まで合わせてくれてありがとうございます！"],
-    "self": ["2026年、新しい始まりを願ってダオンに改名しました。姓との調和まで考えてくれて満足です！", "2026年、人生の転換点でユアンという名前を得ました。意味まで丁寧に説明してくれて良かったです！"],
-    "stage": ["2026年、活動名ルハでデビューしました。呼びやすく覚えやすいとよく言われます！", "2026年、クリエイター活動名イードゥンを作りました。海外ファンにも発音しやすいです！"],
-    "pet": ["2026年に愛犬に사랑（愛）という名前をつけました。とても素敵な名前です！", "2026年に猫の名前を하늘にしました。韓国語で空という意味だそうです！"],
-    "foreign": ["2026年に芸名としてLunaという名前をもらいました。海外SNSでの反応がいいです！", "2026年に英語名Ethanを作りました。発音も意味も気に入っています！"],
-    "goods": ["2026年には印鑑まで注文しました。韓国伝統の結びのネックレスがとても素敵です！", "2026年にネームカードのQRコードを見せたら友達がびっくりしていました！"],
-  },
-  zh: {
-    "korean-name": ["2026年我有了「이하늘」这个韩国名字，谢谢WinkNaming！", "2026年我的韩国名字是「박서연」，韩国朋友们都非常喜欢！", "2026年我成了「강도윤」，我的副角色现在是韩国人了！", "跆拳道教练为了庆祝我晋级给我取了韩国名字，就这样认识了WinkNaming，我真的太幸运了！", "到达韩国后做的第一件事就是取韩国名字。因此拥有了愉快而有意义的旅行，现在正在向朋友们推荐WinkNaming！"],
-    "child": ["2026年给女儿取名서윤。连阴阳五行都考虑到了，让我非常放心！", "2026年在这里决定了儿子도현的名字。连四柱都考虑进去了，真的很感谢！"],
-    "self": ["2026年为了迎接新的开始改名为多温。连和姓氏的和谐都考虑到了，很满意！", "2026年在人生转折点获得了有安这个名字。连含义都仔细解释了，很喜欢！"],
-    "stage": ["2026年以艺名Ru-ha出道了。大家都说好叫又好记！", "2026年取了创作者艺名Eden。海外粉丝也觉得很好发音！"],
-    "pet": ["2026年给爱犬取了사랑（爱）这个名字，真的是个很美的名字！", "2026年给猫咪取名하늘，听说韩语里是天空的意思！"],
-    "foreign": ["2026年获得了Luna这个艺名，在海外社交媒体上反响很好！", "2026年创建了英文名Ethan，发音和含义都很喜欢！"],
-    "goods": ["2026年还订购了印章，韩国传统结绳项链太漂亮了！", "2026年展示名片QR码时，朋友们都惊叹不已！"],
-  },
-  es: {
-    "korean-name": ["¡En 2026 obtuve mi nombre coreano, Lee Haneul. Gracias Wink Naming!", "¡En 2026 obtuve Park Seoyeon como mi nombre coreano. A mis amigos coreanos les encanta!", "¡En 2026 me convertí en Kang Doyun. Mi alter ego ahora es oficialmente coreano!", "¡Mi maestro de taekwondo me hizo un nombre coreano para celebrar mi cinturón. Así conocí Wink Naming. ¡Qué suerte tengo!", "¡Lo primero que hice al llegar a Corea fue crear un nombre coreano. Gracias a eso tuve un viaje tan alegre y significativo. Estoy recomendando Wink Naming a todos mis amigos!"],
-    "child": ["¡En 2026 nombré a mi hija Seoyun. Confiaba en ellos porque consideraron el yin-yang y los cinco elementos!", "¡En 2026 decidí el nombre Dohyun para mi hijo aquí. Gracias por considerar su saju también!"],
-    "self": ["¡En 2026 me cambié el nombre a Da-on para marcar un nuevo comienzo. Me encantó cómo lo armonizaron con mi apellido!", "¡En 2026 encontré el nombre Yu-an en un punto de inflexión de mi vida. Explicaron el significado con tanto cuidado!"],
-    "stage": ["¡En 2026 debuté con el nombre artístico Ru-ha. Dicen que es fácil de decir y de recordar!", "¡En 2026 obtuve el nombre de creador Eden. Mis fans en el extranjero también lo pronuncian fácilmente!"],
-    "pet": ["¡En 2026 le puse a mi perro el nombre Sarangi (Amor). ¡Es un nombre tan bonito!", "¡En 2026 le puse a mi gato el nombre Haneul. Me dijeron que significa 'cielo' en coreano!"],
-    "foreign": ["¡En 2026 obtuve el nombre artístico Luna. ¡La respuesta en las redes sociales internacionales ha sido increíble!", "¡En 2026 creé el nombre inglés Ethan. Me encanta tanto la pronunciación como el significado!"],
-    "goods": ["¡En 2026 incluso pedí un sello. ¡El collar de nudo tradicional coreano es tan hermoso!", "¡En 2026 cuando mostré el código QR de la tarjeta de nombre, mis amigos quedaron asombrados!"],
-  },
-  fr: {
-    "korean-name": ["En 2026, j'ai obtenu mon prénom coréen, Lee Haneul. Merci Wink Naming !", "En 2026, j'ai obtenu Park Seoyeon comme prénom coréen. Mes amis coréens adorent !", "En 2026, je suis devenu Kang Doyun. Mon alter ego est maintenant officiellement coréen !", "Mon maître de taekwondo m'a créé un prénom coréen pour célébrer ma ceinture. C'est ainsi que j'ai découvert Wink Naming. Quelle chance !", "La première chose que j'ai faite en arrivant en Corée était de créer un prénom coréen. Cela a rendu mon voyage si joyeux et significatif. Je recommande Wink Naming à tous mes amis !"],
-    "child": ["En 2026, j'ai nommé ma fille Seoyun. J'avais confiance car ils ont considéré le yin-yang et les cinq éléments !", "En 2026, j'ai décidé du prénom Dohyun pour mon fils ici. Merci d'avoir considéré son saju aussi !"],
-    "self": ["En 2026, j'ai changé mon prénom pour Da-on pour marquer un nouveau départ. J'ai adoré l'harmonie avec mon nom de famille !", "En 2026, j'ai trouvé le prénom Yu-an à un tournant de ma vie. Ils ont expliqué le sens avec tant de soin !"],
-    "stage": ["En 2026, j'ai débuté avec le nom de scène Ru-ha. On me dit qu'il est facile à dire et à retenir !", "En 2026, j'ai obtenu le nom de créateur Eden. Mes fans à l'étranger le prononcent facilement aussi !"],
-    "pet": ["En 2026, j'ai donné à mon chien le prénom Sarangi (Amour). C'est un si beau prénom !", "En 2026, j'ai nommé mon chat Haneul. On m'a dit que ça signifie 'ciel' en coréen !"],
-    "foreign": ["En 2026, j'ai obtenu le nom de scène Luna. La réponse sur les réseaux sociaux internationaux a été incroyable !", "En 2026, j'ai créé le prénom anglais Ethan. J'adore la prononciation et la signification !"],
-    "goods": ["En 2026, j'ai même commandé un sceau. Le collier de nœud traditionnel coréen est si beau !", "En 2026, quand j'ai montré le code QR de la carte de nom, mes amis étaient stupéfaits !"],
-  },
-  ru: {
-    "korean-name": ["В 2026 году у меня появилось корейское имя Lee Haneul. Спасибо Wink Naming!", "В 2026 году моим корейским именем стало Park Seoyeon. Мои корейские друзья в восторге!", "В 2026 году я стал Kang Doyun. Теперь мой альтер эго официально кореец!", "Мой тренер по тхэквондо создал мне корейское имя в честь повышения пояса. Так я узнал о Wink Naming. Мне так повезло!", "Первое, что я сделала в Корее — создала корейское имя. Это сделало поездку такой радостной и значимой. Рекомендую Wink Naming всем друзьям!"],
-    "child": ["В 2026 году я назвала дочь Сеюн. Я доверяла им, потому что они учли инь-ян и пять элементов!", "В 2026 году я выбрала здесь имя Духён для сына. Спасибо, что учли его саджу!"],
-    "self": ["В 2026 году я сменила имя на Да-он, чтобы отметить новое начало. Мне понравилось, как его согласовали с фамилией!", "В 2026 году я нашла имя Ю-ан на переломном моменте своей жизни. Значение объяснили так подробно!"],
-    "stage": ["В 2026 году я дебютировала со сценическим именем Ру-ха. Говорят, его легко произносить и запоминать!", "В 2026 году я получила творческое имя Иден. Зарубежным фанатам тоже легко его произносить!"],
-    "pet": ["В 2026 году я дала собаке имя Саранги (Любовь). Такое красивое имя!", "В 2026 году я назвала кошку Ханыль. Говорят, это значит 'небо' по-корейски!"],
-    "foreign": ["В 2026 году я получила сценическое имя Luna. Реакция в международных социальных сетях потрясающая!", "В 2026 году я создала английское имя Ethan. Мне нравится и произношение, и значение!"],
-    "goods": ["В 2026 году я даже заказала печать. Корейское традиционное ожерелье с узлом такое красивое!", "В 2026 году, когда я показала QR-код именной карточки, друзья были поражены!"],
-  },
-  ar: {
-    "korean-name": ["في عام 2026 حصلت على اسمي الكوري Lee Haneul. شكراً Wink Naming!", "في عام 2026 أصبح اسمي الكوري Park Seoyeon. أصدقائي الكوريون يحبونه كثيراً!", "في عام 2026 أصبحت Kang Doyun. شخصيتي البديلة الآن رسمياً كورية!", "أعطاني أستاذ التايكوندو اسماً كورياً احتفالاً بترقيتي. هكذا عرفت Wink Naming. ما أحظاني!", "أول ما فعلته عند وصولي لكوريا كان الحصول على اسم كوري. جعل ذلك رحلتي ممتعة وذات معنى. أنصح الجميع بـ Wink Naming!"],
-    "child": ["في عام 2026 سميت ابنتي Seoyun. وثقت بهم لأنهم أخذوا في الاعتبار اليين واليانغ والعناصر الخمسة!", "في عام 2026 اخترت هنا اسم Dohyun لابني. شكراً لمراعاة ساجو ابني أيضاً!"],
-    "self": ["في عام 2026 غيرت اسمي إلى Da-on لأبدأ فصلاً جديداً. أحببت كيف نسقوه مع اسم عائلتي!", "في عام 2026 وجدت اسم Yu-an في نقطة تحول في حياتي. شرحوا المعنى بعناية شديدة!"],
-    "stage": ["في عام 2026 بدأت بالاسم الفني Ru-ha. يقولون إنه سهل النطق ولا يُنسى!", "في عام 2026 حصلت على اسم المبدع Eden. حتى معجبيّ في الخارج ينطقونه بسهولة!"],
-    "pet": ["في عام 2026 أعطيت كلبي اسم Sarangi (حب). اسم جميل جداً!", "في عام 2026 سميت قطتي Haneul. قالوا لي إنها تعني 'السماء' بالكورية!"],
-    "foreign": ["في عام 2026 حصلت على اسم فني Luna. الاستجابة على وسائل التواصل الاجتماعي الدولية رائعة!", "في عام 2026 أنشأت الاسم الإنجليزي Ethan. أحب النطق والمعنى!"],
-    "goods": ["في عام 2026 طلبت حتى ختماً. عقد العقدة الكورية التقليدية جميل جداً!", "في عام 2026 عندما أريت رمز QR لبطاقة الاسم، أُذهل أصدقائي!"],
-  },
-  hi: {
-    "korean-name": ["2026 में मुझे Lee Haneul कोरियाई नाम मिला। धन्यवाद Wink Naming!", "2026 में Park Seoyeon मेरा कोरियाई नाम बना। मेरे कोरियाई दोस्तों को बहुत पसंद है!", "2026 में मैं Kang Doyun बन गया। मेरा अल्टर ईगो अब आधिकारिक रूप से कोरियाई है!", "मेरे ताइक्वांडो गुरु ने बेल्ट प्रमोशन के उपलक्ष्य में कोरियाई नाम बनाया। इस तरह Wink Naming से परिचय हुआ। मैं कितना भाग्यशाली हूँ!", "कोरिया पहुँचकर सबसे पहला काम था कोरियाई नाम बनवाना। इससे यात्रा बहुत आनंदमय और अर्थपूर्ण बनी। सभी मित्रों को Wink Naming की सिफारिश कर रही हूँ!"],
-    "child": ["2026 में बेटी का नाम Seoyun रखा। यिन-यांग और पाँच तत्वों पर विचार करने से विश्वास हुआ!", "2026 में यहाँ बेटे के लिए Dohyun नाम तय किया। साजू का भी ध्यान रखने के लिए शुक्रिया!"],
-    "self": ["2026 में नई शुरुआत के लिए मैंने अपना नाम बदलकर Da-on रखा। उपनाम के साथ तालमेल बिठाना बहुत पसंद आया!", "2026 में जीवन के एक मोड़ पर मुझे Yu-an नाम मिला। अर्थ को इतनी बारीकी से समझाया गया!"],
-    "stage": ["2026 में स्टेज नाम Ru-ha के साथ डेब्यू किया। लोग कहते हैं कि यह बोलने और याद रखने में आसान है!", "2026 में क्रिएटर नाम Eden मिला। विदेशी फैंस को भी बोलने में आसान लगता है!"],
-    "pet": ["2026 में कुत्ते को Sarangi (प्यार) नाम दिया। कितना सुंदर नाम है!", "2026 में बिल्ली का नाम Haneul रखा। बताया कि कोरियाई में 'आकाश' का अर्थ है!"],
-    "foreign": ["2026 में स्टेज नाम Luna मिला। अंतर्राष्ट्रीय सोशल मीडिया पर बहुत अच्छी प्रतिक्रिया है!", "2026 में अंग्रेज़ी नाम Ethan बनाया। उच्चारण और अर्थ दोनों पसंद हैं!"],
-    "goods": ["2026 में मुहर भी मँगवाई। कोरियाई पारंपरिक गाँठ का हार इतना सुंदर है!", "2026 में नाम कार्ड QR कोड दिखाया तो दोस्त हैरान रह गए!"],
-  },
-};
+const REVIEWS_GENERAL_PAGE_SIZE = 6;
 
-const REVIEWS_PAGE_SIZE = 6;
-
-/** 하루 단위로 바뀌는 시드값 — 가짜 후기 노출 순서를 주기적으로 로테이션하는 데 사용 */
-function getDayOfYearSeed(): number {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), 0, 0);
-  const diff = now.getTime() - start.getTime();
-  return Math.floor(diff / 86400000);
-}
-
-function getFakeReviews(lang: Lang, catId: CatId): ReviewEntry[] {
-  const base = REVIEWS_BY_CAT[catId];
-  const contents = (REVIEW_CONTENT_BY_LANG[lang] ?? REVIEW_CONTENT_BY_LANG.ko)[catId] ?? [];
-  const merged = base.map((r, i) => ({ ...r, content: contents[i] ?? r.content }));
-  if (merged.length <= 1) return merged;
-  // 날짜 기반 로테이션: 매일 노출 순서가 바뀌도록 오프셋 적용
-  const offset = getDayOfYearSeed() % merged.length;
-  return [...merged.slice(offset), ...merged.slice(0, offset)];
-}
-
-/**
- * 실제 후기를 우선 노출하고, 뒤이어 기획된(가짜) 후기를 붙인다.
- * 한 번에 보여지는 건 페이지당 REVIEWS_PAGE_SIZE개뿐이며, 나머지는 페이지네이션으로 넘겨 본다.
- * 실제 후기가 계속 쌓여도 전체 목록에 계속 추가되므로 데이터가 소실되지 않는다.
- */
-function getReviews(lang: Lang, catId: CatId, realReviews: ReviewEntry[]): ReviewEntry[] {
-  const fake = getFakeReviews(lang, catId);
-  return [...realReviews, ...fake];
-}
-
-// ── 고객 후기 섹션 (카테고리 탭) ────────────────────────
+// ── 고객 후기 섹션 (베스트 고정 + 누적 실제 후기, 가짜 데이터 없음) ──
 function ReviewsSection({ copy, lang }: { copy: HomeCopy; lang: Lang }) {
-  const [activeTab, setActiveTab] = useState<CatId>("korean-name");
-  const [fadeKey, setFadeKey] = useState(0);
-  const [page, setPage] = useState(1);
-  const [realByCategory, setRealByCategory] = useState<Record<string, ReviewEntry[]>>({});
+  const t = REVIEWS_UI_BY_LANG[lang] ?? REVIEWS_UI_BY_LANG.en;
   const serif = "var(--font-noto-serif-kr,'Noto Serif KR',serif)";
 
+  const [bestReviews, setBestReviews] = useState<RealReview[]>([]);
+  const [generalReviews, setGeneralReviews] = useState<RealReview[]>([]);
+  const [generalTotal, setGeneralTotal] = useState(0);
+  const [generalPage, setGeneralPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+
   useEffect(() => {
-    fetch("/api/reviews/featured?grouped=1")
-      .then((res) => res.json())
-      .then((data) => {
-        if (!data?.ok || !data.reviewsByCategory) return;
-        const mapped: Record<string, ReviewEntry[]> = {};
-        for (const [cat, rows] of Object.entries(data.reviewsByCategory as Record<string, RealReview[]>)) {
-          mapped[cat] = rows.map(realReviewToEntry);
+    let cancelled = false;
+    Promise.all([
+      fetch("/api/reviews/featured?best=1").then((r) => r.json()),
+      fetch(`/api/reviews/featured?all=1&page=1&pageSize=${REVIEWS_GENERAL_PAGE_SIZE}`).then((r) => r.json()),
+    ])
+      .then(([bestData, allData]) => {
+        if (cancelled) return;
+        if (bestData?.ok) setBestReviews(bestData.reviews ?? []);
+        if (allData?.ok) {
+          setGeneralReviews(allData.reviews ?? []);
+          setGeneralTotal(allData.total ?? 0);
         }
-        setRealByCategory(mapped);
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, []);
 
-  const CAT_TAB_LABELS: Record<CatId, string> = {
-    "korean-name": copy.cats["korean-name"].label,
-    "child":        copy.cats["child"].label,
-    "self":         copy.cats["self"].label,
-    "stage":        copy.cats["stage"].label,
-    "pet":          copy.cats["pet"].label,
-    "foreign":      copy.cats["foreign"].label,
-    "goods":        copy.cats["goods"].label,
+  const loadMore = () => {
+    const nextPage = generalPage + 1;
+    setLoadingMore(true);
+    fetch(`/api/reviews/featured?all=1&page=${nextPage}&pageSize=${REVIEWS_GENERAL_PAGE_SIZE}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (!data?.ok) return;
+        setGeneralReviews((prev) => [...prev, ...(data.reviews ?? [])]);
+        setGeneralPage(nextPage);
+      })
+      .catch(() => {})
+      .finally(() => setLoadingMore(false));
   };
 
-  const allReviews = getReviews(lang, activeTab, realByCategory[activeTab] ?? []);
-  const totalPages = Math.max(1, Math.ceil(allReviews.length / REVIEWS_PAGE_SIZE));
-  const safePage = Math.min(page, totalPages);
-  const reviews = allReviews.slice((safePage - 1) * REVIEWS_PAGE_SIZE, safePage * REVIEWS_PAGE_SIZE);
+  const hasMore = generalReviews.length < generalTotal;
+  const isEmpty = !loading && bestReviews.length === 0 && generalReviews.length === 0;
+
+  const renderReply = (reply: RealReview["reply"], light: boolean) => {
+    if (!reply) return null;
+    return (
+      <div
+        className="lg-review-reply"
+        style={{ background: light ? "rgba(201,168,76,0.06)" : "rgba(201,168,76,0.1)" }}
+      >
+        <div style={{ fontSize: 11, fontWeight: 800, color: "#C9A84C", marginBottom: 4, letterSpacing: "0.04em" }}>
+          ✓ {t.teamReply}
+        </div>
+        <div style={{ fontSize: 13, lineHeight: 1.6, color: light ? "#444" : "rgba(255,255,255,0.85)" }}>
+          {reply.content}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <section style={{ background: "#FAFAF8", padding: "72px 0" }}>
@@ -2179,86 +2113,94 @@ function ReviewsSection({ copy, lang }: { copy: HomeCopy; lang: Lang }) {
           </h2>
         </div>
 
-        {/* 카테고리 탭 */}
-        <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap", marginBottom: 36 }}>
-          {CATS.map(c => (
-            <button
-              key={c.id}
-              className={`lg-reviews-tab${activeTab === c.id ? " active" : ""}`}
-              onClick={() => { setActiveTab(c.id as CatId); setFadeKey(k => k + 1); setPage(1); }}
-            >
-              {c.emoji} {CAT_TAB_LABELS[c.id as CatId]}
-            </button>
-          ))}
-        </div>
-
-        {/* 후기 카드 그리드 */}
-        <div key={fadeKey} className="lg-reviews-grid" style={{ animation: "lgFadeIn 0.35s ease" }}>
-          {reviews.map((r, i) => {
-            // 본문 속 한국 이름 골드 강조
-            const highlightContent = (text: string, kname?: string) => {
-              if (!kname) return <>{text}</>;
-              const parts = text.split(kname);
-              return <>{parts.map((p, j) => j < parts.length - 1 ? <span key={j}>{p}<strong style={{ color: "#C9A84C", fontStyle: "normal", fontWeight: 800 }}>{kname}</strong></span> : <span key={j}>{p}</span>)}</>;
-            };
-            return (
-            <div key={i} className="lg-review-grid-card">
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-                <span style={{ fontSize: 28, lineHeight: 1 }}>{r.flag}</span>
-                <span style={{ fontSize: 15, fontWeight: 700, color: "#1B2A5E" }}>
-                  {r.name}{r.country ? <span style={{ fontWeight: 500, color: "#888" }}> · {r.country}</span> : null}
-                </span>
-              </div>
-              <div style={{ flex: 1, fontSize: 18, color: "#333333", lineHeight: 1.8, fontStyle: "italic", marginBottom: 18 }}>
-                &ldquo;{highlightContent(r.content, r.koreanName)}&rdquo;
-              </div>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <div style={{ fontSize: 16, color: "#C9A84C", letterSpacing: 2 }}>{"★".repeat(r.rating ?? 5)}</div>
-                <div style={{ fontSize: 11, fontWeight: 700, color: "#FFF", background: r.isReal ? "#C9A84C" : "#1B2A5E", borderRadius: 20, padding: "3px 10px" }}>
-                  {r.dateLabel || "2026"}
-                </div>
-              </div>
+        {isEmpty ? (
+          <div style={{ textAlign: "center", padding: "48px 20px", background: "#FFFFFF", border: "1px solid #EAEAEA", borderRadius: 20 }}>
+            <div style={{ fontSize: 20, fontWeight: 800, color: "#1B2A5E", marginBottom: 8, fontFamily: serif }}>
+              {t.emptyTitle}
             </div>
-            );
-          })}
-        </div>
-
-        {/* 페이지네이션 */}
-        {totalPages > 1 && (
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 28 }}>
+            <div style={{ fontSize: 14, color: "#777", marginBottom: 20, lineHeight: 1.7 }}>
+              {t.emptyDesc}
+            </div>
             <button
               type="button"
-              onClick={() => setPage(p => Math.max(1, p - 1))}
-              disabled={safePage <= 1}
-              style={{ width: 32, height: 32, borderRadius: 8, border: "1px solid #DDD", background: "#FFF", color: safePage <= 1 ? "#CCC" : "#1B2A5E", cursor: safePage <= 1 ? "default" : "pointer", fontSize: 14 }}
+              className="lg-cta-btn"
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
             >
-              ‹
-            </button>
-            {Array.from({ length: totalPages }, (_, idx) => idx + 1).map(p => (
-              <button
-                key={p}
-                type="button"
-                onClick={() => setPage(p)}
-                style={{
-                  width: 32, height: 32, borderRadius: 8,
-                  border: p === safePage ? "1px solid #1B2A5E" : "1px solid #DDD",
-                  background: p === safePage ? "#1B2A5E" : "#FFF",
-                  color: p === safePage ? "#FFF" : "#555",
-                  fontSize: 13, fontWeight: 700, cursor: "pointer",
-                }}
-              >
-                {p}
-              </button>
-            ))}
-            <button
-              type="button"
-              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-              disabled={safePage >= totalPages}
-              style={{ width: 32, height: 32, borderRadius: 8, border: "1px solid #DDD", background: "#FFF", color: safePage >= totalPages ? "#CCC" : "#1B2A5E", cursor: safePage >= totalPages ? "default" : "pointer", fontSize: 14 }}
-            >
-              ›
+              {t.emptyCta}
             </button>
           </div>
+        ) : (
+          <>
+            {/* 베스트 영역 (최대 2개) */}
+            {bestReviews.length > 0 && (
+              <div className="lg-review-best-grid" style={{ marginBottom: 32 }}>
+                {bestReviews.map((r) => (
+                  <div key={r.id} className="lg-review-best-card">
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+                      <span style={{ fontSize: 10, fontWeight: 800, color: "#C9A84C", letterSpacing: "0.1em", textTransform: "uppercase", border: "1px solid rgba(201,168,76,0.4)", borderRadius: 20, padding: "3px 10px" }}>
+                        ✦ {t.bestBadge}
+                      </span>
+                      <span style={{ fontSize: 15, color: "#C9A84C", letterSpacing: 2 }}>{"★".repeat(r.rating)}</span>
+                    </div>
+                    <div style={{ fontSize: 19, color: "#F3EEE4", lineHeight: 1.8, fontStyle: "italic", marginBottom: 16 }}>
+                      &ldquo;{r.content}&rdquo;
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                      <span style={{ fontSize: 14, fontWeight: 700, color: "#FFFFFF" }}>
+                        {r.display_name || t.guestFallback}
+                      </span>
+                      {(r.name_used || r.country) && (
+                        <span style={{ fontSize: 12, color: "rgba(255,255,255,0.55)" }}>
+                          · {r.name_used || r.country}
+                        </span>
+                      )}
+                      <span style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", marginLeft: "auto" }}>
+                        {formatReviewDate(r.created_at)}
+                      </span>
+                    </div>
+                    {renderReply(r.reply, false)}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* 일반 영역 (누적, 최신순) */}
+            {generalReviews.length > 0 && (
+              <div className="lg-reviews-grid">
+                {generalReviews.map((r) => (
+                  <div key={r.id} className="lg-review-grid-card">
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+                      <span style={{ fontSize: 15, fontWeight: 700, color: "#1B2A5E" }}>
+                        {r.display_name || t.guestFallback}
+                      </span>
+                      {(r.name_used || r.country) && (
+                        <span style={{ fontSize: 12, color: "#888" }}> · {r.name_used || r.country}</span>
+                      )}
+                    </div>
+                    <div style={{ flex: 1, fontSize: 16, color: "#333333", lineHeight: 1.8, fontStyle: "italic", marginBottom: 14 }}>
+                      &ldquo;{r.content}&rdquo;
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: r.reply ? 10 : 0 }}>
+                      <div style={{ fontSize: 15, color: "#C9A84C", letterSpacing: 2 }}>{"★".repeat(r.rating)}</div>
+                      <div style={{ fontSize: 11, color: "#999" }}>{formatReviewDate(r.created_at)}</div>
+                    </div>
+                    {renderReply(r.reply, true)}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {hasMore && (
+              <button
+                type="button"
+                className="lg-reviews-loadmore"
+                onClick={loadMore}
+                disabled={loadingMore}
+              >
+                {loadingMore ? "..." : t.loadMore}
+              </button>
+            )}
+          </>
         )}
       </div>
     </section>
@@ -2314,6 +2256,64 @@ function MarqueeBand({ lang }: { lang: Lang }) {
         ))}
       </div>
     </div>
+  );
+}
+
+// ── WINK METHOD 섹션 (작명 원리) ──────────────────────────
+function MethodSection({ lang }: { lang: Lang }) {
+  const m = METHOD_BY_LANG[lang === "ko" ? "ko" : "en"];
+  const serif = "var(--font-noto-serif-kr,'Noto Serif KR',serif)";
+
+  return (
+    <section id="method" className="lg-method-section">
+      <div className="lg-method-grid" style={{ maxWidth: 1180, margin: "0 auto", padding: "0 clamp(20px,5vw,80px)" }}>
+        <div className="lg-method-left">
+          <div style={{ fontSize: 11, color: "#A8322A", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", marginBottom: 14 }}>
+            {m.kicker}
+          </div>
+          <h2 style={{ margin: "0 0 18px", fontSize: "clamp(24px,2.8vw,34px)", fontWeight: 900, color: "#1D1B18", fontFamily: serif, letterSpacing: "-0.02em", lineHeight: 1.25 }}>
+            {m.headline}
+          </h2>
+          <p style={{ margin: "0 0 28px", fontSize: 14.5, color: "#6E675C", lineHeight: 1.9, maxWidth: 420 }}>
+            {m.desc}
+          </p>
+          <div style={{ border: "1px solid rgba(29,27,24,0.12)", borderRadius: 12, overflow: "hidden", background: "rgba(255,255,255,0.5)" }}>
+            {m.sourceRows.map((row, i) => (
+              <div
+                key={row.label}
+                style={{
+                  display: "flex", justifyContent: "space-between", gap: 12,
+                  padding: "12px 16px", fontSize: 12.5,
+                  borderTop: i === 0 ? "none" : "1px solid rgba(29,27,24,0.08)",
+                }}
+              >
+                <span style={{ color: "#4A453D", fontWeight: 700 }}>{row.label}</span>
+                <span style={{ color: "#6E675C", textAlign: "right" }}>{row.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="lg-method-right">
+          {m.items.map((item) => (
+            <div key={item.num} className="lg-method-item">
+              <div className="lg-method-badge" style={{ fontFamily: serif }}>{item.hanja}</div>
+              <div>
+                <div style={{ fontSize: 11, color: "#A8322A", fontWeight: 800, letterSpacing: "0.08em", marginBottom: 4 }}>
+                  {item.num}
+                </div>
+                <div style={{ fontSize: 16, fontWeight: 800, color: "#1D1B18", marginBottom: 6, fontFamily: serif }}>
+                  {item.titleKo} <span style={{ fontSize: 13, color: "#6E675C", fontWeight: 600 }}>· {item.titleEn}</span>
+                </div>
+                <div style={{ fontSize: 13.5, color: "#6E675C", lineHeight: 1.7 }}>
+                  {item.desc}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -2539,11 +2539,18 @@ export default function HomePage() {
       {/* ── 헤더 ── */}
       <header className="lg-header">
         <button onClick={() => router.push("/")} style={{ display: "flex", alignItems: "center", gap: 10, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
-          <div style={{ width: 40, height: 40, borderRadius: "50%", background: "linear-gradient(145deg,#C0392B,#922b21)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 900, fontSize: 18, boxShadow: "0 4px 12px rgba(192,57,43,0.3)", flexShrink: 0 }}>W</div>
+          <WinkMark size={40} />
           <div style={{ textAlign: "left" }}>
             <div style={{ fontSize: 17, fontWeight: 900, color: "#1B2A5E", lineHeight: 1.1, fontFamily: serif }}>윙크 네이밍</div>
             <div style={{ fontSize: 9, color: "#AAA", letterSpacing: "0.14em" }}>WINK NAMING</div>
           </div>
+        </button>
+        <button
+          type="button"
+          onClick={() => document.getElementById("method")?.scrollIntoView({ behavior: "smooth" })}
+          className="lg-nav-method"
+        >
+          {METHOD_NAV_LABEL[lang] ?? METHOD_NAV_LABEL.en}
         </button>
         <button
           onClick={() => setShowLangPicker(true)}
@@ -2662,6 +2669,9 @@ export default function HomePage() {
 
       {/* ── 3단계 가이드 섹션 ── */}
       <GuideSection lang={lang} onStart={() => handleStart(cat.href)} />
+
+      {/* ── WINK METHOD 섹션 (작명 원리) ── */}
+      <MethodSection lang={lang} />
 
       {/* ── 카테고리 아이콘 바 ── */}
       <div className="lg-cat-bar">

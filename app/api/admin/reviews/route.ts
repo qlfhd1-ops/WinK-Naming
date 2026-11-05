@@ -82,7 +82,21 @@ export async function GET(req: Request) {
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ ok: true, reviews: data ?? [], total: count ?? 0, page, pageSize });
+  const reviewIds = (data ?? []).map((r) => r.id);
+  let repliesByReview: Record<string, { id: string; content: string; created_at: string; updated_at: string }> = {};
+  if (reviewIds.length > 0) {
+    const { data: replies } = await supabase
+      .from("review_replies")
+      .select("id, review_id, content, created_at, updated_at")
+      .in("review_id", reviewIds);
+    repliesByReview = Object.fromEntries(
+      (replies ?? []).map((r) => [r.review_id, { id: r.id, content: r.content, created_at: r.created_at, updated_at: r.updated_at }])
+    );
+  }
+
+  const reviewsWithReplies = (data ?? []).map((r) => ({ ...r, reply: repliesByReview[r.id] ?? null }));
+
+  return NextResponse.json({ ok: true, reviews: reviewsWithReplies, total: count ?? 0, page, pageSize });
 }
 
 /**
@@ -110,6 +124,26 @@ export async function PATCH(req: Request) {
     }
 
     const supabase = getAdminClient();
+
+    // 베스트(is_featured) 고정은 최대 2개까지만 허용
+    if (patch.is_featured === true) {
+      const { count, error: countError } = await supabase
+        .from("naming_reviews")
+        .select("id", { count: "exact", head: true })
+        .eq("is_featured", true)
+        .neq("id", reviewId);
+
+      if (countError) {
+        return NextResponse.json({ ok: false, error: countError.message }, { status: 500 });
+      }
+      if ((count ?? 0) >= 2) {
+        return NextResponse.json(
+          { ok: false, error: "베스트 고정은 최대 2개까지만 가능합니다. 먼저 다른 후기의 고정을 해제해주세요." },
+          { status: 400 }
+        );
+      }
+    }
+
     const { error } = await supabase.from("naming_reviews").update(patch).eq("id", reviewId);
 
     if (error) {

@@ -469,6 +469,32 @@ CREATE INDEX IF NOT EXISTS idx_naming_reviews_user_id ON public.naming_reviews(u
 CREATE INDEX IF NOT EXISTS idx_naming_reviews_is_featured ON public.naming_reviews(is_featured) WHERE is_featured = true;
 CREATE INDEX IF NOT EXISTS idx_naming_reviews_category ON public.naming_reviews(category);
 
+-- ─── 19. review_replies (관리자 댓글 — 후기에 대한 운영자 답변) ────
+-- 승인된(is_approved=true) 후기의 답변만 공개 조회 가능.
+-- 작성/수정/삭제는 service_role(관리자 API)에서만 수행 — RLS에 쓰기 정책 없음(의도적).
+CREATE TABLE IF NOT EXISTS public.review_replies (
+  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  review_id  UUID NOT NULL REFERENCES public.naming_reviews(id) ON DELETE CASCADE,
+  admin_id   UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  content    TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (review_id)
+);
+
+ALTER TABLE public.review_replies ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "review_replies_select_public" ON public.review_replies;
+CREATE POLICY "review_replies_select_public"
+  ON public.review_replies FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM public.naming_reviews r
+      WHERE r.id = review_replies.review_id AND r.is_approved = true
+    )
+  );
+
+CREATE INDEX IF NOT EXISTS idx_review_replies_review_id ON public.review_replies(review_id);
+
 -- ─── 인덱스 (위에서 테이블별로 생성한 것 제외, 나머지 전체) ────────
 CREATE INDEX IF NOT EXISTS idx_naming_briefs_user_id            ON public.naming_briefs(user_id);
 CREATE INDEX IF NOT EXISTS idx_naming_briefs_status             ON public.naming_briefs(status);

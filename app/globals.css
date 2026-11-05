@@ -1263,6 +1263,26 @@ html[data-theme="light"] .wink-bottom-nav {
   padding: 0 clamp(20px, 5vw, 80px);
 }
 
+.lg-nav-method {
+  font-size: 13px;
+  font-weight: 700;
+  color: #555555;
+  background: none;
+  border: none;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  padding: 8px 10px;
+}
+.lg-nav-method:hover {
+  color: #A8322A;
+}
+@media (max-width: 560px) {
+  .lg-nav-method {
+    font-size: 11px;
+    padding: 6px 4px;
+  }
+}
+
 /* ── 히어로 섹션 ── */
 .lg-hero {
   position: relative;
@@ -1376,6 +1396,63 @@ html[data-theme="light"] .wink-bottom-nav {
   grid-template-columns: 1fr 1fr;
   gap: 48px;
   align-items: start;
+}
+
+/* ── WINK Method 섹션 ── */
+.lg-method-section {
+  background: #F3EEE4;
+  padding: 72px 0;
+}
+
+.lg-method-grid {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 56px;
+  align-items: start;
+}
+
+.lg-method-left {
+  position: sticky;
+  top: 100px;
+}
+
+.lg-method-right {
+  display: flex;
+  flex-direction: column;
+}
+
+.lg-method-item {
+  display: flex;
+  gap: 18px;
+  padding: 20px 0;
+  border-bottom: 1px solid rgba(29, 27, 24, 0.10);
+}
+.lg-method-item:last-child {
+  border-bottom: none;
+}
+
+.lg-method-badge {
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  background: #A8322A;
+  color: #F3EEE4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+@media (max-width: 860px) {
+  .lg-method-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .lg-method-left {
+    position: static;
+  }
 }
 
 /* ── 참고 정보 섹션 ── */
@@ -1531,6 +1608,52 @@ html[data-theme="light"] .wink-bottom-nav {
   min-height: 240px;
 }
 
+/* ── 베스트 후기 영역 (최대 2개, 큰 카드) ── */
+.lg-review-best-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.lg-review-best-card {
+  position: relative;
+  background: linear-gradient(160deg, #1B2A5E 0%, #0F1A3E 100%);
+  border-radius: 24px;
+  padding: 32px 28px 28px;
+  border: 1px solid rgba(201, 168, 76, 0.3);
+  box-shadow: 0 16px 40px rgba(27, 42, 94, 0.18);
+}
+
+.lg-review-reply {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border-left: 3px solid #C9A84C;
+}
+
+/* ── 더보기 버튼 ── */
+.lg-reviews-loadmore {
+  display: block;
+  margin: 28px auto 0;
+  padding: 11px 28px;
+  border-radius: 999px;
+  border: 1px solid #1B2A5E;
+  background: #FFFFFF;
+  color: #1B2A5E;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.lg-reviews-loadmore:hover {
+  background: #1B2A5E;
+  color: #FFFFFF;
+}
+.lg-reviews-loadmore:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 /* ── 하단 고정 카테고리 바 (전 화면) ── */
 .lg-mobile-tabs {
   display: flex;
@@ -1670,6 +1793,11 @@ html[data-theme="light"] .wink-bottom-nav {
 
   /* 후기 그리드: 모바일 1열 */
   .lg-reviews-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .lg-review-best-grid {
     grid-template-columns: 1fr;
     gap: 16px;
   }

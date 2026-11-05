@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/browser";
 
+type ReplyRow = { id: string; content: string; created_at: string; updated_at: string };
+
 type ReviewRow = {
   id: string;
   user_id: string;
@@ -17,6 +19,7 @@ type ReviewRow = {
   is_approved: boolean;
   is_featured: boolean;
   created_at: string;
+  reply: ReplyRow | null;
 };
 
 type StatusFilter = "all" | "pending" | "approved" | "featured";
@@ -47,6 +50,9 @@ export default function AdminReviewsPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
+  const [editingReplyId, setEditingReplyId] = useState<string | null>(null);
+  const [replyBusyId, setReplyBusyId] = useState<string | null>(null);
 
   useEffect(() => {
     const check = async () => {
@@ -156,6 +162,46 @@ export default function AdminReviewsPage() {
       alert(e instanceof Error ? e.message : "실패");
     } finally {
       setBusyId(null);
+    }
+  };
+
+  const submitReply = async (reviewId: string) => {
+    const content = (replyDrafts[reviewId] ?? "").trim();
+    if (!content) return;
+    setReplyBusyId(reviewId);
+    try {
+      const res = await fetch("/api/admin/reviews/replies", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        body: JSON.stringify({ reviewId, content }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.ok) throw new Error(json.error ?? "답변 저장 실패");
+      setReviews((prev) => prev.map((r) => (r.id === reviewId ? { ...r, reply: json.reply } : r)));
+      setReplyDrafts((prev) => ({ ...prev, [reviewId]: "" }));
+      setEditingReplyId(null);
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "실패");
+    } finally {
+      setReplyBusyId(null);
+    }
+  };
+
+  const deleteReply = async (reviewId: string) => {
+    if (!confirm("이 답변을 삭제하시겠습니까?")) return;
+    setReplyBusyId(reviewId);
+    try {
+      const res = await fetch(`/api/admin/reviews/replies?reviewId=${reviewId}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.ok) throw new Error(json.error ?? "삭제 실패");
+      setReviews((prev) => prev.map((r) => (r.id === reviewId ? { ...r, reply: null } : r)));
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "실패");
+    } finally {
+      setReplyBusyId(null);
     }
   };
 
@@ -309,6 +355,82 @@ export default function AdminReviewsPage() {
                   >
                     삭제
                   </button>
+                </div>
+
+                {/* 운영자 답변 */}
+                <div style={{ marginTop: 14, paddingTop: 14, borderTop: "1px dashed rgba(255,255,255,0.1)" }}>
+                  {r.reply && editingReplyId !== r.id ? (
+                    <div style={{
+                      borderRadius: 10, padding: "10px 14px",
+                      background: "rgba(201,168,76,0.06)", border: "1px solid rgba(201,168,76,0.2)",
+                    }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: "rgba(230,210,150,0.9)" }}>
+                          ✓ 운영자 답변
+                        </span>
+                        <div style={{ display: "flex", gap: 10 }}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingReplyId(r.id);
+                              setReplyDrafts((prev) => ({ ...prev, [r.id]: r.reply!.content }));
+                            }}
+                            style={{ background: "none", border: "none", color: "rgba(200,218,248,0.55)", fontSize: 11, cursor: "pointer", fontWeight: 600 }}
+                          >
+                            수정
+                          </button>
+                          <button
+                            type="button"
+                            disabled={replyBusyId === r.id}
+                            onClick={() => deleteReply(r.id)}
+                            style={{ background: "none", border: "none", color: "rgba(255,130,130,0.75)", fontSize: 11, cursor: "pointer", fontWeight: 600 }}
+                          >
+                            삭제
+                          </button>
+                        </div>
+                      </div>
+                      <p style={{ fontSize: 13, lineHeight: 1.6, color: "rgba(220,230,250,0.85)" }}>
+                        {r.reply.content}
+                      </p>
+                    </div>
+                  ) : (
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <input
+                        type="text"
+                        value={replyDrafts[r.id] ?? ""}
+                        onChange={(e) => setReplyDrafts((prev) => ({ ...prev, [r.id]: e.target.value }))}
+                        placeholder="답변 작성..."
+                        style={{
+                          flex: 1, padding: "8px 12px", borderRadius: 8, fontSize: 13,
+                          background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.12)",
+                          color: "#f0f5ff", outline: "none",
+                        }}
+                      />
+                      <button
+                        type="button"
+                        disabled={replyBusyId === r.id || !(replyDrafts[r.id] ?? "").trim()}
+                        onClick={() => submitReply(r.id)}
+                        style={{
+                          padding: "8px 16px", borderRadius: 8, fontSize: 12, fontWeight: 700,
+                          border: "1px solid rgba(201,168,76,0.4)", background: "rgba(201,168,76,0.12)",
+                          color: "rgba(230,210,150,0.95)",
+                          cursor: replyBusyId === r.id ? "default" : "pointer",
+                          opacity: (replyDrafts[r.id] ?? "").trim() ? 1 : 0.5,
+                        }}
+                      >
+                        {replyBusyId === r.id ? "저장 중..." : "답변 달기"}
+                      </button>
+                      {editingReplyId === r.id && (
+                        <button
+                          type="button"
+                          onClick={() => setEditingReplyId(null)}
+                          style={{ padding: "8px 12px", borderRadius: 8, fontSize: 12, fontWeight: 600, border: "1px solid rgba(255,255,255,0.12)", background: "transparent", color: "rgba(200,218,248,0.6)", cursor: "pointer" }}
+                        >
+                          취소
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
