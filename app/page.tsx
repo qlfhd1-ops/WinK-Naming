@@ -976,7 +976,7 @@ const GUIDE_BY_LANG: Record<Lang, GuideCopy> = {
     steps: [
       { icon: "✨", title: "이름 생성", desc: "카테고리를 선택하면 AI가 이름 3개를 제안합니다" },
       { icon: "💛", title: "이름 선택", desc: "마음에 드는 이름 1개를 선택하세요" },
-      { icon: "🎴", title: "이름카드 받기", desc: "선택한 이름으로 이름카드를 만들고 다운로드하세요" },
+      { icon: "🪪", title: "이름카드 받기", desc: "선택한 이름으로 이름카드를 만들고 다운로드하세요" },
     ],
     cta: "지금 이름 만들기 →",
   },
@@ -986,7 +986,7 @@ const GUIDE_BY_LANG: Record<Lang, GuideCopy> = {
     steps: [
       { icon: "✨", title: "Generate Names", desc: "Pick a category and AI suggests 3 names" },
       { icon: "💛", title: "Choose Your Name", desc: "Select the one you like best" },
-      { icon: "🎴", title: "Get Your Name Card", desc: "Create and download your name card" },
+      { icon: "🪪", title: "Get Your Name Card", desc: "Create and download your name card" },
     ],
     cta: "Create Your Name →",
   },
@@ -996,7 +996,7 @@ const GUIDE_BY_LANG: Record<Lang, GuideCopy> = {
     steps: [
       { icon: "✨", title: "名前生成", desc: "カテゴリーを選ぶとAIが名前を3つ提案します" },
       { icon: "💛", title: "名前を選択", desc: "気に入った名前を1つ選んでください" },
-      { icon: "🎴", title: "ネームカードを受け取る", desc: "選んだ名前でネームカードを作成・ダウンロードできます" },
+      { icon: "🪪", title: "ネームカードを受け取る", desc: "選んだ名前でネームカードを作成・ダウンロードできます" },
     ],
     cta: "今すぐ名前を作る →",
   },
@@ -1006,7 +1006,7 @@ const GUIDE_BY_LANG: Record<Lang, GuideCopy> = {
     steps: [
       { icon: "✨", title: "生成名字", desc: "选择分类后，AI 会推荐3个名字" },
       { icon: "💛", title: "选择名字", desc: "选出您最喜欢的一个名字" },
-      { icon: "🎴", title: "获取名字卡", desc: "为所选名字生成并下载名字卡" },
+      { icon: "🪪", title: "获取名字卡", desc: "为所选名字生成并下载名字卡" },
     ],
     cta: "立即创建名字 →",
   },
@@ -1016,7 +1016,7 @@ const GUIDE_BY_LANG: Record<Lang, GuideCopy> = {
     steps: [
       { icon: "✨", title: "Genera Nombres", desc: "Elige una categoría y la IA sugiere 3 nombres" },
       { icon: "💛", title: "Elige tu Nombre", desc: "Selecciona el que más te guste" },
-      { icon: "🎴", title: "Recibe tu Tarjeta de Nombre", desc: "Crea y descarga la tarjeta de tu nombre" },
+      { icon: "🪪", title: "Recibe tu Tarjeta de Nombre", desc: "Crea y descarga la tarjeta de tu nombre" },
     ],
     cta: "Crea tu Nombre →",
   },
@@ -1026,7 +1026,7 @@ const GUIDE_BY_LANG: Record<Lang, GuideCopy> = {
     steps: [
       { icon: "✨", title: "Создание имён", desc: "Выберите категорию — ИИ предложит 3 имени" },
       { icon: "💛", title: "Выбор имени", desc: "Выберите имя, которое вам больше нравится" },
-      { icon: "🎴", title: "Получите именную карточку", desc: "Создайте и скачайте карточку с выбранным именем" },
+      { icon: "🪪", title: "Получите именную карточку", desc: "Создайте и скачайте карточку с выбранным именем" },
     ],
     cta: "Создать имя →",
   },
@@ -1036,7 +1036,7 @@ const GUIDE_BY_LANG: Record<Lang, GuideCopy> = {
     steps: [
       { icon: "✨", title: "Génération de noms", desc: "Choisissez une catégorie, l'IA propose 3 noms" },
       { icon: "💛", title: "Choisissez votre nom", desc: "Sélectionnez celui que vous préférez" },
-      { icon: "🎴", title: "Recevez votre carte de nom", desc: "Créez et téléchargez la carte de votre nom" },
+      { icon: "🪪", title: "Recevez votre carte de nom", desc: "Créez et téléchargez la carte de votre nom" },
     ],
     cta: "Créer votre nom →",
   },
@@ -1046,7 +1046,7 @@ const GUIDE_BY_LANG: Record<Lang, GuideCopy> = {
     steps: [
       { icon: "✨", title: "توليد الأسماء", desc: "اختر فئة ليقترح الذكاء الاصطناعي 3 أسماء" },
       { icon: "💛", title: "اختر اسمك", desc: "اختر الاسم الذي يعجبك أكثر" },
-      { icon: "🎴", title: "احصل على بطاقة اسمك", desc: "أنشئ وحمّل بطاقة الاسم الذي اخترته" },
+      { icon: "🪪", title: "احصل على بطاقة اسمك", desc: "أنشئ وحمّل بطاقة الاسم الذي اخترته" },
     ],
     cta: "أنشئ اسمك →",
   },
@@ -1056,7 +1056,7 @@ const GUIDE_BY_LANG: Record<Lang, GuideCopy> = {
     steps: [
       { icon: "✨", title: "नाम जनरेट करें", desc: "एक श्रेणी चुनें, AI 3 नाम सुझाएगा" },
       { icon: "💛", title: "अपना नाम चुनें", desc: "जो नाम आपको सबसे अच्छा लगे उसे चुनें" },
-      { icon: "🎴", title: "अपना नेम कार्ड प्राप्त करें", desc: "चुने गए नाम के लिए नेम कार्ड बनाएं और डाउनलोड करें" },
+      { icon: "🪪", title: "अपना नेम कार्ड प्राप्त करें", desc: "चुने गए नाम के लिए नेम कार्ड बनाएं और डाउनलोड करें" },
     ],
     cta: "अभी अपना नाम बनाएं →",
   },
@@ -1157,60 +1157,6 @@ const INFO_TABS_BY_LANG: Record<Lang, { id: string; label: string }[]> = {
 
 const INFO_TABS = INFO_TABS_BY_LANG.ko;
 type InfoTabId = "rank" | "saju" | "sejong" | "culture" | "tips";
-
-// ── WINK METHOD 섹션 데이터 (최소 en/ko 지원, 그 외 언어는 en으로 대체) ──
-type MethodItem = { num: string; hanja: string; titleKo: string; titleEn: string; desc: string };
-type MethodCopy = {
-  kicker: string;
-  headline: string;
-  desc: string;
-  sourceRows: { label: string; value: string }[];
-  items: MethodItem[];
-};
-
-const METHOD_BY_LANG: Record<"ko" | "en", MethodCopy> = {
-  ko: {
-    kicker: "THE WINK METHOD · 작명 원리",
-    headline: "No 아무개 names.",
-    desc: "윙크 네이밍은 음령·자원·수리·사주 네 가지 성명학 이론과 대법원 인명용 한자, 그리고 당신의 언어까지 모두 통과한 이름만 제안합니다.",
-    sourceRows: [
-      { label: "음령오행 이론", value: "훈민정음 해례본 (1446)" },
-      { label: "인명용 한자", value: "대법원 인명용 한자 8,319자" },
-      { label: "수리성명학", value: "81수리 · 원형이정 4격" },
-    ],
-    items: [
-      { num: "01", hanja: "音靈", titleKo: "음령오행", titleEn: "Sound Elements", desc: "이름의 음운이 지닌 소리의 오행(五行) 에너지를 분석해 발음이 주는 기운의 균형을 맞춥니다." },
-      { num: "02", hanja: "字源", titleKo: "자원오행", titleEn: "Character Elements", desc: "한자의 구성 요소(자원)가 지닌 오행 속성을 반영해 이름에 담긴 의미의 기운을 설계합니다." },
-      { num: "03", hanja: "數理", titleKo: "수리성명학", titleEn: "Stroke Numerology", desc: "한자 획수의 조합(원형이정 4격)을 계산해 숫자가 지닌 길흉의 기운까지 고려합니다." },
-      { num: "04", hanja: "四柱", titleKo: "사주 보완", titleEn: "Birth-Chart Balance", desc: "태어난 연월일시의 사주팔자를 분석해 부족한 오행을 이름으로 보완합니다." },
-      { num: "05", hanja: "人名", titleKo: "인명용 한자", titleEn: "Official Name Hanja", desc: "대법원이 고시한 인명용 한자 범위 내에서만 선정해 법적으로 유효한 이름을 보장합니다." },
-      { num: "06", hanja: "發音", titleKo: "글로벌 발음", titleEn: "Your-Language Check", desc: "영어 등 사용자의 모국어로 발음했을 때 어색하거나 부정적인 뜻이 없는지 교차 검증합니다." },
-    ],
-  },
-  en: {
-    kicker: "THE WINK METHOD",
-    headline: "No 아무개 names.",
-    desc: "Wink Naming only proposes names that pass through four classical naming theories — sound, character, numerology, and birth-chart balance — plus the Supreme Court's official hanja list and a check in your own language.",
-    sourceRows: [
-      { label: "Sound-Element Theory", value: "Hunminjeongeum Haerye (1446)" },
-      { label: "Official Name Hanja", value: "Supreme Court's 8,319 registered hanja" },
-      { label: "Stroke Numerology", value: "81-Number System · Won-Hyeong-Yi-Jeong" },
-    ],
-    items: [
-      { num: "01", hanja: "音靈", titleKo: "음령오행", titleEn: "Sound Elements", desc: "Analyzes the five-element energy carried by each syllable's sound, balancing the energy conveyed by pronunciation." },
-      { num: "02", hanja: "字源", titleKo: "자원오행", titleEn: "Character Elements", desc: "Reflects the five-element properties in a hanja's root components to design the energy of meaning embedded in the name." },
-      { num: "03", hanja: "數理", titleKo: "수리성명학", titleEn: "Stroke Numerology", desc: "Calculates the combination of hanja stroke counts (the four Won-Hyeong-Yi-Jeong formations) to weigh the fortune implied by numbers." },
-      { num: "04", hanja: "四柱", titleKo: "사주 보완", titleEn: "Birth-Chart Balance", desc: "Analyzes the four pillars of the birth date and time to supplement any lacking five elements through the name." },
-      { num: "05", hanja: "人名", titleKo: "인명용 한자", titleEn: "Official Name Hanja", desc: "Selects characters strictly within the Supreme Court's officially registered name-hanja list to guarantee a legally valid name." },
-      { num: "06", hanja: "發音", titleKo: "글로벌 발음", titleEn: "Your-Language Check", desc: "Cross-checks the name's pronunciation in your own language (e.g. English) to avoid awkward or unintended meanings." },
-    ],
-  },
-};
-
-const METHOD_NAV_LABEL: Record<Lang, string> = {
-  ko: "작명원리", en: "Method", ja: "作名原理", zh: "起名原理",
-  es: "Método", fr: "Méthode", ru: "Метод", ar: "المنهج", hi: "विधि",
-};
 
 type InfoCard = { title: string; body: string; highlight?: string };
 type InfoCardSet = Record<InfoTabId, InfoCard[]>;
@@ -2259,65 +2205,6 @@ function MarqueeBand({ lang }: { lang: Lang }) {
   );
 }
 
-// ── WINK METHOD 섹션 (작명 원리) ──────────────────────────
-function MethodSection({ lang }: { lang: Lang }) {
-  const m = METHOD_BY_LANG[lang === "ko" ? "ko" : "en"];
-  const serif = "var(--font-noto-serif-kr,'Noto Serif KR',serif)";
-
-  return (
-    <section id="method" className="lg-method-section">
-      <div className="lg-method-grid" style={{ maxWidth: 1180, margin: "0 auto", padding: "0 clamp(20px,5vw,80px)" }}>
-        <div className="lg-method-left">
-          <div style={{ fontSize: 11, color: "#A8322A", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", marginBottom: 14 }}>
-            {m.kicker}
-          </div>
-          <h2 style={{ margin: "0 0 18px", fontSize: "clamp(24px,2.8vw,34px)", fontWeight: 900, color: "#1D1B18", fontFamily: serif, letterSpacing: "-0.02em", lineHeight: 1.25 }}>
-            {m.headline}
-          </h2>
-          <p style={{ margin: "0 0 28px", fontSize: 14.5, color: "#6E675C", lineHeight: 1.9, maxWidth: 420 }}>
-            {m.desc}
-          </p>
-          <div style={{ border: "1px solid rgba(29,27,24,0.12)", borderRadius: 12, overflow: "hidden", background: "rgba(255,255,255,0.5)" }}>
-            {m.sourceRows.map((row, i) => (
-              <div
-                key={row.label}
-                style={{
-                  display: "flex", justifyContent: "space-between", gap: 12,
-                  padding: "12px 16px", fontSize: 12.5,
-                  borderTop: i === 0 ? "none" : "1px solid rgba(29,27,24,0.08)",
-                }}
-              >
-                <span style={{ color: "#4A453D", fontWeight: 700 }}>{row.label}</span>
-                <span style={{ color: "#6E675C", textAlign: "right" }}>{row.value}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="lg-method-right">
-          {m.items.map((item) => (
-            <div key={item.num} className="lg-method-item">
-              <div className="lg-method-badge" style={{ fontFamily: serif }}>{item.hanja}</div>
-              <div>
-                <div style={{ fontSize: 11, color: "#A8322A", fontWeight: 800, letterSpacing: "0.08em", marginBottom: 4 }}>
-                  {item.num}
-                </div>
-                <div style={{ fontSize: 16, fontWeight: 800, color: "#1D1B18", marginBottom: 6, fontFamily: serif }}>
-                  {item.titleKo} <span style={{ fontSize: 13, color: "#6E675C", fontWeight: 600 }}>· {item.titleEn}</span>
-                </div>
-                <div style={{ fontSize: 13.5, color: "#6E675C", lineHeight: 1.7 }}>
-                  {item.desc}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ── 참고 정보 섹션 ─────────────────────────────────────────
 function InfoSection({ copy, lang }: { copy: HomeCopy; lang: Lang }) {
   const [activeTab, setActiveTab] = useState<InfoTabId>("rank");
   const tabs = INFO_TABS_BY_LANG[lang] ?? INFO_TABS_BY_LANG.ko;
@@ -2546,13 +2433,6 @@ export default function HomePage() {
           </div>
         </button>
         <button
-          type="button"
-          onClick={() => document.getElementById("method")?.scrollIntoView({ behavior: "smooth" })}
-          className="lg-nav-method"
-        >
-          {METHOD_NAV_LABEL[lang] ?? METHOD_NAV_LABEL.en}
-        </button>
-        <button
           onClick={() => setShowLangPicker(true)}
           className="lg-lang-btn"
           aria-label="Change language"
@@ -2669,9 +2549,6 @@ export default function HomePage() {
 
       {/* ── 3단계 가이드 섹션 ── */}
       <GuideSection lang={lang} onStart={() => handleStart(cat.href)} />
-
-      {/* ── WINK METHOD 섹션 (작명 원리) ── */}
-      <MethodSection lang={lang} />
 
       {/* ── 카테고리 아이콘 바 ── */}
       <div className="lg-cat-bar">

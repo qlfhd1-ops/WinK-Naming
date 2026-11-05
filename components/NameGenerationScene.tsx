@@ -8,6 +8,8 @@ type Props = {
   previewName?: string;
   isComplete?: boolean;
   statusMessage?: string;
+  stepTag?: string;
+  stepSub?: string;
 };
 
 // #1B2A5E navy, #C9A84C gold
@@ -36,6 +38,8 @@ export default function NameGenerationScene({
   previewName,
   isComplete = false,
   statusMessage,
+  stepTag,
+  stepSub,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef<number>(0);
@@ -369,6 +373,10 @@ export default function NameGenerationScene({
               0%, 100% { opacity: 0.4; transform: scale(0.85); }
               50% { opacity: 1; transform: scale(1.2); }
             }
+            @keyframes winkStepFade {
+              from { opacity: 0; transform: translateY(4px); }
+              to { opacity: 1; transform: translateY(0); }
+            }
           `}</style>
 
           <div
@@ -421,23 +429,57 @@ export default function NameGenerationScene({
             }}
           >
             {statusMessage ? (
-              <span style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-                color: "rgba(201,168,76,0.9)",
-                fontWeight: 600,
-                fontSize: 15,
-              }}>
-                <span style={{
-                  display: "inline-block",
-                  width: 7,
-                  height: 7,
-                  borderRadius: "50%",
-                  background: "rgba(201,168,76,0.85)",
-                  animation: "winkPulse 1.1s ease-in-out infinite",
-                }} />
-                {statusMessage}
+              <span style={{ display: "inline-flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+                {stepTag && (
+                  <span
+                    key={stepTag}
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 700,
+                      letterSpacing: "0.14em",
+                      textTransform: "uppercase",
+                      color: "rgba(201,168,76,0.85)",
+                      animation: "winkStepFade 0.4s ease",
+                    }}
+                  >
+                    {stepTag}
+                  </span>
+                )}
+                <span
+                  key={statusMessage}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 8,
+                    color: "rgba(242, 232, 200, 0.98)",
+                    fontWeight: 700,
+                    fontSize: 15.5,
+                    animation: "winkStepFade 0.4s ease",
+                  }}
+                >
+                  <span style={{
+                    display: "inline-block",
+                    width: 7,
+                    height: 7,
+                    borderRadius: "50%",
+                    background: "rgba(201,168,76,0.85)",
+                    animation: "winkPulse 1.1s ease-in-out infinite",
+                  }} />
+                  {statusMessage}
+                </span>
+                {stepSub && (
+                  <span
+                    key={stepSub}
+                    style={{
+                      fontSize: 12.5,
+                      color: "rgba(200, 212, 235, 0.7)",
+                      fontWeight: 400,
+                      animation: "winkStepFade 0.4s ease",
+                    }}
+                  >
+                    {stepSub}
+                  </span>
+                )}
               </span>
             ) : (
               <>

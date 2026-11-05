@@ -9,6 +9,7 @@ import { addCartItem } from "@/lib/cart";
 import { addToShortlist, isInShortlist } from "@/lib/shortlist";
 import { getSessionToken } from "@/lib/session-token";
 import NameGenerationScene from "@/components/NameGenerationScene";
+import { GENERATION_STEPS } from "@/lib/generation-steps";
 import { PRICING, PACKAGES, CATEGORY_PRICING, SHOW_SEAL, SHOW_NAMEPLATE } from "@/lib/pricing";
 import { trackEvent } from "@/components/GoogleAnalytics";
 import UpgradeModal from "@/components/UpgradeModal";
@@ -1459,6 +1460,8 @@ export default function ResultPage() {
   const [showScene, setShowScene] = useState(false);
   const [sceneComplete, setSceneComplete] = useState(false);
   const [progressMsg, setProgressMsg] = useState("");
+  const [stepTag, setStepTag] = useState("");
+  const [stepSub, setStepSub] = useState("");
   const [selectedPackage, setSelectedPackage] = useState<PackageType | "">("");
   const [message, setMessage] = useState("");
   const [briefId, setBriefId] = useState("");
@@ -1632,19 +1635,19 @@ export default function ResultPage() {
 
     hasCalledGPT.current = true;
 
-    // ── 진행 메시지 순환 ──────────────────────────────────────
-    const PROGRESS_MSGS = [
-      "이름을 설계하고 있습니다...",
-      "한자 오행을 분석하고 있습니다...",
-      "성씨와의 음운 조화를 검토하고 있습니다...",
-      "최적의 이름을 선별하고 있습니다...",
-    ];
-    let msgIdx = 0;
-    setProgressMsg(PROGRESS_MSGS[0]);
+    // ── 6단계 분석 과정 순환 (음령/자원/수리/사주/인명/발음) ──────
+    const steps = GENERATION_STEPS[lang] ?? GENERATION_STEPS.ko;
+    let stepIdx = 0;
+    const applyStep = (i: number) => {
+      setStepTag(steps[i].n);
+      setProgressMsg(steps[i].label);
+      setStepSub(steps[i].sub);
+    };
+    applyStep(0);
     const msgTimer = setInterval(() => {
-      msgIdx = (msgIdx + 1) % PROGRESS_MSGS.length;
-      setProgressMsg(PROGRESS_MSGS[msgIdx]);
-    }, 3200);
+      stepIdx = (stepIdx + 1) % steps.length;
+      applyStep(stepIdx);
+    }, 1800);
 
     const callGPT = async () => {
       setIsGenerating(true);
@@ -1692,6 +1695,8 @@ export default function ResultPage() {
                 // 첫 이름 도착 → 씬 완료 애니메이션 후 결과 표시
                 clearInterval(msgTimer);
                 setProgressMsg("");
+                setStepTag("");
+                setStepSub("");
                 setSceneComplete(true);
                 await new Promise((r) => setTimeout(r, 500));
                 setShowScene(false);
@@ -1703,6 +1708,8 @@ export default function ResultPage() {
             if (payload.done && Array.isArray(payload.results)) {
               clearInterval(msgTimer);
               setProgressMsg("");
+              setStepTag("");
+              setStepSub("");
               const nameResults = payload.results as NameResult[];
 
               if (incrementalCount === 0) {
@@ -1728,6 +1735,8 @@ export default function ResultPage() {
       } catch (err) {
         clearInterval(msgTimer);
         setProgressMsg("");
+        setStepTag("");
+        setStepSub("");
         console.error("[GPT stream error]", err);
         setIsError(true);
         setShowScene(false);
@@ -2108,6 +2117,8 @@ export default function ResultPage() {
             previewName={brief?.familyName ? `${brief.familyName}○○` : "　"}
             isComplete={sceneComplete}
             statusMessage={progressMsg}
+            stepTag={stepTag}
+            stepSub={stepSub}
           />
         </div>
       </main>
@@ -3508,6 +3519,7 @@ export default function ResultPage() {
       <MultiLangNameCard
         data={results[nameCardIdx]}
         lang={lang}
+        targetCountry={brief?.targetCountry}
         onClose={() => setNameCardIdx(null)}
       />
     )}

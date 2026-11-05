@@ -3,7 +3,24 @@
 import { useEffect, useRef, useState } from "react";
 import { toPng } from "html-to-image";
 import WinkMark from "@/components/WinkMark";
-import { PLAQUES, PLAQUE_KEYS, LIGHT_PLAQUE_KEYS, OHAENG_COLORS, type PlaqueKey } from "@/lib/plaques";
+import { PLAQUES, PLAQUE_KEYS, LIGHT_PLAQUE_KEYS, OHAENG_COLORS, type PlaqueKey, type PlaqueStyle } from "@/lib/plaques";
+import { CARD_BACKGROUNDS } from "@/lib/card-backgrounds";
+import { getCountryFlag } from "@/lib/country-flags";
+import KoreanPatternOverlay from "@/components/KoreanPatternOverlay";
+
+type CardStyleKey = PlaqueKey | (typeof CARD_BACKGROUNDS)[number]["id"];
+
+/** 랜드마크 사진 스타일의 고정 팔레트 — 금장(gold) 톤 */
+const PHOTO_STYLE: PlaqueStyle = {
+  bg: "#0B1634",
+  pattern: "none",
+  ink: "#FFFFFF",
+  sub: "#D9BC7A",
+  frame: "#C9A45C",
+  line: "rgba(201,164,92,.7)",
+  badge: "✦",
+  label: "Landmark",
+};
 
 export interface NameCardData {
   name: string;
@@ -21,15 +38,16 @@ export interface NameCardData {
 interface Props {
   data: NameCardData;
   lang?: string;
+  targetCountry?: string;
   onClose: () => void;
 }
 
-export default function MultiLangNameCard({ data, lang = "ko", onClose }: Props) {
+export default function MultiLangNameCard({ data, lang = "ko", targetCountry, onClose }: Props) {
   const cardRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [plaqueKey, setPlaqueKey] = useState<PlaqueKey>("giwa");
+  const [plaqueKey, setPlaqueKey] = useState<CardStyleKey>("giwa");
   // closing: true → opacity 0 트랜지션 시작, onTransitionEnd에서 onClose() 호출
   const [closing, setClosing] = useState(false);
   // 중복 호출 방지
@@ -37,13 +55,25 @@ export default function MultiLangNameCard({ data, lang = "ko", onClose }: Props)
 
   const isKo = lang === "ko";
   const koreanRomanized = data.english || data.name;
-  const plaque = PLAQUES[plaqueKey];
-  const isLight = LIGHT_PLAQUE_KEYS.includes(plaqueKey);
+  const photoBg = CARD_BACKGROUNDS.find((b) => b.id === plaqueKey) ?? null;
+  const plaque = photoBg ? PHOTO_STYLE : PLAQUES[plaqueKey as PlaqueKey];
+  const isLight = !photoBg && LIGHT_PLAQUE_KEYS.includes(plaqueKey as PlaqueKey);
   const textPrimary = isLight ? "#1D1B18" : "#F3EEE4";
   const textSecondary = isLight ? "rgba(29,27,24,0.65)" : "rgba(243,238,228,0.65)";
   const panelBg = isLight ? "rgba(29,27,24,0.045)" : "rgba(255,255,255,0.04)";
   const panelBorder = isLight ? "rgba(29,27,24,0.10)" : "rgba(255,255,255,0.08)";
   const panelHeaderBg = isLight ? "rgba(29,27,24,0.05)" : `${plaque.ink}14`;
+  const flagEmoji = getCountryFlag(targetCountry);
+
+  function handleSpeak(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (typeof window === "undefined" || !window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(data.name);
+    u.lang = "ko-KR";
+    u.rate = 0.85;
+    window.speechSynthesis.speak(u);
+  }
 
   // 마운트 시 body 스크롤 잠금, 언마운트 시 복원
   useEffect(() => {
@@ -194,6 +224,38 @@ export default function MultiLangNameCard({ data, lang = "ko", onClose }: Props)
               </button>
             );
           })}
+          {CARD_BACKGROUNDS.map((bg) => {
+            const active = bg.id === plaqueKey;
+            return (
+              <button
+                key={bg.id}
+                type="button"
+                onClick={() => setPlaqueKey(bg.id)}
+                style={{
+                  height: 34,
+                  borderRadius: 10,
+                  backgroundImage: `linear-gradient(rgba(10,15,30,${active ? 0.25 : 0.45}), rgba(10,15,30,${active ? 0.25 : 0.45})), url(${bg.image})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  border: active ? "1px solid #C9A45C" : "1px solid rgba(255,255,255,0.14)",
+                  color: "#FFFFFF",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  transition: "all 0.15s",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  textShadow: "0 1px 3px rgba(0,0,0,0.6)",
+                }}
+              >
+                {bg.nameKo}
+              </button>
+            );
+          })}
         </div>
 
         {/* ── 카드 본체 (다운로드 대상) ── */}
@@ -210,9 +272,45 @@ export default function MultiLangNameCard({ data, lang = "ko", onClose }: Props)
             fontFamily: "'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif",
           }}
         >
-          {/* 질감 패턴 오버레이 */}
-          {plaque.pattern !== "none" && (
-            <div aria-hidden style={{ position: "absolute", inset: 0, backgroundImage: plaque.pattern, pointerEvents: "none" }} />
+          {/* 랜드마크 사진 배경 + 그라디언트 오버레이 + 전통 문양 + 국기 배지 */}
+          {photoBg ? (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={photoBg.image}
+                alt={photoBg.name}
+                crossOrigin="anonymous"
+                style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+              />
+              <div
+                aria-hidden
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  background: "linear-gradient(180deg, rgba(6,10,22,0.22) 0%, rgba(6,10,22,0.58) 45%, rgba(4,8,18,0.9) 100%)",
+                }}
+              />
+              <KoreanPatternOverlay size={150} opacity={0.22} />
+              <div
+                aria-hidden
+                style={{
+                  position: "absolute",
+                  top: 14,
+                  left: 16,
+                  display: "flex",
+                  gap: 5,
+                  fontSize: 18,
+                  textShadow: "0 1px 4px rgba(0,0,0,0.5)",
+                }}
+              >
+                <span>🇰🇷</span>
+                {flagEmoji !== "🇰🇷" && <span>{flagEmoji}</span>}
+              </div>
+            </>
+          ) : (
+            plaque.pattern !== "none" && (
+              <div aria-hidden style={{ position: "absolute", inset: 0, backgroundImage: plaque.pattern, pointerEvents: "none" }} />
+            )
           )}
 
           {/* 상단 라인 */}
@@ -242,6 +340,29 @@ export default function MultiLangNameCard({ data, lang = "ko", onClose }: Props)
 
           {/* 메인 이름 */}
           <div style={{ padding: "22px 28px 0", textAlign: "center", position: "relative" }}>
+            <button
+              type="button"
+              onClick={handleSpeak}
+              aria-label={isKo ? "이름 발음 듣기" : "Listen to pronunciation"}
+              style={{
+                position: "absolute",
+                top: 0,
+                right: 12,
+                width: 32,
+                height: 32,
+                borderRadius: "50%",
+                border: `1px solid ${plaque.line}`,
+                background: isLight ? "rgba(29,27,24,0.06)" : "rgba(255,255,255,0.08)",
+                color: plaque.sub,
+                fontSize: 14,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              🔊
+            </button>
             <div style={{
               fontSize: "clamp(52px, 13vw, 80px)",
               fontWeight: 900,
