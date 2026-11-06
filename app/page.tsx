@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { SERVICE_PRE_LAUNCH } from "@/lib/pricing";
 import WinkMark from "@/components/WinkMark";
 import WinkLogoFull from "@/components/WinkLogoFull";
+import KoreanPatternOverlay from "@/components/KoreanPatternOverlay";
+import { CARD_BACKGROUNDS } from "@/lib/card-backgrounds";
 
 const LANG_KEY = "wink.naming.preferred-lang";
 const LANGS = ["ko","en","ja","zh","es","ru","fr","ar","hi"] as const;
@@ -1736,7 +1738,7 @@ function NameCard({ card, accent }: { card: AnyCard; accent: string }) {
 }
 
 // ── 빅 네임카드 (16:9) ────────────────────────────────────
-function BigNameCard({ card, accent, bg, lang }: { card: AnyCard; accent: string; bg: string; lang: Lang }) {
+function BigNameCard({ card, accent, bg, lang, bgImage }: { card: AnyCard; accent: string; bg: string; lang: Lang; bgImage?: string }) {
   const serif = "var(--font-noto-serif-kr,'Noto Serif KR',serif)";
 
   let name = "", hanja = "", meaning = "", story = "", badge = "", roman = "";
@@ -1796,10 +1798,33 @@ function BigNameCard({ card, accent, bg, lang }: { card: AnyCard; accent: string
       className="lg-big-name-card"
       style={{ background: `linear-gradient(135deg, ${bg} 0%, #1B2A5E 100%)`, border: `1px solid ${accent}22` }}
     >
+      {/* 한국 랜드마크 사진 배경 */}
+      {bgImage && (
+        <>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={bgImage}
+            alt=""
+            aria-hidden="true"
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 0 }}
+          />
+          <div
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              inset: 0,
+              zIndex: 0,
+              background:
+                "linear-gradient(90deg, rgba(5,10,24,0.82) 0%, rgba(5,10,24,0.5) 48%, rgba(5,10,24,0.82) 100%)",
+            }}
+          />
+          <KoreanPatternOverlay size={150} opacity={0.35} color={accent} />
+        </>
+      )}
       {/* 상단 그라디언트 바 */}
       <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, #1B2A5E 0%, ${accent} 100%)`, zIndex: 2 }} />
       {/* 단청 문양 오버레이 */}
-      <div style={{ position: "absolute", inset: 0, opacity: 0.04 }} aria-hidden="true">
+      <div style={{ position: "absolute", inset: 0, opacity: 0.04, zIndex: 0 }} aria-hidden="true">
         <DanchingBg />
       </div>
       {/* 기와(瓦) 질감 오버레이 */}
@@ -1807,6 +1832,7 @@ function BigNameCard({ card, accent, bg, lang }: { card: AnyCard; accent: string
         aria-hidden="true"
         style={{
           position: "absolute", inset: 0,
+          zIndex: 0,
           backgroundImage: "repeating-linear-gradient(0deg, rgba(255,255,255,.025) 0 1px, transparent 1px 8px)",
           pointerEvents: "none",
         }}
@@ -2507,7 +2533,13 @@ export default function HomePage() {
                 onPlay={() => setVideoPlaying(true)}
               />
             ) : (
-              <BigNameCard card={card} accent={theme.accent} bg={theme.bg} lang={lang} />
+              <BigNameCard
+                card={card}
+                accent={theme.accent}
+                bg={theme.bg}
+                lang={lang}
+                bgImage={CARD_BACKGROUNDS[cardIdx % CARD_BACKGROUNDS.length].image}
+              />
             )}
           </div>
           {/* 슬라이드 도트 */}
