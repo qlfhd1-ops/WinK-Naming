@@ -26,7 +26,7 @@ export default function PrivacyPage() {
             </div>
           </section>
           <div className="wink-actions">
-            <button type="button" className="wink-secondary-btn" onClick={() => router.push(`/${lang}`)}>
+            <button type="button" className="wink-secondary-btn" onClick={() => router.push("/")}>
               홈으로
             </button>
           </div>
@@ -209,7 +209,7 @@ export default function PrivacyPage() {
           <button
             type="button"
             className="wink-secondary-btn"
-            onClick={() => router.push(`/${lang}`)}
+            onClick={() => router.push("/")}
           >
             홈으로
           </button>

@@ -1239,7 +1239,7 @@ export default function OrderPage() {
             </div>
           </section>
           <div className="wink-actions">
-            <button type="button" className="wink-secondary-btn" onClick={() => router.push(`/${lang}`)}>
+            <button type="button" className="wink-secondary-btn" onClick={() => router.push("/")}>
               홈으로
             </button>
           </div>
@@ -1409,7 +1409,7 @@ export default function OrderPage() {
             <button
               type="button"
               className="wink-primary-btn"
-              onClick={() => router.push(`/${lang}`)}
+              onClick={() => router.push("/")}
             >
               {ui.btnGoHome}
             </button>
