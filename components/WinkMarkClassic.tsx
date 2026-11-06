@@ -1,0 +1,56 @@
+/**
+ * WINK Mark Classic — 네임카드 전용 기존 심볼
+ * 빨간 사각형(丹靑 red) 안에 ● (天) + ﹏ (地) 두 요소로 구성된 심볼.
+ * 사이트 전역 아이콘은 components/WinkMark.tsx(새 한옥 지붕+매듭 아이콘)로 교체되었지만,
+ * 네임카드(공유/다운로드되는 결과물)는 기존 디자인을 그대로 유지한다.
+ */
+export default function WinkMarkClassic({ size = 40 }: { size?: number }) {
+  const scale = size / 40;
+  const dot = 8 * scale;
+  const smileW = 13 * scale;
+  const smileH = 7 * scale;
+  const gap = 6 * scale;
+  const borderW = 3 * scale;
+  const borderW2 = 4.5 * scale;
+  const radius = 4 * scale;
+  const smileRadius = 9 * scale;
+
+  return (
+    <span
+      aria-label="Wink Naming"
+      style={{
+        width: size,
+        height: size,
+        background: "#A8322A",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap,
+        borderRadius: radius,
+        boxShadow: `inset 0 0 0 ${borderW}px #A8322A, inset 0 0 0 ${borderW2}px #F3EEE4`,
+        flexShrink: 0,
+      }}
+    >
+      <span
+        aria-hidden
+        style={{
+          width: dot,
+          height: dot,
+          borderRadius: "50%",
+          background: "#F3EEE4",
+        }}
+      />
+      <span
+        aria-hidden
+        style={{
+          width: smileW,
+          height: smileH,
+          border: `${borderW}px solid #F3EEE4`,
+          borderTop: 0,
+          borderRadius: `0 0 ${smileRadius}px ${smileRadius}px`,
+          marginTop: -2 * scale,
+        }}
+      />
+    </span>
+  );
+}

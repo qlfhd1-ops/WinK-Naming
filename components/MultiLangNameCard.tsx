@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { toPng } from "html-to-image";
-import WinkMark from "@/components/WinkMark";
+import WinkMarkClassic from "@/components/WinkMarkClassic";
 import { PLAQUES, PLAQUE_KEYS, LIGHT_PLAQUE_KEYS, OHAENG_COLORS, type PlaqueKey, type PlaqueStyle } from "@/lib/plaques";
 import { CARD_BACKGROUNDS } from "@/lib/card-backgrounds";
 import { getCountryFlag } from "@/lib/country-flags";
@@ -323,7 +323,7 @@ export default function MultiLangNameCard({ data, lang = "ko", targetCountry, on
             position: "relative",
           }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <WinkMark size={24} />
+              <WinkMarkClassic size={24} />
               <div style={{ fontSize: 10, letterSpacing: "0.18em", color: plaque.sub, fontWeight: 700, textTransform: "uppercase" }}>
                 WINK NAMING
               </div>

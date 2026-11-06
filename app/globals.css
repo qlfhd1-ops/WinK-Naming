@@ -356,6 +356,13 @@ select {
   line-height: 1.15;
 }
 
+.wink-logo-full-header {
+  height: 52px;
+  width: auto;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
 .wink-header-right {
   display: flex;
   align-items: center;
@@ -992,6 +999,10 @@ select {
     width: 34px;
     height: 34px;
     border-radius: 10px;
+  }
+
+  .wink-logo-full-header {
+    height: 40px;
   }
 
   .wink-brand {

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { SERVICE_PRE_LAUNCH } from "@/lib/pricing";
 import WinkMark from "@/components/WinkMark";
+import WinkLogoFull from "@/components/WinkLogoFull";
 
 const LANG_KEY = "wink.naming.preferred-lang";
 const LANGS = ["ko","en","ja","zh","es","ru","fr","ar","hi"] as const;
@@ -2426,11 +2427,7 @@ export default function HomePage() {
       {/* ── 헤더 ── */}
       <header className="lg-header">
         <button onClick={() => router.push("/")} style={{ display: "flex", alignItems: "center", gap: 10, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
-          <WinkMark size={40} />
-          <div style={{ textAlign: "left" }}>
-            <div style={{ fontSize: 17, fontWeight: 900, color: "#1B2A5E", lineHeight: 1.1, fontFamily: serif }}>윙크 네이밍</div>
-            <div style={{ fontSize: 9, color: "#AAA", letterSpacing: "0.14em" }}>WINK NAMING</div>
-          </div>
+          <WinkLogoFull className="wink-logo-full-header" />
         </button>
         <button
           onClick={() => setShowLangPicker(true)}
