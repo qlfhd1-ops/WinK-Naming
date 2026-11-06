@@ -66,7 +66,7 @@ export async function GET(req: Request) {
   let query = supabase
     .from("naming_reviews")
     .select(
-      "id, user_id, brief_id, name_used, rating, content, display_name, country, lang, is_approved, is_featured, created_at",
+      "id, user_id, brief_id, name_used, rating, content, display_name, country, lang, is_approved, is_featured, is_seed, created_at",
       { count: "exact" }
     )
     .order("created_at", { ascending: false })

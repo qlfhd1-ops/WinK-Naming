@@ -18,6 +18,7 @@ type ReviewRow = {
   lang: string;
   is_approved: boolean;
   is_featured: boolean;
+  is_seed: boolean;
   created_at: string;
   reply: ReplyRow | null;
 };
@@ -298,6 +299,15 @@ export default function AdminReviewsPage() {
                     <span style={{ fontSize: 13, fontWeight: 700, color: "#f0f5ff" }}>
                       {r.display_name || "(닉네임 없음)"}
                     </span>
+                    {r.is_seed && (
+                      <span style={{
+                        fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 999,
+                        background: "rgba(140,160,255,0.12)", border: "1px solid rgba(140,160,255,0.3)",
+                        color: "rgba(180,195,255,0.9)",
+                      }}>
+                        샘플
+                      </span>
+                    )}
                     {r.country && (
                       <span style={{ fontSize: 11, color: "rgba(200,218,248,0.5)" }}>· {r.country}</span>
                     )}

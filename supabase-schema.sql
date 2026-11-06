@@ -434,14 +434,15 @@ CREATE TABLE IF NOT EXISTS public.user_emails (
 ALTER TABLE public.user_emails ENABLE ROW LEVEL SECURITY;
 -- (의도적으로 정책 없음 — service_role 전용)
 
--- ─── 18. naming_reviews (실제 사용자 후기) ──────────────────
--- 로그인한 사용자만 자신의 brief에 대해 후기를 작성할 수 있다.
+-- ─── 18. naming_reviews (실제 사용자 후기 + 운영자 시드 후기) ────
+-- 일반 사용자는 로그인 후 자신의 brief에 대해서만 후기를 작성할 수 있다(user_id/brief_id 필수).
+-- 운영자가 초기 콘텐츠용으로 등록하는 시드 후기는 user_id/brief_id가 NULL이고 is_seed=true로 구분한다.
 -- is_approved=true인 후기만 공개 조회 가능(관리자 승인 전에는 비공개).
 -- is_featured=true + is_approved=true인 후기가 메인 페이지에 노출된다.
 CREATE TABLE IF NOT EXISTS public.naming_reviews (
   id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id      UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  brief_id     UUID NOT NULL REFERENCES public.naming_briefs(id) ON DELETE CASCADE,
+  user_id      UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  brief_id     UUID REFERENCES public.naming_briefs(id) ON DELETE CASCADE,
   name_used    TEXT,
   rating       INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
   content      TEXT NOT NULL,
@@ -451,9 +452,15 @@ CREATE TABLE IF NOT EXISTS public.naming_reviews (
   category     TEXT, -- 홈페이지 카테고리 탭(CatId)과 매핑되는 값. brief.category로부터 자동 산출.
   is_approved  BOOLEAN NOT NULL DEFAULT false,
   is_featured  BOOLEAN NOT NULL DEFAULT false,
+  is_seed      BOOLEAN NOT NULL DEFAULT false, -- 운영자가 직접 넣은 임시/샘플 후기 여부
   created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
   UNIQUE (brief_id)
 );
+
+-- 기존 DB에 이미 테이블이 있던 경우를 위한 재실행 안전 변경
+ALTER TABLE public.naming_reviews ALTER COLUMN user_id DROP NOT NULL;
+ALTER TABLE public.naming_reviews ALTER COLUMN brief_id DROP NOT NULL;
+ALTER TABLE public.naming_reviews ADD COLUMN IF NOT EXISTS is_seed BOOLEAN NOT NULL DEFAULT false;
 
 ALTER TABLE public.naming_reviews ENABLE ROW LEVEL SECURITY;
 
