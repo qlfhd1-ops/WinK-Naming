@@ -320,8 +320,8 @@ export default function MultiLangNameCard({ data, lang = "ko", targetCountry, on
             <div style={{ position: "relative", width: "100%", aspectRatio: "8 / 5" }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={photoBg.image}
-                alt={photoBg.name}
+                src={FRAME_EXAMPLE.image}
+                alt={FRAME_EXAMPLE.name}
                 crossOrigin="anonymous"
                 style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
               />
