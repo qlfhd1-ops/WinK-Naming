@@ -1476,6 +1476,11 @@ export default function ResultPage() {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewLoginEmail, setReviewLoginEmail] = useState("");
+  const [reviewLoginSending, setReviewLoginSending] = useState(false);
+  const [reviewLoginSent, setReviewLoginSent] = useState(false);
+  const [reviewLoginError, setReviewLoginError] = useState("");
+  const [reviewIntent, setReviewIntent] = useState(false); // 로그인 완료 즉시 후기 모달 열기용
   const [nameCardIdx, setNameCardIdx] = useState<number | null>(null);
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
   const [userEmail, setUserEmail] = useState<string | undefined>(undefined);
@@ -1542,6 +1547,15 @@ export default function ResultPage() {
       }
     };
     fetchUser();
+
+    // 다른 탭/창에서 매직링크 로그인이 완료되면 이 탭에도 즉시 반영
+    // (후기 작성처럼 로그인 후 바로 이어가야 하는 흐름을 위해 필요)
+    if (!supabaseRef.current) return;
+    const { data: listener } = supabaseRef.current.auth.onAuthStateChange((_event, session) => {
+      setUserId(session?.user?.id ?? null);
+      setUserEmail(session?.user?.email ?? undefined);
+    });
+    return () => listener.subscription.unsubscribe();
   }, []);
 
   // Fetch free usage + plan — userLoaded 이후에만 실행 (레이스 컨디션 방지)
@@ -1568,6 +1582,55 @@ export default function ResultPage() {
     };
     fetchUsageAndPlan();
   }, [userId, userLoaded]);
+
+  // 후기용 로그인 직후 바로 후기 모달 열기
+  useEffect(() => {
+    if (reviewIntent && userId && briefId) {
+      setShowReviewModal(true);
+      setReviewIntent(false);
+      setReviewLoginSent(false);
+    }
+  }, [reviewIntent, userId, briefId]);
+
+  // 매직링크가 같은 탭에서 열려 ?openReview=1 로 돌아온 경우에도 후기 모달 자동 오픈
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!userId || !briefId) return;
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("openReview") === "1") {
+      setShowReviewModal(true);
+      url.searchParams.delete("openReview");
+      window.history.replaceState({}, "", url.toString());
+    }
+  }, [userId, briefId]);
+
+  const handleReviewLoginSend = async () => {
+    setReviewLoginError("");
+    const email = reviewLoginEmail.trim();
+    if (!email) {
+      setReviewLoginError(lang === "ko" ? "이메일을 입력해 주세요." : "Please enter your email.");
+      return;
+    }
+    if (!supabaseRef.current) return;
+    setReviewLoginSending(true);
+    try {
+      const redirectTo = `${window.location.origin}${window.location.pathname}?openReview=1`;
+      const { error } = await supabaseRef.current.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: redirectTo },
+      });
+      if (error) {
+        setReviewLoginError(lang === "ko" ? "로그인 링크 전송에 실패했습니다." : "Failed to send the login link.");
+      } else {
+        setReviewLoginSent(true);
+        setReviewIntent(true);
+      }
+    } catch {
+      setReviewLoginError(lang === "ko" ? "로그인 링크 전송에 실패했습니다." : "Failed to send the login link.");
+    } finally {
+      setReviewLoginSending(false);
+    }
+  };
 
   // Fetch A/S eligibility once briefId is known
   useEffect(() => {
@@ -1804,7 +1867,11 @@ export default function ResultPage() {
       }
     };
     save();
-  }, [brief, results, briefId, isSavingResult, leadBriefId, ui.saving, ui.saveDone, ui.saveFailed]);
+    // isSavingResult는 저장 시작/종료를 표시하는 상태일 뿐, 의존성에 넣으면
+    // 실패 시(finally에서 false로 바뀌는 순간) 이 effect가 즉시 재실행되어
+    // 무한 재시도 루프가 발생한다. 그래서 의도적으로 제외한다.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [brief, results, briefId, leadBriefId, ui.saving, ui.saveDone, ui.saveFailed]);
 
   // Record free usage once briefId is saved, then show privacy → upgrade flow
   useEffect(() => {
@@ -2882,26 +2949,105 @@ export default function ResultPage() {
           </section>
         )}
 
-        {/* 후기 남기기 */}
-        {selectedNameIndex !== null && results[selectedNameIndex] && briefId && userId && (
-          <div style={{ marginTop: 16, textAlign: "center" }}>
-            <button
-              type="button"
-              onClick={() => setShowReviewModal(true)}
-              style={{
-                padding: "10px 22px",
-                borderRadius: 12,
-                border: "1px solid rgba(201,168,76,0.4)",
-                background: "rgba(201,168,76,0.08)",
-                color: "rgba(230,210,150,0.95)",
-                fontSize: 13,
-                fontWeight: 700,
-                cursor: "pointer",
-              }}
-            >
-              ✎ {REVIEW_BUTTON_LABEL[lang in REVIEW_BUTTON_LABEL ? (lang as keyof typeof REVIEW_BUTTON_LABEL) : "ko"]}
-            </button>
-          </div>
+        {/* 후기 남기기 — 이름 선택/로그인 여부와 무관하게, 결과가 저장되면 바로 노출 */}
+        {briefId && (
+          <section
+            style={{
+              marginTop: 24,
+              padding: "30px 24px",
+              borderRadius: 20,
+              border: "1px solid rgba(201,168,76,0.45)",
+              background: "linear-gradient(160deg, rgba(201,168,76,0.12), rgba(11,22,52,0.78))",
+              boxShadow: "0 12px 48px rgba(201,168,76,0.10)",
+              textAlign: "center",
+            }}
+          >
+            <div style={{ fontSize: 22, letterSpacing: 2, marginBottom: 8, color: "#E8C870" }}>
+              ⭐⭐⭐⭐⭐
+            </div>
+            <div style={{ fontSize: "clamp(18px, 3.4vw, 22px)", fontWeight: 800, color: "#f0f4ff", marginBottom: 8 }}>
+              {lang === "ko" ? "이번 이름 설계, 어떠셨나요?" : "How was your naming experience?"}
+            </div>
+            <div style={{ fontSize: 13, color: "rgba(210,225,255,0.70)", marginBottom: 20, maxWidth: 420, marginInline: "auto", lineHeight: 1.6 }}>
+              {lang === "ko"
+                ? "소중한 후기 한 줄이 이름을 찾고 있는 다른 분들에게 큰 힘이 됩니다."
+                : "Your review helps others who are searching for the perfect name."}
+            </div>
+
+            {userId ? (
+              <button
+                type="button"
+                onClick={() => setShowReviewModal(true)}
+                style={{
+                  padding: "14px 32px",
+                  borderRadius: 14,
+                  border: "none",
+                  background: "linear-gradient(135deg, #C9A84C, #E8C870)",
+                  color: "#0B1634",
+                  fontSize: 15,
+                  fontWeight: 800,
+                  cursor: "pointer",
+                  letterSpacing: "0.02em",
+                  boxShadow: "0 4px 24px rgba(201,168,76,0.30)",
+                }}
+              >
+                ✎ {REVIEW_BUTTON_LABEL[lang in REVIEW_BUTTON_LABEL ? (lang as keyof typeof REVIEW_BUTTON_LABEL) : "ko"]}
+              </button>
+            ) : reviewLoginSent ? (
+              <div style={{ fontSize: 13, color: "rgba(230,210,150,0.95)", lineHeight: 1.7, maxWidth: 360, marginInline: "auto" }}>
+                {lang === "ko"
+                  ? `${reviewLoginEmail} 로 로그인 링크를 보냈습니다. 메일함에서 링크를 눌러주세요. 이 탭은 그대로 열어두시면 로그인 후 후기 작성창이 자동으로 열립니다.`
+                  : `We sent a login link to ${reviewLoginEmail}. Click the link in your email — keep this tab open and the review form will open automatically once you're logged in.`}
+              </div>
+            ) : (
+              <div>
+                <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
+                  <input
+                    type="email"
+                    value={reviewLoginEmail}
+                    onChange={(e) => setReviewLoginEmail(e.target.value)}
+                    placeholder={lang === "ko" ? "이메일 주소" : "Email address"}
+                    style={{
+                      padding: "12px 16px",
+                      borderRadius: 12,
+                      border: "1px solid rgba(201,168,76,0.4)",
+                      background: "rgba(255,255,255,0.06)",
+                      color: "#f0f4ff",
+                      fontSize: 14,
+                      minWidth: 220,
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleReviewLoginSend}
+                    disabled={reviewLoginSending}
+                    style={{
+                      padding: "12px 24px",
+                      borderRadius: 12,
+                      border: "none",
+                      background: "linear-gradient(135deg, #C9A84C, #E8C870)",
+                      color: "#0B1634",
+                      fontSize: 14,
+                      fontWeight: 800,
+                      cursor: reviewLoginSending ? "default" : "pointer",
+                      opacity: reviewLoginSending ? 0.7 : 1,
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {reviewLoginSending
+                      ? (lang === "ko" ? "전송 중..." : "Sending...")
+                      : (lang === "ko" ? "로그인하고 후기 남기기" : "Log in & Review")}
+                  </button>
+                </div>
+                <div style={{ marginTop: 10, fontSize: 11, color: "rgba(210,225,255,0.5)" }}>
+                  {lang === "ko" ? "비밀번호 없이 이메일 링크로 간편하게 로그인합니다." : "Passwordless login via a secure email link."}
+                </div>
+              </div>
+            )}
+            {reviewLoginError && (
+              <div style={{ marginTop: 10, fontSize: 12, color: "#ff8a8a" }}>{reviewLoginError}</div>
+            )}
+          </section>
         )}
 
         {/* Package selection */}
