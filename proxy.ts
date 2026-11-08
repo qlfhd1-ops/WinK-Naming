@@ -58,11 +58,11 @@ function applySecurityHeaders(res: NextResponse): NextResponse {
   const csp = [
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://developers.kakao.com https://t1.daumcdn.net https://www.googletagmanager.com https://tagmanager.google.com",
-    "style-src 'self' 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://tagmanager.google.com https://fonts.googleapis.com",
     "img-src 'self' data: blob: https:",
     "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.openai.com https://*.upstash.io https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com",
-    "frame-src https://postcode.map.daum.net https://tagassistant.google.com",
-    "font-src 'self' https://fonts.gstatic.com",
+    "frame-src https://postcode.map.daum.net https://tagassistant.google.com https://www.googletagmanager.com",
+    "font-src 'self' https://fonts.gstatic.com data:",
     "frame-ancestors 'none'",
     "form-action 'self'",
   ].join("; ");
