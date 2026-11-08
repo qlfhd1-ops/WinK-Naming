@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+**/node_modules/
 /.pnp
 .pnp.*
 .yarn/*
@@ -15,10 +16,14 @@
 
 # next.js
 /.next/
+**/.next/
 /out/
 
 # production
 /build
+
+# claude code agent worktrees (temporary isolated copies)
+.claude/worktrees/
 
 # misc
 .DS_Store
