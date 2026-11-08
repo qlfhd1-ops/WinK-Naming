@@ -1,7 +1,7 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import Script from "next/script";
-import { GoogleTagManager } from "@next/third-parties/google";
+import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
 import { Noto_Serif_KR, Noto_Sans_KR } from "next/font/google";
 import AudioPlayer from "@/components/AudioPlayer";
 import { SERVICE_PRE_LAUNCH } from "@/lib/pricing";
@@ -77,6 +77,7 @@ export default function RootLayout({
     <html lang="ko" suppressHydrationWarning>
       <body className={`${notoSerifKR.variable} ${notoSansKR.variable}`}>
         <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID || "GTM-MWLC54CZ"} />
+        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || "G-XX15NG3GMN"} />
         {SERVICE_PRE_LAUNCH && (
           <div
             style={{
