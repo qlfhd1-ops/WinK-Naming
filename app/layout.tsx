@@ -1,9 +1,8 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import Script from "next/script";
+import { GoogleTagManager } from "@next/third-parties/google";
 import { Noto_Serif_KR, Noto_Sans_KR } from "next/font/google";
-import GoogleAnalytics from "@/components/GoogleAnalytics";
 import AudioPlayer from "@/components/AudioPlayer";
 import { SERVICE_PRE_LAUNCH } from "@/lib/pricing";
 
@@ -77,9 +76,7 @@ export default function RootLayout({
   return (
     <html lang="ko" suppressHydrationWarning>
       <body className={`${notoSerifKR.variable} ${notoSansKR.variable}`}>
-        <Suspense fallback={null}>
-          <GoogleAnalytics />
-        </Suspense>
+        <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID || "GTM-MWLC54CZ"} />
         {SERVICE_PRE_LAUNCH && (
           <div
             style={{

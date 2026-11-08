@@ -1,52 +1,15 @@
-"use client";
-
-import Script from "next/script";
-import { usePathname, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
-
-const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
-
-declare global {
-  interface Window {
-    gtag: (...args: unknown[]) => void;
-    dataLayer: unknown[];
-  }
-}
-
+/**
+ * GA4는 Google Tag Manager(GTM-MWLC54CZ) 안에서 연결되므로,
+ * 여기서는 별도의 gtag.js를 직접 로드하지 않고 GTM의 dataLayer에
+ * 커스텀 이벤트만 push한다. GTM 쪽에 해당 이벤트를 트리거로 등록하면
+ * GA4로 전달된다.
+ */
 export function trackEvent(
   eventName: string,
   params?: Record<string, string | number | boolean>
 ) {
-  if (typeof window === "undefined" || !window.gtag || !GA_ID) return;
-  window.gtag("event", eventName, params);
-}
-
-export default function GoogleAnalytics() {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
-  useEffect(() => {
-    if (!GA_ID || typeof window === "undefined" || !window.gtag) return;
-    const url = pathname + (searchParams.toString() ? `?${searchParams.toString()}` : "");
-    window.gtag("config", GA_ID, { page_path: url });
-  }, [pathname, searchParams]);
-
-  if (!GA_ID) return null;
-
-  return (
-    <>
-      <Script
-        src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
-        strategy="afterInteractive"
-      />
-      <Script id="gtag-init" strategy="afterInteractive">
-        {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', '${GA_ID}', { page_path: window.location.pathname });
-        `}
-      </Script>
-    </>
-  );
+  if (typeof window === "undefined") return;
+  const w = window as typeof window & { dataLayer?: unknown[] };
+  w.dataLayer = w.dataLayer || [];
+  w.dataLayer.push({ event: eventName, ...params });
 }
