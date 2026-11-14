@@ -1,10 +1,11 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import Script from "next/script";
-import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
 import { Noto_Serif_KR, Noto_Sans_KR } from "next/font/google";
 import AudioPlayer from "@/components/AudioPlayer";
 import { SERVICE_PRE_LAUNCH } from "@/lib/pricing";
+
+const GTM_ID = (process.env.NEXT_PUBLIC_GTM_ID || "GTM-MWLC54CZ").trim();
 
 const notoSerifKR = Noto_Serif_KR({
   weight: ["700", "900"],
@@ -75,9 +76,29 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko" suppressHydrationWarning>
+      <head>
+        {/* Google Tag Manager — 공식 설치 가이드 (서버 렌더링 HTML에 정적 포함) */}
+        <script
+          id="gtm-init"
+          dangerouslySetInnerHTML={{
+            __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','${GTM_ID}');`,
+          }}
+        />
+      </head>
       <body className={`${notoSerifKR.variable} ${notoSansKR.variable}`}>
-        <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID || "GTM-MWLC54CZ"} />
-        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || "G-XX15NG3GMN"} />
+        {/* Google Tag Manager (noscript) — body 시작 직후 */}
+        <noscript>
+          <iframe
+            src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
+            height="0"
+            width="0"
+            style={{ display: "none", visibility: "hidden" }}
+          />
+        </noscript>
         {SERVICE_PRE_LAUNCH && (
           <div
             style={{
