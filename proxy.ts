@@ -36,9 +36,9 @@ function getIp(req: NextRequest): string {
 
 // ─── Admin 인증 ─────────────────────────────────────────
 function hasAdminCredential(req: NextRequest): boolean {
-  const adminPw = process.env.ADMIN_PASSWORD;
+  const adminPw = process.env.ADMIN_PASSWORD?.trim();
   if (adminPw) {
-    const pw = req.headers.get("x-admin-password") ?? "";
+    const pw = (req.headers.get("x-admin-password") ?? "").trim();
     if (pw === adminPw) return true;
   }
   const auth = req.headers.get("authorization") ?? "";

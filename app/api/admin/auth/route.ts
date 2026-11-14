@@ -9,13 +9,13 @@ import { NextResponse } from "next/server";
  * X-Admin-Password 헤더로 재사용한다.
  */
 export async function POST(req: Request) {
-  const adminPw = process.env.ADMIN_PASSWORD;
+  const adminPw = process.env.ADMIN_PASSWORD?.trim();
   if (!adminPw) {
     return NextResponse.json({ ok: false, error: "ADMIN_PASSWORD not set" }, { status: 503 });
   }
 
   const body = await req.json().catch(() => ({}));
-  const entered = typeof body?.password === "string" ? body.password : "";
+  const entered = typeof body?.password === "string" ? body.password.trim() : "";
 
   if (entered !== adminPw) {
     return NextResponse.json({ ok: false, error: "비밀번호가 틀렸습니다" }, { status: 401 });
