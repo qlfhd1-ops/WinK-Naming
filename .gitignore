@@ -44,3 +44,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# 고객 이메일 등 개인정보 — 커밋 금지
+recovery-mail/

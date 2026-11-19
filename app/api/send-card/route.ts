@@ -24,26 +24,20 @@ export async function POST(req: Request) {
     }
 
     const adminClient = getAdminClient();
-    if (adminClient) {
-      const { data: { user }, error: authErr } = await adminClient.auth.getUser(token);
-      if (authErr || !user) {
-        return NextResponse.json({ ok: false, error: "invalid token" }, { status: 401 });
-      }
-
-      // ── 2. Plan check (paid only) ──────────────────────
-      const { data: profile } = await adminClient
-        .from("users")
-        .select("plan")
-        .eq("id", user.id)
-        .single();
-
-      if (!profile || profile.plan === "free") {
-        return NextResponse.json(
-          { ok: false, error: "paid plan required" },
-          { status: 403 }
-        );
-      }
+    if (!adminClient) {
+      console.error("[send-card] Supabase service role not configured");
+      return NextResponse.json({ ok: false, error: "server misconfigured" }, { status: 503 });
     }
+
+    const { data: { user }, error: authErr } = await adminClient.auth.getUser(token);
+    if (authErr || !user) {
+      return NextResponse.json({ ok: false, error: "invalid token" }, { status: 401 });
+    }
+
+    // ── 2. 무료/유료 구분 없이 로그인한 사용자 누구나 이름카드를 받을 수 있다.
+    //      (이전의 `users` 테이블 plan 조회는 존재하지 않는 테이블이라 항상 403이었음)
+    //      스팸 릴레이 방지를 위해 수신 주소는 로그인한 본인 이메일로만 허용한다.
+    const ownEmail = (user.email ?? "").trim().toLowerCase();
 
     // ── 3. Email service check ───────────────────────────
     const apiKey = process.env.RESEND_API_KEY;
@@ -64,6 +58,9 @@ export async function POST(req: Request) {
 
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return NextResponse.json({ ok: false, error: "invalid email" }, { status: 400 });
+    }
+    if (!ownEmail || email.toLowerCase() !== ownEmail) {
+      return NextResponse.json({ ok: false, error: "recipient must be your account email" }, { status: 403 });
     }
 
     const name: string = stripTags(item.name) || "-";
@@ -154,7 +151,9 @@ export async function POST(req: Request) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "윙크 네이밍 <onboarding@resend.dev>",  // TODO: 도메인 인증 후 noreply@wink-naming.com 으로 변경
+        // Resend 도메인(wink-naming.com) 인증 후 RESEND_FROM="윙크 네이밍 <noreply@wink-naming.com>" 로 설정.
+        // 인증 전 기본값(onboarding@resend.dev)은 Resend 계정 소유자 주소로만 발송 가능.
+        from: process.env.RESEND_FROM || "윙크 네이밍 <onboarding@resend.dev>",
         to: [email],
         subject,
         html,

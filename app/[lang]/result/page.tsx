@@ -1421,6 +1421,61 @@ function TrustPill({ text }: { text: string }) {
   return <div className="wink-score-pill">{text}</div>;
 }
 
+// 이름 선택 직후 이름카드 이메일 발송 CTA / 후기 유도 문구 (ko·en·ja, 그 외 언어는 en 사용)
+const NEXT_STEP_COPY = {
+  ko: {
+    chosen: (n: string) => `✓ '${n}' 선택 완료`,
+    cardTitle: "이름카드가 완성됐어요",
+    cardDesc: "영어·중국어·일본어 표기가 담긴 이름카드를 이메일로 보내드려요. 이미지로 저장해 친구에게 공유할 수도 있어요.",
+    sendBtn: "✉ 내 이메일로 이름카드 받기",
+    sending: "보내는 중...",
+    sendTo: (e: string) => `${e} 로 보내드려요`,
+    emailPh: "받으실 이메일 주소",
+    previewBtn: "🪪 카드 미리보기 · 이미지 저장",
+    sent: (e: string) => `✓ 이름카드를 ${e} 로 보냈어요. 메일함(스팸함 포함)을 확인해 주세요.`,
+    failed: "전송에 실패했어요. 잠시 후 다시 시도해 주세요.",
+    invalid: "올바른 이메일 주소를 입력해 주세요.",
+    revTitle: "생성된 한국식 이름이 마음에 드셨나요?",
+    revSub: "솔직한 한 줄 리뷰를 부탁드려요. 30초면 충분하고, 이름을 찾는 다른 분들께 큰 도움이 됩니다 🙏",
+    revTap: "별점을 눌러 바로 시작하세요",
+    revLoginHint: "리뷰는 이메일 로그인 후 작성할 수 있어요 (비밀번호 없이 링크로 간편하게).",
+  },
+  en: {
+    chosen: (n: string) => `✓ You chose '${n}'`,
+    cardTitle: "Your name card is ready",
+    cardDesc: "We'll email you a name card with English, Chinese and Japanese spellings. You can also save it as an image to share with friends.",
+    sendBtn: "✉ Email me my name card",
+    sending: "Sending...",
+    sendTo: (e: string) => `Will be sent to ${e}`,
+    emailPh: "Email address to send to",
+    previewBtn: "🪪 Preview & save as image",
+    sent: (e: string) => `✓ Name card sent to ${e}. Please check your inbox (and spam folder).`,
+    failed: "Couldn't send it. Please try again in a moment.",
+    invalid: "Please enter a valid email address.",
+    revTitle: "Did you like your Korean name?",
+    revSub: "A quick, honest review would mean a lot — it takes under 30 seconds and helps others who are looking for a name 🙏",
+    revTap: "Tap a star to get started",
+    revLoginHint: "Sign in with your email to leave a review (no password — just a secure link).",
+  },
+  ja: {
+    chosen: (n: string) => `✓ 「${n}」を選びました`,
+    cardTitle: "名前カードが完成しました",
+    cardDesc: "英語・中国語・日本語の表記入りの名前カードをメールでお送りします。画像として保存して友達に共有することもできます。",
+    sendBtn: "✉ 名前カードをメールで受け取る",
+    sending: "送信中...",
+    sendTo: (e: string) => `${e} に送信します`,
+    emailPh: "送信先のメールアドレス",
+    previewBtn: "🪪 カードをプレビュー・画像保存",
+    sent: (e: string) => `✓ 名前カードを ${e} に送りました。受信箱（迷惑メールも）をご確認ください。`,
+    failed: "送信に失敗しました。しばらくしてからもう一度お試しください。",
+    invalid: "有効なメールアドレスを入力してください。",
+    revTitle: "生成された韓国式の名前は気に入っていただけましたか？",
+    revSub: "正直な一言レビューをお願いします。30秒で完了し、名前を探している方の助けになります 🙏",
+    revTap: "星をタップして開始",
+    revLoginHint: "レビューはメールでログイン後に書けます（パスワード不要、リンクだけ）。",
+  },
+} as const;
+
 function PackageCard({
   title, desc, priceLabel, selected, disabled, onClick, selectedText,
 }: {
@@ -1520,6 +1575,11 @@ export default function ResultPage() {
   // 이름카드 이메일 전송
   const [sendCardOpen, setSendCardOpen] = useState(false);
   const [sendCardEmail, setSendCardEmail] = useState("");
+  const [cardCtaEmail, setCardCtaEmail] = useState("");
+  const [cardCtaStatus, setCardCtaStatus] = useState<"idle" | "sending" | "sent" | "error" | "invalid">("idle");
+  const [cardCtaSentTo, setCardCtaSentTo] = useState("");
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewHoverStar, setReviewHoverStar] = useState(0);
   const [sendCardLoading, setSendCardLoading] = useState(false);
   const [sendCardMsg, setSendCardMsg] = useState("");
 
@@ -2103,6 +2163,32 @@ export default function ResultPage() {
     }
   };
 
+  // ─── 이름 선택 직후 CTA: 로그인한 본인 이메일로 이름카드 발송 ───
+  const handleCardCtaSend = async () => {
+    const target = (cardCtaEmail || userEmail || "").trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(target)) { setCardCtaStatus("invalid"); return; }
+    if (cardCtaStatus === "sending" || results.length === 0) return;
+    setCardCtaStatus("sending");
+    try {
+      const allResults = [...results, ...extraResults];
+      const item = allResults[selectedNameIndex ?? 0];
+      let token = "";
+      if (supabaseRef.current) {
+        const { data: { session } } = await supabaseRef.current.auth.getSession();
+        token = session?.access_token ?? "";
+      }
+      const res = await fetch("/api/send-card", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({ email: target, item, lang, brief }),
+      });
+      if (res.ok) { setCardCtaSentTo(target); setCardCtaStatus("sent"); }
+      else setCardCtaStatus("error");
+    } catch {
+      setCardCtaStatus("error");
+    }
+  };
+
   // ─── 이미지 다운로드 ─────────────────────────────────────
   const handleDownload = async () => {
     if (isDownloading || !topPickRef.current) return;
@@ -2237,7 +2323,8 @@ export default function ResultPage() {
       <ReviewModal
         lang={lang}
         briefId={briefId}
-        nameUsed={selectedNameIndex !== null ? results[selectedNameIndex]?.name : undefined}
+        nameUsed={selectedNameIndex !== null ? allResultsForDisplay[selectedNameIndex]?.name : undefined}
+        initialRating={reviewRating}
         onClose={() => setShowReviewModal(false)}
       />
     )}
@@ -2518,9 +2605,9 @@ export default function ResultPage() {
                 fontSize: 11,
                 fontWeight: 600,
                 letterSpacing: "0.04em",
-                color: "rgba(180,200,240,0.70)",
-                background: "rgba(120,160,255,0.07)",
-                border: "1px solid rgba(120,160,255,0.14)",
+                color: "var(--text-dim)",
+                background: "var(--gold-soft)",
+                border: "1px solid var(--line-soft)",
                 borderRadius: 99,
                 padding: "3px 9px",
               };
@@ -2529,13 +2616,13 @@ export default function ResultPage() {
                 fontWeight: 700,
                 letterSpacing: "0.12em",
                 textTransform: "uppercase" as const,
-                color: "rgba(180,200,240,0.50)",
+                color: "var(--text-dim)",
                 marginBottom: 6,
               };
               const textStyle: React.CSSProperties = {
                 fontSize: 13,
                 lineHeight: 1.75,
-                color: "rgba(200,215,245,0.78)",
+                color: "var(--text-main)",
               };
               const isSelected = selectedNameIndex === idx;
               const isDimmed  = selectedNameIndex !== null && !isSelected;
@@ -2556,10 +2643,19 @@ export default function ResultPage() {
                     boxShadow: isSelected
                       ? "0 0 0 4px rgba(201,168,76,0.12), 0 16px 48px rgba(0,0,0,0.3)"
                       : "0 4px 16px rgba(0,0,0,0.1)",
-                    opacity: isDimmed ? 0.32 : 1,
+                    opacity: isDimmed ? 0.5 : 1,
                     transform: isSelected ? "scale(1.01)" : "scale(1)",
                     transition: "all 0.28s ease",
                     pointerEvents: isDimmed ? "none" : "auto",
+                    ...(isSelected ? ({
+                      "--text-main": "#f0f4ff",
+                      "--text-dim": "rgba(190,205,235,0.78)",
+                      "--gold-main": "#e7bf58",
+                      "--gold-soft": "rgba(231,191,88,0.14)",
+                      "--line-soft": "rgba(120,160,255,0.18)",
+                      "--line-strong": "rgba(120,160,255,0.30)",
+                      "--line-gold": "rgba(233,190,77,0.45)",
+                    } as React.CSSProperties) : {}),
                   }}
                 >
                   {/* ── 접힌 헤더 (항상 표시) ── */}
@@ -2569,16 +2665,16 @@ export default function ResultPage() {
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
                       <span style={{
                         fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
-                        color: isSelected ? "rgba(201,168,76,0.95)" : "rgba(180,195,230,0.65)",
-                        background: isSelected ? "rgba(201,168,76,0.12)" : "rgba(120,160,255,0.08)",
-                        border: `1px solid ${isSelected ? "rgba(201,168,76,0.30)" : "rgba(120,160,255,0.15)"}`,
+                        color: isSelected ? "rgba(201,168,76,0.95)" : "var(--text-dim)",
+                        background: isSelected ? "rgba(201,168,76,0.12)" : "var(--gold-soft)",
+                        border: `1px solid ${isSelected ? "rgba(201,168,76,0.30)" : "var(--line-soft)"}`,
                         padding: "3px 10px", borderRadius: 99,
                       }}>
                         {trackLabel(item.track, ui)}
                       </span>
                       <span style={{
                         fontSize: 12, fontWeight: 800,
-                        color: isSelected ? "rgba(201,168,76,0.90)" : "rgba(180,195,230,0.50)",
+                        color: isSelected ? "rgba(201,168,76,0.90)" : "var(--text-dim)",
                       }}>
                         ✦ {item.score}
                       </span>
@@ -2603,12 +2699,12 @@ export default function ResultPage() {
                         marginTop: 6,
                         fontSize: 16,
                         letterSpacing: "0.14em",
-                        color: isSelected ? "rgba(201,168,76,0.85)" : "rgba(180,195,230,0.60)",
+                        color: isSelected ? "rgba(201,168,76,0.85)" : "var(--text-dim)",
                         fontFamily: "serif",
                       }}>
                         {item.hanja}
                         {item.hanja_meaning && (
-                          <span style={{ fontSize: 11, marginLeft: 8, opacity: 0.65 }}>
+                          <span style={{ fontSize: 12, marginLeft: 8, opacity: 0.9 }}>
                             {item.hanja_meaning}
                           </span>
                         )}
@@ -2619,7 +2715,7 @@ export default function ResultPage() {
                     <div style={{
                       marginTop: 10, marginBottom: 16,
                       fontSize: 13,
-                      color: isSelected ? "rgba(210,225,255,0.80)" : "rgba(180,195,230,0.60)",
+                      color: isSelected ? "rgba(210,225,255,0.80)" : "var(--text-dim)",
                       lineHeight: 1.6,
                       display: "-webkit-box",
                       WebkitLineClamp: isExpanded ? "unset" : 2,
@@ -2659,10 +2755,10 @@ export default function ResultPage() {
                       style={{
                         width: "100%", padding: "10px 20px",
                         background: "none", border: "none",
-                        borderTop: "1px solid rgba(120,160,255,0.10)",
+                        borderTop: "1px solid var(--line-soft)",
                         cursor: "pointer",
-                        fontSize: 12, fontWeight: 600,
-                        color: "rgba(180,200,240,0.55)",
+                        fontSize: 13, fontWeight: 700,
+                        color: "var(--text-dim)",
                         display: "flex", alignItems: "center", justifyContent: "center", gap: 4,
                         transition: "color 0.18s",
                       }}
@@ -2696,7 +2792,7 @@ export default function ResultPage() {
                       {item.fit_reason && (
                         <div style={{ marginBottom: 14 }}>
                           <div style={labelStyle}>{ui.fitReason}</div>
-                          <div style={{ ...textStyle, fontSize: 12, color: "rgba(180,200,240,0.65)" }}>
+                          <div style={{ ...textStyle, fontSize: 12, color: "var(--text-dim)" }}>
                             {item.fit_reason}
                           </div>
                         </div>
@@ -2767,13 +2863,57 @@ export default function ResultPage() {
                     </div>
                   )}
 
-                  {/* ── 하단 액션 버튼 ── */}
+                  {/* ── 하단 액션 버튼 (주 행동: 이 이름 선택 → 이름카드 → 숏리스트) ── */}
                   <div style={{
-                    padding: isExpanded ? "0 20px 20px" : "0 20px 16px",
-                    display: "flex", flexDirection: "column", gap: 8,
-                    borderTop: isExpanded ? "1px solid rgba(120,160,255,0.08)" : "none",
+                    padding: isExpanded ? "0 20px 20px" : "0 20px 18px",
+                    display: "flex", flexDirection: "column", gap: 10,
+                    borderTop: isExpanded ? "1px solid var(--line-soft)" : "none",
                     paddingTop: isExpanded ? 16 : 0,
                   }}>
+                    {/* 선택 버튼 — 가장 눈에 띄는 주 행동 */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        Sound.playTab();
+                        Sound.playSeal();
+                        setSelectedNameIndex(idx);
+                        setGiftCardNameIndex(idx);
+                        setExpandedIdx(null);
+                        setTimeout(() => document.getElementById("wink-card-cta")?.scrollIntoView({ behavior: "smooth", block: "center" }), 350);
+                      }}
+                      style={{
+                        width: "100%", padding: "16px 0", borderRadius: 14,
+                        fontSize: 16, fontWeight: 900, cursor: "pointer",
+                        border: "none",
+                        background: isSelected
+                          ? "linear-gradient(135deg,#C9A84C,#a87c2a)"
+                          : "linear-gradient(135deg,#F0CF7A,#C9A84C)",
+                        color: "#0B1634",
+                        letterSpacing: "0.03em",
+                        boxShadow: isSelected ? "none" : "0 6px 20px rgba(201,168,76,0.40)",
+                        transition: "all 0.22s ease",
+                      }}
+                    >
+                      {isSelected ? `✓ ${ui.nameSelectedBadge}` : `✦ ${ui.selectThisName}`}
+                    </button>
+
+                    {/* 네임카드 버튼 */}
+                    <button
+                      type="button"
+                      onClick={() => setNameCardIdx(idx)}
+                      style={{
+                        width: "100%", padding: "13px 0", borderRadius: 14,
+                        fontSize: 14, fontWeight: 800, cursor: "pointer",
+                        border: "1.5px solid var(--gold-main)",
+                        background: "var(--gold-soft)",
+                        color: "var(--gold-main)",
+                        display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                        transition: "all 0.18s",
+                      }}
+                    >
+                      🪪 {lang === "ko" ? "다국어 네임카드 보기" : "Preview Name Card"}
+                    </button>
+
                     {/* 숏리스트 저장 버튼 */}
                     {(() => {
                       const saved = isInShortlist(item.name, brief?.category);
@@ -2804,9 +2944,9 @@ export default function ResultPage() {
                           style={{
                             width: "100%", padding: "10px 0", borderRadius: 12,
                             fontSize: 13, fontWeight: 700, cursor: "pointer",
-                            border: saved ? "1px solid rgba(100,200,120,0.45)" : "1px solid rgba(120,200,160,0.28)",
-                            background: saved ? "rgba(80,180,120,0.10)" : "rgba(120,200,160,0.06)",
-                            color: saved ? "rgba(100,200,130,0.90)" : "rgba(120,200,160,0.70)",
+                            border: saved ? "1.5px solid #2f9e62" : "1.5px solid var(--line-strong)",
+                            background: saved ? "rgba(47,158,98,0.12)" : "transparent",
+                            color: saved ? "#2f9e62" : "var(--text-dim)",
                             display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
                             transition: "all 0.18s",
                           }}
@@ -2816,47 +2956,6 @@ export default function ResultPage() {
                       );
                     })()}
 
-                    {/* 네임카드 버튼 */}
-                    <button
-                      type="button"
-                      onClick={() => setNameCardIdx(idx)}
-                      style={{
-                        width: "100%", padding: "11px 0", borderRadius: 12,
-                        fontSize: 13, fontWeight: 700, cursor: "pointer",
-                        border: "1px solid rgba(201,168,76,0.28)",
-                        background: "rgba(201,168,76,0.06)",
-                        color: "rgba(201,168,76,0.82)",
-                        display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
-                        transition: "all 0.18s",
-                      }}
-                    >
-                      🪪 {lang === "ko" ? "다국어 네임카드" : "Name Card"}
-                    </button>
-
-                    {/* 선택 버튼 */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        Sound.playTab();
-                        Sound.playSeal();
-                        setSelectedNameIndex(idx);
-                        setGiftCardNameIndex(idx);
-                        setExpandedIdx(null);
-                      }}
-                      style={{
-                        width: "100%", padding: "14px 0", borderRadius: 12,
-                        fontSize: 15, fontWeight: 800, cursor: "pointer",
-                        border: isSelected ? "2px solid rgba(201,168,76,0.80)" : "1.5px solid rgba(201,168,76,0.40)",
-                        background: isSelected
-                          ? "linear-gradient(135deg,#C9A84C,#a87c2a)"
-                          : "rgba(201,168,76,0.10)",
-                        color: isSelected ? "#0B1634" : "rgba(201,168,76,0.90)",
-                        letterSpacing: "0.03em",
-                        transition: "all 0.22s ease",
-                      }}
-                    >
-                      {isSelected ? `✓ ${ui.nameSelectedBadge}` : ui.selectThisName}
-                    </button>
                   </div>
 
                 </article>
@@ -2865,193 +2964,201 @@ export default function ResultPage() {
           </div>
         </section>
 
-        {/* Payment nudge banner */}
-        {selectedNameIndex !== null && results[selectedNameIndex] && (
-          <section
-            style={{
-              marginTop: 24,
-              padding: "32px 28px",
-              borderRadius: 20,
-              border: "1px solid rgba(201,168,76,0.45)",
-              background: "linear-gradient(160deg, rgba(201,168,76,0.13), rgba(11,22,52,0.80))",
-              boxShadow: "0 12px 48px rgba(201,168,76,0.12)",
-              textAlign: "center",
-            }}
-          >
-            {/* 선택 완료 라벨 */}
-            <div style={{
-              display: "inline-block",
-              fontSize: 11, fontWeight: 700, letterSpacing: "0.12em",
-              textTransform: "uppercase",
-              color: "rgba(201,168,76,0.80)",
-              marginBottom: 14,
-            }}>
-              ✓ 선택 완료 · {results[selectedNameIndex].name}
-            </div>
-
-            {/* 제목 */}
-            <div style={{
-              fontSize: "clamp(20px, 4vw, 26px)",
-              fontWeight: 800,
-              color: "#f0f4ff",
-              lineHeight: 1.3,
-              marginBottom: 10,
-            }}>
-              이 이름을 평생 간직하세요 ✨
-            </div>
-
-            {/* 부제 */}
-            <div style={{
-              fontSize: 14,
-              color: "rgba(210,225,255,0.72)",
-              lineHeight: 1.7,
-              marginBottom: 24,
-              maxWidth: 400,
-              marginInline: "auto",
-            }}>
-              지금 선택하시면 이름 리포트 + 다국어 네임카드 + 도장 할인 혜택까지
-            </div>
-
-            {/* CTA 버튼 */}
-            <button
-              type="button"
-              onClick={() => {
-                const el = document.getElementById("wink-package-section");
-                el?.scrollIntoView({ behavior: "smooth", block: "start" });
-              }}
+        {/* 이름 선택 직후: 이름카드 이메일 발송 CTA */}
+        {selectedNameIndex !== null && allResultsForDisplay[selectedNameIndex] && (() => {
+          const cc = NEXT_STEP_COPY[(lang as "ko" | "en" | "ja")] ?? NEXT_STEP_COPY.en;
+          const chosen = allResultsForDisplay[selectedNameIndex];
+          const targetEmail = (cardCtaEmail || userEmail || "").trim();
+          return (
+            <section
+              id="wink-card-cta"
               style={{
-                display: "inline-block",
-                padding: "16px 36px",
-                borderRadius: 14,
-                border: "none",
-                background: "linear-gradient(135deg, #C9A84C, #E8C870)",
-                color: "#0B1634",
-                fontSize: 16,
-                fontWeight: 800,
-                cursor: "pointer",
-                letterSpacing: "0.02em",
-                boxShadow: "0 4px 24px rgba(201,168,76,0.35)",
-                transition: "opacity 0.18s",
-                marginBottom: 16,
+                marginTop: 24, padding: "28px 22px", borderRadius: 22, textAlign: "center",
+                border: "2px solid var(--gold-main)",
+                background: "var(--bg-panel-strong)",
+                boxShadow: "0 14px 44px rgba(201,168,76,0.22)",
               }}
             >
-              지금 바로 패키지 선택하기 →
-            </button>
-
-            {/* 긴박감 */}
-            <div style={{
-              fontSize: 12,
-              color: "rgba(201,168,76,0.60)",
-              letterSpacing: "0.04em",
-            }}>
-              오늘 선택하신 이름은 24시간 동안 보관됩니다
-            </div>
-          </section>
-        )}
-
-        {/* 후기 남기기 — 이름 선택/로그인 여부와 무관하게, 결과가 저장되면 바로 노출 */}
-        {briefId && (
-          <section
-            style={{
-              marginTop: 24,
-              padding: "30px 24px",
-              borderRadius: 20,
-              border: "1px solid rgba(201,168,76,0.45)",
-              background: "linear-gradient(160deg, rgba(201,168,76,0.12), rgba(11,22,52,0.78))",
-              boxShadow: "0 12px 48px rgba(201,168,76,0.10)",
-              textAlign: "center",
-            }}
-          >
-            <div style={{ fontSize: 22, letterSpacing: 2, marginBottom: 8, color: "#E8C870" }}>
-              ⭐⭐⭐⭐⭐
-            </div>
-            <div style={{ fontSize: "clamp(18px, 3.4vw, 22px)", fontWeight: 800, color: "#f0f4ff", marginBottom: 8 }}>
-              {lang === "ko" ? "이번 이름 설계, 어떠셨나요?" : "How was your naming experience?"}
-            </div>
-            <div style={{ fontSize: 13, color: "rgba(210,225,255,0.70)", marginBottom: 20, maxWidth: 420, marginInline: "auto", lineHeight: 1.6 }}>
-              {lang === "ko"
-                ? "소중한 후기 한 줄이 이름을 찾고 있는 다른 분들에게 큰 힘이 됩니다."
-                : "Your review helps others who are searching for the perfect name."}
-            </div>
-
-            {userId ? (
-              <button
-                type="button"
-                onClick={() => setShowReviewModal(true)}
-                style={{
-                  padding: "14px 32px",
-                  borderRadius: 14,
-                  border: "none",
-                  background: "linear-gradient(135deg, #C9A84C, #E8C870)",
-                  color: "#0B1634",
-                  fontSize: 15,
-                  fontWeight: 800,
-                  cursor: "pointer",
-                  letterSpacing: "0.02em",
-                  boxShadow: "0 4px 24px rgba(201,168,76,0.30)",
-                }}
-              >
-                ✎ {REVIEW_BUTTON_LABEL[lang in REVIEW_BUTTON_LABEL ? (lang as keyof typeof REVIEW_BUTTON_LABEL) : "ko"]}
-              </button>
-            ) : reviewLoginSent ? (
-              <div style={{ fontSize: 13, color: "rgba(230,210,150,0.95)", lineHeight: 1.7, maxWidth: 360, marginInline: "auto" }}>
-                {lang === "ko"
-                  ? `${reviewLoginEmail} 로 로그인 링크를 보냈습니다. 메일함에서 링크를 눌러주세요. 이 탭은 그대로 열어두시면 로그인 후 후기 작성창이 자동으로 열립니다.`
-                  : `We sent a login link to ${reviewLoginEmail}. Click the link in your email — keep this tab open and the review form will open automatically once you're logged in.`}
+              <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: "0.04em", color: "var(--gold-main)", marginBottom: 10 }}>
+                {cc.chosen(chosen.name)}
               </div>
-            ) : (
-              <div>
-                <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
-                  <input
-                    type="email"
-                    value={reviewLoginEmail}
-                    onChange={(e) => setReviewLoginEmail(e.target.value)}
-                    placeholder={lang === "ko" ? "이메일 주소" : "Email address"}
-                    style={{
-                      padding: "12px 16px",
-                      borderRadius: 12,
-                      border: "1px solid rgba(201,168,76,0.4)",
-                      background: "rgba(255,255,255,0.06)",
-                      color: "#f0f4ff",
-                      fontSize: 14,
-                      minWidth: 220,
-                    }}
-                  />
+              <div style={{ fontSize: "clamp(22px, 4.4vw, 28px)", fontWeight: 900, color: "var(--text-main)", lineHeight: 1.3, marginBottom: 10 }}>
+                🪪 {cc.cardTitle}
+              </div>
+              <div style={{ fontSize: 14, color: "var(--text-dim)", lineHeight: 1.7, maxWidth: 440, marginInline: "auto", marginBottom: 20 }}>
+                {cc.cardDesc}
+              </div>
+
+              {cardCtaStatus === "sent" ? (
+                <div style={{
+                  padding: "14px 16px", borderRadius: 14, fontSize: 14, fontWeight: 700, lineHeight: 1.6,
+                  color: "#1f7a4a", background: "rgba(47,158,98,0.12)", border: "1.5px solid #2f9e62",
+                  maxWidth: 440, marginInline: "auto",
+                }}>
+                  {cc.sent(cardCtaSentTo)}
+                </div>
+              ) : (
+                <>
+                  {!userEmail && (
+                    <input
+                      className="wink-input"
+                      type="email"
+                      value={cardCtaEmail}
+                      onChange={(e) => { setCardCtaEmail(e.target.value); if (cardCtaStatus === "invalid") setCardCtaStatus("idle"); }}
+                      placeholder={cc.emailPh}
+                      autoComplete="email"
+                      style={{ maxWidth: 360, marginInline: "auto", marginBottom: 12, textAlign: "center" }}
+                    />
+                  )}
                   <button
                     type="button"
-                    onClick={handleReviewLoginSend}
-                    disabled={reviewLoginSending}
+                    onClick={handleCardCtaSend}
+                    disabled={cardCtaStatus === "sending"}
                     style={{
-                      padding: "12px 24px",
-                      borderRadius: 12,
-                      border: "none",
-                      background: "linear-gradient(135deg, #C9A84C, #E8C870)",
-                      color: "#0B1634",
-                      fontSize: 14,
-                      fontWeight: 800,
-                      cursor: reviewLoginSending ? "default" : "pointer",
-                      opacity: reviewLoginSending ? 0.7 : 1,
-                      whiteSpace: "nowrap",
+                      display: "block", width: "100%", maxWidth: 360, marginInline: "auto",
+                      padding: "17px 24px", borderRadius: 16, border: "none",
+                      background: "linear-gradient(135deg,#F0CF7A,#C9A84C)",
+                      color: "#0B1634", fontSize: 17, fontWeight: 900, letterSpacing: "0.02em",
+                      cursor: cardCtaStatus === "sending" ? "default" : "pointer",
+                      opacity: cardCtaStatus === "sending" ? 0.7 : 1,
+                      boxShadow: "0 8px 26px rgba(201,168,76,0.45)",
                     }}
                   >
-                    {reviewLoginSending
-                      ? (lang === "ko" ? "전송 중..." : "Sending...")
-                      : (lang === "ko" ? "로그인하고 후기 남기기" : "Log in & Review")}
+                    {cardCtaStatus === "sending" ? cc.sending : cc.sendBtn}
                   </button>
-                </div>
-                <div style={{ marginTop: 10, fontSize: 11, color: "rgba(210,225,255,0.5)" }}>
-                  {lang === "ko" ? "비밀번호 없이 이메일 링크로 간편하게 로그인합니다." : "Passwordless login via a secure email link."}
-                </div>
+                  {userEmail && (
+                    <div style={{ marginTop: 8, fontSize: 12, color: "var(--text-dim)" }}>{cc.sendTo(userEmail)}</div>
+                  )}
+                  {cardCtaStatus === "error" && (
+                    <div role="alert" style={{ marginTop: 10, fontSize: 13, fontWeight: 700, color: "#c0392b" }}>{cc.failed}</div>
+                  )}
+                  {cardCtaStatus === "invalid" && (
+                    <div role="alert" style={{ marginTop: 10, fontSize: 13, fontWeight: 700, color: "#c0392b" }}>{cc.invalid}</div>
+                  )}
+                </>
+              )}
+
+              <button
+                type="button"
+                onClick={() => setNameCardIdx(selectedNameIndex)}
+                style={{
+                  display: "block", width: "100%", maxWidth: 360, marginInline: "auto", marginTop: 12,
+                  padding: "13px 20px", borderRadius: 14,
+                  border: "1.5px solid var(--gold-main)", background: "transparent",
+                  color: "var(--gold-main)", fontSize: 14, fontWeight: 800, cursor: "pointer",
+                }}
+              >
+                {cc.previewBtn}
+              </button>
+            </section>
+          );
+        })()}
+
+        {/* 후기 남기기 — 이름 선택/로그인 여부와 무관하게, 결과가 저장되면 바로 노출 */}
+        {briefId && (() => {
+          const cc = NEXT_STEP_COPY[(lang as "ko" | "en" | "ja")] ?? NEXT_STEP_COPY.en;
+          const activeStar = reviewHoverStar || reviewRating;
+          return (
+            <section
+              id="wink-review-cta"
+              style={{
+                marginTop: 24, padding: "30px 22px", borderRadius: 22, textAlign: "center",
+                border: "2px solid var(--gold-main)",
+                background: "var(--bg-panel-strong)",
+                boxShadow: "0 14px 44px rgba(201,168,76,0.20)",
+              }}
+            >
+              <div style={{ fontSize: "clamp(20px, 4vw, 25px)", fontWeight: 900, color: "var(--text-main)", lineHeight: 1.35, marginBottom: 10 }}>
+                {cc.revTitle}
               </div>
-            )}
-            {reviewLoginError && (
-              <div style={{ marginTop: 10, fontSize: 12, color: "#ff8a8a" }}>{reviewLoginError}</div>
-            )}
-          </section>
-        )}
+              <div style={{ fontSize: 14, color: "var(--text-dim)", marginBottom: 18, maxWidth: 440, marginInline: "auto", lineHeight: 1.7 }}>
+                {cc.revSub}
+              </div>
+
+              {userId ? (
+                <>
+                  <div style={{ display: "flex", justifyContent: "center", gap: 6, marginBottom: 6 }} onMouseLeave={() => setReviewHoverStar(0)}>
+                    {[1, 2, 3, 4, 5].map((n) => (
+                      <button
+                        key={n}
+                        type="button"
+                        aria-label={`${n} / 5`}
+                        onMouseEnter={() => setReviewHoverStar(n)}
+                        onClick={() => { setReviewRating(n); setShowReviewModal(true); }}
+                        style={{
+                          background: "none", border: "none", cursor: "pointer", padding: 2,
+                          fontSize: 42, lineHeight: 1,
+                          color: n <= activeStar ? "var(--gold-main)" : "var(--line-strong)",
+                          transition: "transform 0.12s, color 0.12s",
+                          transform: n <= activeStar ? "scale(1.08)" : "scale(1)",
+                        }}
+                      >
+                        ★
+                      </button>
+                    ))}
+                  </div>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 16 }}>{cc.revTap}</div>
+                  <button
+                    type="button"
+                    onClick={() => setShowReviewModal(true)}
+                    style={{
+                      display: "block", width: "100%", maxWidth: 360, marginInline: "auto",
+                      padding: "16px 24px", borderRadius: 16, border: "none",
+                      background: "linear-gradient(135deg,#F0CF7A,#C9A84C)",
+                      color: "#0B1634", fontSize: 16, fontWeight: 900, cursor: "pointer",
+                      letterSpacing: "0.02em", boxShadow: "0 8px 26px rgba(201,168,76,0.42)",
+                    }}
+                  >
+                    ✎ {REVIEW_BUTTON_LABEL[lang in REVIEW_BUTTON_LABEL ? (lang as keyof typeof REVIEW_BUTTON_LABEL) : "ko"]}
+                  </button>
+                </>
+              ) : reviewLoginSent ? (
+                <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-main)", lineHeight: 1.7, maxWidth: 380, marginInline: "auto" }}>
+                  {lang === "ko"
+                    ? `${reviewLoginEmail} 로 로그인 링크를 보냈습니다. 메일함에서 링크를 눌러주세요. 이 탭은 그대로 열어두시면 로그인 후 후기 작성창이 자동으로 열립니다.`
+                    : `We sent a login link to ${reviewLoginEmail}. Click the link in your email — keep this tab open and the review form will open automatically once you're logged in.`}
+                </div>
+              ) : (
+                <div>
+                  <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
+                    <input
+                      className="wink-input"
+                      type="email"
+                      value={reviewLoginEmail}
+                      onChange={(e) => setReviewLoginEmail(e.target.value)}
+                      placeholder={lang === "ko" ? "이메일 주소" : "Email address"}
+                      style={{ minWidth: 220, maxWidth: 280 }}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleReviewLoginSend}
+                      disabled={reviewLoginSending}
+                      style={{
+                        padding: "13px 24px", borderRadius: 14, border: "none",
+                        background: "linear-gradient(135deg,#F0CF7A,#C9A84C)",
+                        color: "#0B1634", fontSize: 15, fontWeight: 900,
+                        cursor: reviewLoginSending ? "default" : "pointer",
+                        opacity: reviewLoginSending ? 0.7 : 1, whiteSpace: "nowrap",
+                        boxShadow: "0 6px 20px rgba(201,168,76,0.38)",
+                      }}
+                    >
+                      {reviewLoginSending
+                        ? (lang === "ko" ? "전송 중..." : "Sending...")
+                        : (lang === "ko" ? "로그인하고 리뷰 남기기" : "Log in & Review")}
+                    </button>
+                  </div>
+                  <div style={{ marginTop: 10, fontSize: 12, color: "var(--text-dim)" }}>{cc.revLoginHint}</div>
+                </div>
+              )}
+              {reviewLoginError && (
+                <div style={{ marginTop: 10, fontSize: 13, fontWeight: 700, color: "#c0392b" }}>{reviewLoginError}</div>
+              )}
+            </section>
+          );
+        })()}
 
         {/* Package selection */}
-        <section id="wink-package-section" style={{ marginTop: 32, opacity: selectedNameIndex === null ? 0.45 : 1, transition: "opacity 0.3s" }}>
+        <section id="wink-package-section" style={{ marginTop: 32, opacity: selectedNameIndex === null ? 0.6 : 1, transition: "opacity 0.3s" }}>
           <div className="wink-section-head">
             <h2 className="wink-section-title">{ui.packageTitle}</h2>
             <p className="wink-section-desc">
@@ -3510,7 +3617,10 @@ export default function ResultPage() {
                 <button
                   type="button"
                   className="wink-secondary-btn"
-                  onClick={() => setSendCardOpen(true)}
+                  onClick={() => {
+                    if (selectedNameIndex === null) { window.scrollTo({ top: 0, behavior: "smooth" }); return; }
+                    document.getElementById("wink-card-cta")?.scrollIntoView({ behavior: "smooth", block: "center" });
+                  }}
                   style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
                 >
                   📧 {lang === "ko" ? "이메일로 받기" : "Receive by Email"}

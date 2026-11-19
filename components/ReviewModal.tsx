@@ -208,14 +208,15 @@ interface Props {
   lang: string;
   briefId: string;
   nameUsed?: string;
+  initialRating?: number;
   onClose: () => void;
 }
 
-export default function ReviewModal({ lang, briefId, nameUsed, onClose }: Props) {
+export default function ReviewModal({ lang, briefId, nameUsed, initialRating, onClose }: Props) {
   const ui = COPY[toUiLang(lang)];
   const isRtl = lang === "ar";
 
-  const [rating, setRating] = useState(5);
+  const [rating, setRating] = useState(initialRating && initialRating >= 1 && initialRating <= 5 ? initialRating : 5);
   const [hoverRating, setHoverRating] = useState(0);
   const [content, setContent] = useState("");
   const [displayName, setDisplayName] = useState("");
