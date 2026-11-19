@@ -1,10 +1,10 @@
 /**
  * Wink Naming — 공통 이메일 발송 유틸 (Resend)
- * 발신: onboarding@resend.dev (임시 / 도메인 인증 후 noreply@wink-naming.com 으로 변경 예정)
+ * 발신: noreply@wink-naming.com (Resend 도메인 인증 완료). RESEND_FROM 환경변수로 덮어쓸 수 있음.
  */
 
 const RESEND_API = "https://api.resend.com/emails";
-const FROM = "윙크 네이밍 <onboarding@resend.dev>";
+const FROM = process.env.RESEND_FROM || "윙크 네이밍 <noreply@wink-naming.com>";
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? "https://wink-naming.com";
 
 /** 공통 헤더 HTML — 네이비 + 골드 브랜딩 */

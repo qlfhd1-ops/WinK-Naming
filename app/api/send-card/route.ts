@@ -151,9 +151,8 @@ export async function POST(req: Request) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        // Resend 도메인(wink-naming.com) 인증 후 RESEND_FROM="윙크 네이밍 <noreply@wink-naming.com>" 로 설정.
-        // 인증 전 기본값(onboarding@resend.dev)은 Resend 계정 소유자 주소로만 발송 가능.
-        from: process.env.RESEND_FROM || "윙크 네이밍 <onboarding@resend.dev>",
+        // Resend 도메인(wink-naming.com) 인증 완료 — RESEND_FROM 환경변수로 덮어쓸 수 있음.
+        from: process.env.RESEND_FROM || "윙크 네이밍 <noreply@wink-naming.com>",
         to: [email],
         subject,
         html,
