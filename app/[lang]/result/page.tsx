@@ -1421,60 +1421,195 @@ function TrustPill({ text }: { text: string }) {
   return <div className="wink-score-pill">{text}</div>;
 }
 
-// 이름 선택 직후 이름카드 이메일 발송 CTA / 후기 유도 문구 (ko·en·ja, 그 외 언어는 en 사용)
-const NEXT_STEP_COPY = {
+// 이름 선택 직후 이름카드 이메일 발송 CTA / 후기 유도 / 선택 카드 버튼 문구 (9개 언어)
+type NextCopy = {
+  chosen: (n: string) => string;
+  cardTitle: string; cardDesc: string; sendBtn: string; sending: string;
+  sendTo: (e: string) => string; emailPh: string; previewBtn: string;
+  sent: (e: string) => string; failed: string; invalid: string;
+  revTitle: string; revSub: string; revTap: string; revLoginHint: string;
+  loginSent: (e: string) => string; loginReview: string; revEmailPh: string; sendingShort: string;
+  previewCardBtn: string; shortlist: string; shortlistSaved: string; shortlistDup: string;
+  details: string; collapse: string;
+};
+
+const NEXT_STEP_COPY: Record<string, NextCopy> = {
   ko: {
-    chosen: (n: string) => `✓ '${n}' 선택 완료`,
+    chosen: (n) => `✓ '${n}' 선택 완료`,
     cardTitle: "이름카드가 완성됐어요",
     cardDesc: "영어·중국어·일본어 표기가 담긴 이름카드를 이메일로 보내드려요. 이미지로 저장해 친구에게 공유할 수도 있어요.",
-    sendBtn: "✉ 내 이메일로 이름카드 받기",
-    sending: "보내는 중...",
-    sendTo: (e: string) => `${e} 로 보내드려요`,
-    emailPh: "받으실 이메일 주소",
+    sendBtn: "✉ 내 이메일로 이름카드 받기", sending: "보내는 중...",
+    sendTo: (e) => `${e} 로 보내드려요`, emailPh: "받으실 이메일 주소",
     previewBtn: "🪪 카드 미리보기 · 이미지 저장",
-    sent: (e: string) => `✓ 이름카드를 ${e} 로 보냈어요. 메일함(스팸함 포함)을 확인해 주세요.`,
-    failed: "전송에 실패했어요. 잠시 후 다시 시도해 주세요.",
-    invalid: "올바른 이메일 주소를 입력해 주세요.",
+    sent: (e) => `✓ 이름카드를 ${e} 로 보냈어요. 메일함(스팸함 포함)을 확인해 주세요.`,
+    failed: "전송에 실패했어요. 잠시 후 다시 시도해 주세요.", invalid: "올바른 이메일 주소를 입력해 주세요.",
     revTitle: "생성된 한국식 이름이 마음에 드셨나요?",
     revSub: "솔직한 한 줄 리뷰를 부탁드려요. 30초면 충분하고, 이름을 찾는 다른 분들께 큰 도움이 됩니다 🙏",
     revTap: "별점을 눌러 바로 시작하세요",
     revLoginHint: "리뷰는 이메일 로그인 후 작성할 수 있어요 (비밀번호 없이 링크로 간편하게).",
+    loginSent: (e) => `${e} 로 로그인 링크를 보냈습니다. 메일함에서 링크를 눌러주세요. 이 탭은 그대로 열어두시면 로그인 후 후기 작성창이 자동으로 열립니다.`,
+    loginReview: "로그인하고 리뷰 남기기", revEmailPh: "이메일 주소", sendingShort: "전송 중...",
+    previewCardBtn: "🪪 다국어 네임카드 보기", shortlist: "숏리스트 저장",
+    shortlistSaved: "숏리스트에 저장됐습니다", shortlistDup: "이미 저장된 이름입니다",
+    details: "자세히 보기 ▾", collapse: "접기 ▲",
   },
   en: {
-    chosen: (n: string) => `✓ You chose '${n}'`,
+    chosen: (n) => `✓ You chose '${n}'`,
     cardTitle: "Your name card is ready",
     cardDesc: "We'll email you a name card with English, Chinese and Japanese spellings. You can also save it as an image to share with friends.",
-    sendBtn: "✉ Email me my name card",
-    sending: "Sending...",
-    sendTo: (e: string) => `Will be sent to ${e}`,
-    emailPh: "Email address to send to",
+    sendBtn: "✉ Email me my name card", sending: "Sending...",
+    sendTo: (e) => `Will be sent to ${e}`, emailPh: "Email address to send to",
     previewBtn: "🪪 Preview & save as image",
-    sent: (e: string) => `✓ Name card sent to ${e}. Please check your inbox (and spam folder).`,
-    failed: "Couldn't send it. Please try again in a moment.",
-    invalid: "Please enter a valid email address.",
+    sent: (e) => `✓ Name card sent to ${e}. Please check your inbox (and spam folder).`,
+    failed: "Couldn't send it. Please try again in a moment.", invalid: "Please enter a valid email address.",
     revTitle: "Did you like your Korean name?",
     revSub: "A quick, honest review would mean a lot — it takes under 30 seconds and helps others who are looking for a name 🙏",
     revTap: "Tap a star to get started",
     revLoginHint: "Sign in with your email to leave a review (no password — just a secure link).",
+    loginSent: (e) => `We sent a login link to ${e}. Click the link in your email — keep this tab open and the review form will open automatically once you're logged in.`,
+    loginReview: "Log in & Review", revEmailPh: "Email address", sendingShort: "Sending...",
+    previewCardBtn: "🪪 Preview Name Card", shortlist: "Save to Shortlist",
+    shortlistSaved: "Saved to shortlist", shortlistDup: "Already in shortlist",
+    details: "View details ▾", collapse: "Collapse ▲",
   },
   ja: {
-    chosen: (n: string) => `✓ 「${n}」を選びました`,
+    chosen: (n) => `✓ 「${n}」を選びました`,
     cardTitle: "名前カードが完成しました",
     cardDesc: "英語・中国語・日本語の表記入りの名前カードをメールでお送りします。画像として保存して友達に共有することもできます。",
-    sendBtn: "✉ 名前カードをメールで受け取る",
-    sending: "送信中...",
-    sendTo: (e: string) => `${e} に送信します`,
-    emailPh: "送信先のメールアドレス",
+    sendBtn: "✉ 名前カードをメールで受け取る", sending: "送信中...",
+    sendTo: (e) => `${e} に送信します`, emailPh: "送信先のメールアドレス",
     previewBtn: "🪪 カードをプレビュー・画像保存",
-    sent: (e: string) => `✓ 名前カードを ${e} に送りました。受信箱（迷惑メールも）をご確認ください。`,
-    failed: "送信に失敗しました。しばらくしてからもう一度お試しください。",
-    invalid: "有効なメールアドレスを入力してください。",
+    sent: (e) => `✓ 名前カードを ${e} に送りました。受信箱（迷惑メールも）をご確認ください。`,
+    failed: "送信に失敗しました。しばらくしてからもう一度お試しください。", invalid: "有効なメールアドレスを入力してください。",
     revTitle: "生成された韓国式の名前は気に入っていただけましたか？",
     revSub: "正直な一言レビューをお願いします。30秒で完了し、名前を探している方の助けになります 🙏",
     revTap: "星をタップして開始",
     revLoginHint: "レビューはメールでログイン後に書けます（パスワード不要、リンクだけ）。",
+    loginSent: (e) => `${e} にログインリンクを送りました。メールのリンクを押してください。このタブを開いたままにしておくと、ログイン後にレビュー画面が自動で開きます。`,
+    loginReview: "ログインしてレビューを書く", revEmailPh: "メールアドレス", sendingShort: "送信中...",
+    previewCardBtn: "🪪 多言語ネームカードを見る", shortlist: "ショートリストに保存",
+    shortlistSaved: "ショートリストに保存しました", shortlistDup: "すでに保存されています",
+    details: "詳細を見る ▾", collapse: "閉じる ▲",
   },
-} as const;
+  zh: {
+    chosen: (n) => `✓ 已选择「${n}」`,
+    cardTitle: "您的名字卡已准备好",
+    cardDesc: "我们会将包含英文、中文和日文写法的名字卡发送到您的邮箱，您也可以保存为图片分享给朋友。",
+    sendBtn: "✉ 将名字卡发送到我的邮箱", sending: "发送中...",
+    sendTo: (e) => `将发送至 ${e}`, emailPh: "接收名字卡的邮箱地址",
+    previewBtn: "🪪 预览名字卡并保存为图片",
+    sent: (e) => `✓ 名字卡已发送至 ${e}，请查看收件箱（包括垃圾邮件箱）。`,
+    failed: "发送失败，请稍后重试。", invalid: "请输入有效的邮箱地址。",
+    revTitle: "您喜欢生成的韩式名字吗？",
+    revSub: "请留下一句真实的评价。只需30秒，对正在寻找名字的人帮助很大 🙏",
+    revTap: "点击星星即可开始",
+    revLoginHint: "使用邮箱登录后即可撰写评价（无需密码，只需点击安全链接）。",
+    loginSent: (e) => `已向 ${e} 发送登录链接。请点击邮件中的链接。保持此标签页打开，登录后评价窗口会自动弹出。`,
+    loginReview: "登录并撰写评价", revEmailPh: "邮箱地址", sendingShort: "发送中...",
+    previewCardBtn: "🪪 查看多语言名字卡", shortlist: "加入候选清单",
+    shortlistSaved: "已加入候选清单", shortlistDup: "已在候选清单中",
+    details: "查看详情 ▾", collapse: "收起 ▲",
+  },
+  es: {
+    chosen: (n) => `✓ Has elegido '${n}'`,
+    cardTitle: "Tu tarjeta de nombre está lista",
+    cardDesc: "Te enviaremos por correo una tarjeta de nombre con las grafías en inglés, chino y japonés. También puedes guardarla como imagen para compartirla con tus amigos.",
+    sendBtn: "✉ Enviarme mi tarjeta de nombre", sending: "Enviando...",
+    sendTo: (e) => `Se enviará a ${e}`, emailPh: "Correo al que enviarla",
+    previewBtn: "🪪 Vista previa y guardar como imagen",
+    sent: (e) => `✓ Tarjeta enviada a ${e}. Revisa tu bandeja de entrada (y la carpeta de spam).`,
+    failed: "No se pudo enviar. Inténtalo de nuevo en un momento.", invalid: "Introduce un correo electrónico válido.",
+    revTitle: "¿Te gustó tu nombre coreano?",
+    revSub: "Una reseña breve y sincera significa mucho: lleva menos de 30 segundos y ayuda a quienes buscan un nombre 🙏",
+    revTap: "Toca una estrella para empezar",
+    revLoginHint: "Inicia sesión con tu correo para dejar una reseña (sin contraseña, solo un enlace seguro).",
+    loginSent: (e) => `Enviamos un enlace de acceso a ${e}. Haz clic en el enlace del correo; mantén esta pestaña abierta y el formulario de reseña se abrirá automáticamente al iniciar sesión.`,
+    loginReview: "Iniciar sesión y dejar reseña", revEmailPh: "Correo electrónico", sendingShort: "Enviando...",
+    previewCardBtn: "🪪 Ver tarjeta de nombre multilingüe", shortlist: "Guardar en la lista",
+    shortlistSaved: "Guardado en la lista", shortlistDup: "Ya está en la lista",
+    details: "Ver detalles ▾", collapse: "Cerrar ▲",
+  },
+  ru: {
+    chosen: (n) => `✓ Вы выбрали «${n}»`,
+    cardTitle: "Ваша именная карточка готова",
+    cardDesc: "Мы отправим вам на email карточку с написанием имени на английском, китайском и японском. Её также можно сохранить как изображение и поделиться с друзьями.",
+    sendBtn: "✉ Отправить карточку мне на email", sending: "Отправка...",
+    sendTo: (e) => `Будет отправлено на ${e}`, emailPh: "Email для отправки",
+    previewBtn: "🪪 Просмотр и сохранение как изображение",
+    sent: (e) => `✓ Карточка отправлена на ${e}. Проверьте входящие (и папку «Спам»).`,
+    failed: "Не удалось отправить. Попробуйте ещё раз чуть позже.", invalid: "Введите корректный адрес email.",
+    revTitle: "Понравилось ли вам ваше корейское имя?",
+    revSub: "Короткий честный отзыв очень важен: он займёт меньше 30 секунд и поможет тем, кто ищет имя 🙏",
+    revTap: "Нажмите на звезду, чтобы начать",
+    revLoginHint: "Войдите по email, чтобы оставить отзыв (без пароля — только безопасная ссылка).",
+    loginSent: (e) => `Мы отправили ссылку для входа на ${e}. Нажмите на ссылку в письме — оставьте эту вкладку открытой, и форма отзыва откроется автоматически после входа.`,
+    loginReview: "Войти и оставить отзыв", revEmailPh: "Адрес email", sendingShort: "Отправка...",
+    previewCardBtn: "🪪 Посмотреть многоязычную карточку", shortlist: "В избранное",
+    shortlistSaved: "Сохранено в избранном", shortlistDup: "Уже в избранном",
+    details: "Подробнее ▾", collapse: "Свернуть ▲",
+  },
+  fr: {
+    chosen: (n) => `✓ Vous avez choisi « ${n} »`,
+    cardTitle: "Votre carte de nom est prête",
+    cardDesc: "Nous vous enverrons par email une carte de nom avec les graphies en anglais, chinois et japonais. Vous pouvez aussi l'enregistrer en image pour la partager avec vos amis.",
+    sendBtn: "✉ Recevoir ma carte de nom par email", sending: "Envoi...",
+    sendTo: (e) => `Envoi à ${e}`, emailPh: "Adresse email d'envoi",
+    previewBtn: "🪪 Aperçu et enregistrement en image",
+    sent: (e) => `✓ Carte envoyée à ${e}. Vérifiez votre boîte de réception (et le dossier spam).`,
+    failed: "L'envoi a échoué. Veuillez réessayer dans un instant.", invalid: "Veuillez saisir une adresse email valide.",
+    revTitle: "Votre nom coréen vous plaît-il ?",
+    revSub: "Un avis court et sincère compte beaucoup : moins de 30 secondes, et cela aide ceux qui cherchent un nom 🙏",
+    revTap: "Touchez une étoile pour commencer",
+    revLoginHint: "Connectez-vous par email pour laisser un avis (sans mot de passe, juste un lien sécurisé).",
+    loginSent: (e) => `Nous avons envoyé un lien de connexion à ${e}. Cliquez sur le lien dans l'email — gardez cet onglet ouvert, le formulaire d'avis s'ouvrira automatiquement après la connexion.`,
+    loginReview: "Se connecter et laisser un avis", revEmailPh: "Adresse email", sendingShort: "Envoi...",
+    previewCardBtn: "🪪 Voir la carte de nom multilingue", shortlist: "Ajouter aux favoris",
+    shortlistSaved: "Ajouté aux favoris", shortlistDup: "Déjà dans les favoris",
+    details: "Voir les détails ▾", collapse: "Réduire ▲",
+  },
+  ar: {
+    chosen: (n) => `✓ لقد اخترت «${n}»`,
+    cardTitle: "بطاقة اسمك جاهزة",
+    cardDesc: "سنرسل إلى بريدك الإلكتروني بطاقة الاسم مع الكتابة بالإنجليزية والصينية واليابانية. ويمكنك أيضًا حفظها كصورة ومشاركتها مع أصدقائك.",
+    sendBtn: "✉ أرسل بطاقة الاسم إلى بريدي", sending: "جارٍ الإرسال...",
+    sendTo: (e) => `سيتم الإرسال إلى ${e}`, emailPh: "البريد الإلكتروني للإرسال",
+    previewBtn: "🪪 معاينة وحفظ كصورة",
+    sent: (e) => `✓ تم إرسال البطاقة إلى ${e}. تحقق من صندوق الوارد (ومجلد البريد العشوائي).`,
+    failed: "تعذّر الإرسال. حاول مرة أخرى بعد قليل.", invalid: "يرجى إدخال بريد إلكتروني صالح.",
+    revTitle: "هل أعجبك اسمك الكوري؟",
+    revSub: "تقييم قصير وصادق يعني لنا الكثير — يستغرق أقل من 30 ثانية ويساعد من يبحثون عن اسم 🙏",
+    revTap: "اضغط على نجمة للبدء",
+    revLoginHint: "سجّل الدخول بالبريد الإلكتروني لكتابة تقييم (بدون كلمة مرور — رابط آمن فقط).",
+    loginSent: (e) => `أرسلنا رابط تسجيل الدخول إلى ${e}. اضغط على الرابط في البريد — أبقِ هذه الصفحة مفتوحة وسيُفتح نموذج التقييم تلقائيًا بعد تسجيل الدخول.`,
+    loginReview: "سجّل الدخول واكتب تقييمًا", revEmailPh: "البريد الإلكتروني", sendingShort: "جارٍ الإرسال...",
+    previewCardBtn: "🪪 عرض بطاقة الاسم متعددة اللغات", shortlist: "حفظ في القائمة المختصرة",
+    shortlistSaved: "تم الحفظ في القائمة", shortlistDup: "موجود بالفعل في القائمة",
+    details: "عرض التفاصيل ▾", collapse: "إخفاء ▲",
+  },
+  hi: {
+    chosen: (n) => `✓ आपने '${n}' चुना`,
+    cardTitle: "आपका नेम कार्ड तैयार है",
+    cardDesc: "हम आपको अंग्रेज़ी, चीनी और जापानी वर्तनी वाला नेम कार्ड ईमेल से भेजेंगे। आप इसे इमेज के रूप में सहेजकर दोस्तों के साथ साझा भी कर सकते हैं।",
+    sendBtn: "✉ मुझे मेरा नेम कार्ड ईमेल करें", sending: "भेज रहे हैं...",
+    sendTo: (e) => `${e} पर भेजा जाएगा`, emailPh: "जिस ईमेल पर भेजना है",
+    previewBtn: "🪪 प्रीव्यू देखें और इमेज के रूप में सहेजें",
+    sent: (e) => `✓ नेम कार्ड ${e} पर भेज दिया गया है। कृपया इनबॉक्स (और स्पैम फ़ोल्डर) देखें।`,
+    failed: "भेजा नहीं जा सका। कृपया थोड़ी देर बाद फिर कोशिश करें।", invalid: "कृपया मान्य ईमेल पता दर्ज करें।",
+    revTitle: "क्या आपको अपना कोरियाई नाम पसंद आया?",
+    revSub: "एक छोटी, ईमानदार समीक्षा हमारे लिए बहुत मायने रखती है — 30 सेकंड से कम समय लगता है और नाम खोज रहे लोगों की मदद होती है 🙏",
+    revTap: "शुरू करने के लिए किसी तारे पर टैप करें",
+    revLoginHint: "समीक्षा लिखने के लिए ईमेल से लॉगिन करें (बिना पासवर्ड, सिर्फ़ एक सुरक्षित लिंक)।",
+    loginSent: (e) => `हमने ${e} पर लॉगिन लिंक भेजा है। ईमेल में दिए लिंक पर क्लिक करें — इस टैब को खुला रखें, लॉगिन के बाद समीक्षा फ़ॉर्म अपने आप खुल जाएगा।`,
+    loginReview: "लॉगिन करके समीक्षा लिखें", revEmailPh: "ईमेल पता", sendingShort: "भेज रहे हैं...",
+    previewCardBtn: "🪪 बहुभाषी नेम कार्ड देखें", shortlist: "शॉर्टलिस्ट में सहेजें",
+    shortlistSaved: "शॉर्टलिस्ट में सहेजा गया", shortlistDup: "पहले से शॉर्टलिस्ट में है",
+    details: "विवरण देखें ▾", collapse: "बंद करें ▲",
+  },
+};
+
+function getNextCopy(l: string): NextCopy {
+  return NEXT_STEP_COPY[l] ?? NEXT_STEP_COPY.en;
+}
 
 function PackageCard({
   title, desc, priceLabel, selected, disabled, onClick, selectedText,
@@ -1506,6 +1641,7 @@ export default function ResultPage() {
   const rawLang = String(params.lang || "ko");
   const lang: AppLang = isSupportedLang(rawLang) ? rawLang : "ko";
   const ui = COPY[toUiLang(rawLang)];
+  const nx = getNextCopy(lang);
 
   const [brief, setBrief] = useState<BriefPayload | null>(null);
   const [briefLoaded, setBriefLoaded] = useState(false);
@@ -2764,8 +2900,8 @@ export default function ResultPage() {
                       }}
                     >
                       {isExpanded
-                        ? (lang === "ko" ? "접기 ▲" : "Collapse ▲")
-                        : (lang === "ko" ? "자세히 보기 ▾" : "View details ▾")}
+                        ? nx.collapse
+                        : nx.details}
                     </button>
                   )}
 
@@ -2911,7 +3047,7 @@ export default function ResultPage() {
                         transition: "all 0.18s",
                       }}
                     >
-                      🪪 {lang === "ko" ? "다국어 네임카드 보기" : "Preview Name Card"}
+                      {nx.previewCardBtn}
                     </button>
 
                     {/* 숏리스트 저장 버튼 */}
@@ -2937,8 +3073,8 @@ export default function ResultPage() {
                               category: brief?.category,
                               lang: rawLang,
                             });
-                            if (ok) setMessage(lang === "ko" ? "숏리스트에 저장됐습니다" : "Saved to shortlist");
-                            else setMessage(lang === "ko" ? "이미 저장된 이름입니다" : "Already in shortlist");
+                            if (ok) setMessage(nx.shortlistSaved);
+                            else setMessage(nx.shortlistDup);
                             setTimeout(() => setMessage(""), 2000);
                           }}
                           style={{
@@ -2951,7 +3087,7 @@ export default function ResultPage() {
                             transition: "all 0.18s",
                           }}
                         >
-                          {saved ? "✓" : "+"} {lang === "ko" ? "숏리스트 저장" : "Save to Shortlist"}
+                          {saved ? "✓" : "+"} {nx.shortlist}
                         </button>
                       );
                     })()}
@@ -2966,12 +3102,13 @@ export default function ResultPage() {
 
         {/* 이름 선택 직후: 이름카드 이메일 발송 CTA */}
         {selectedNameIndex !== null && allResultsForDisplay[selectedNameIndex] && (() => {
-          const cc = NEXT_STEP_COPY[(lang as "ko" | "en" | "ja")] ?? NEXT_STEP_COPY.en;
+          const cc = nx;
           const chosen = allResultsForDisplay[selectedNameIndex];
           const targetEmail = (cardCtaEmail || userEmail || "").trim();
           return (
             <section
               id="wink-card-cta"
+              dir={lang === "ar" ? "rtl" : undefined}
               style={{
                 marginTop: 24, padding: "28px 22px", borderRadius: 22, textAlign: "center",
                 border: "2px solid var(--gold-main)",
@@ -3056,11 +3193,12 @@ export default function ResultPage() {
 
         {/* 후기 남기기 — 이름 선택/로그인 여부와 무관하게, 결과가 저장되면 바로 노출 */}
         {briefId && (() => {
-          const cc = NEXT_STEP_COPY[(lang as "ko" | "en" | "ja")] ?? NEXT_STEP_COPY.en;
+          const cc = nx;
           const activeStar = reviewHoverStar || reviewRating;
           return (
             <section
               id="wink-review-cta"
+              dir={lang === "ar" ? "rtl" : undefined}
               style={{
                 marginTop: 24, padding: "30px 22px", borderRadius: 22, textAlign: "center",
                 border: "2px solid var(--gold-main)",
@@ -3114,9 +3252,7 @@ export default function ResultPage() {
                 </>
               ) : reviewLoginSent ? (
                 <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-main)", lineHeight: 1.7, maxWidth: 380, marginInline: "auto" }}>
-                  {lang === "ko"
-                    ? `${reviewLoginEmail} 로 로그인 링크를 보냈습니다. 메일함에서 링크를 눌러주세요. 이 탭은 그대로 열어두시면 로그인 후 후기 작성창이 자동으로 열립니다.`
-                    : `We sent a login link to ${reviewLoginEmail}. Click the link in your email — keep this tab open and the review form will open automatically once you're logged in.`}
+                  {cc.loginSent(reviewLoginEmail)}
                 </div>
               ) : (
                 <div>
@@ -3126,7 +3262,7 @@ export default function ResultPage() {
                       type="email"
                       value={reviewLoginEmail}
                       onChange={(e) => setReviewLoginEmail(e.target.value)}
-                      placeholder={lang === "ko" ? "이메일 주소" : "Email address"}
+                      placeholder={cc.revEmailPh}
                       style={{ minWidth: 220, maxWidth: 280 }}
                     />
                     <button
@@ -3143,8 +3279,8 @@ export default function ResultPage() {
                       }}
                     >
                       {reviewLoginSending
-                        ? (lang === "ko" ? "전송 중..." : "Sending...")
-                        : (lang === "ko" ? "로그인하고 리뷰 남기기" : "Log in & Review")}
+                        ? cc.sendingShort
+                        : cc.loginReview}
                     </button>
                   </div>
                   <div style={{ marginTop: 10, fontSize: 12, color: "var(--text-dim)" }}>{cc.revLoginHint}</div>
