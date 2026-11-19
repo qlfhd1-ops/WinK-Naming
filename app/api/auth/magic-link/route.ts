@@ -63,7 +63,20 @@ export async function POST(req: NextRequest) {
 
     if (error) {
       console.error("[magic-link] signInWithOtp error:", error.message);
-      return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+
+      // Supabase의 "N초 후에 다시 요청" 제한(429) — 화면에서 현지화된 안내와
+      // 카운트다운을 보여줄 수 있도록 구조화된 코드로 돌려준다.
+      if (error.status === 429 || /you can only request this after/i.test(error.message)) {
+        const seconds = Number(/after (\d+) seconds?/i.exec(error.message)?.[1]);
+        const retryAfter = Number.isFinite(seconds) && seconds > 0 ? Math.min(seconds, 300) : 60;
+        const isEmailLimit = /email rate limit/i.test(error.message);
+        return NextResponse.json(
+          { ok: false, code: isEmailLimit ? "email_rate_limit" : "rate_limited", retryAfter },
+          { status: 429 },
+        );
+      }
+
+      return NextResponse.json({ ok: false, code: "send_failed", error: error.message }, { status: 500 });
     }
 
     console.log("[magic-link] otp sent to", email.trim());

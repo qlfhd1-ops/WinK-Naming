@@ -29,7 +29,7 @@ const COPY = {
     confirm: "로그인 확인",
     confirming: "확인하는 중...",
     invalidLink: "유효하지 않은 링크입니다. 다시 로그인해 주세요.",
-    errorDefault: "로그인 확인에 실패했습니다. 다시 시도해 주세요.",
+    errorDefault: "링크가 만료되었거나 이미 사용되었습니다. 가장 최근에 받은 메일의 링크를 사용하거나, 로그인 화면에서 새 링크를 받아 주세요.",
     retry: "로그인 화면으로 돌아가기",
   },
   en: {
@@ -39,7 +39,7 @@ const COPY = {
     confirm: "Confirm Login",
     confirming: "Confirming...",
     invalidLink: "This link is invalid. Please sign in again.",
-    errorDefault: "Failed to confirm login. Please try again.",
+    errorDefault: "This link has expired or was already used. Use the link in your most recent email, or request a new one from the login page.",
     retry: "Back to login",
   },
 } as const;

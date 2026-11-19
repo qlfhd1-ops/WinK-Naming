@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { AppLang, isSupportedLang } from "@/lib/lang-config";
 
@@ -124,19 +124,89 @@ const COPY = {
   },
 } as const;
 
+// 재전송 쿨다운/안내 문구 — {n}은 남은 초로 치환된다.
+const COPY_EXTRA = {
+  ko: {
+    resendIn: "{n}초 후 다시 보내기",
+    rateLimited: "요청이 너무 잦습니다. {n}초 후에 다시 시도해 주세요.",
+    invalidEmail: "올바른 이메일 주소를 입력해 주세요.",
+    hint: "가장 최근에 받은 메일의 링크만 유효합니다. 메일이 보이지 않으면 스팸함을 확인해 주세요.",
+  },
+  en: {
+    resendIn: "Resend in {n}s",
+    rateLimited: "Too many requests. Please try again in {n} seconds.",
+    invalidEmail: "Please enter a valid email address.",
+    hint: "Only the link in your most recent email works. If you can't find it, check your spam folder.",
+  },
+  ja: {
+    resendIn: "{n}秒後に再送信",
+    rateLimited: "リクエストが多すぎます。{n}秒後にもう一度お試しください。",
+    invalidEmail: "有効なメールアドレスを入力してください。",
+    hint: "最新のメールのリンクのみ有効です。見つからない場合は迷惑メールフォルダをご確認ください。",
+  },
+  zh: {
+    resendIn: "{n}秒后可重新发送",
+    rateLimited: "请求过于频繁，请在{n}秒后重试。",
+    invalidEmail: "请输入有效的邮箱地址。",
+    hint: "只有最新一封邮件中的链接有效。如果没有收到，请检查垃圾邮件箱。",
+  },
+  es: {
+    resendIn: "Reenviar en {n}s",
+    rateLimited: "Demasiadas solicitudes. Inténtelo de nuevo en {n} segundos.",
+    invalidEmail: "Introduzca un correo electrónico válido.",
+    hint: "Solo es válido el enlace del correo más reciente. Si no lo ve, revise la carpeta de spam.",
+  },
+  ru: {
+    resendIn: "Отправить снова через {n} с",
+    rateLimited: "Слишком много запросов. Повторите через {n} с.",
+    invalidEmail: "Введите корректный адрес email.",
+    hint: "Действует только ссылка из самого последнего письма. Если письма нет, проверьте папку «Спам».",
+  },
+  fr: {
+    resendIn: "Renvoyer dans {n} s",
+    rateLimited: "Trop de demandes. Réessayez dans {n} secondes.",
+    invalidEmail: "Veuillez saisir une adresse email valide.",
+    hint: "Seul le lien du dernier email reçu est valide. Si vous ne le voyez pas, vérifiez vos spams.",
+  },
+  ar: {
+    resendIn: "إعادة الإرسال بعد {n} ث",
+    rateLimited: "طلبات كثيرة جدًا. حاول مرة أخرى بعد {n} ثانية.",
+    invalidEmail: "يرجى إدخال بريد إلكتروني صالح.",
+    hint: "الرابط في أحدث رسالة فقط هو الصالح. إذا لم تجدها، تحقق من مجلد البريد العشوائي.",
+  },
+  hi: {
+    resendIn: "{n} सेकंड में दोबारा भेजें",
+    rateLimited: "बहुत अधिक अनुरोध। कृपया {n} सेकंड बाद पुनः प्रयास करें।",
+    invalidEmail: "कृपया मान्य ईमेल पता दर्ज करें।",
+    hint: "केवल सबसे हाल के ईमेल का लिंक मान्य है। न मिले तो स्पैम फ़ोल्डर देखें।",
+  },
+} as const;
+
+const DEFAULT_COOLDOWN_SEC = 60;
+
 export default function LoginPage() {
   const params = useParams();
   const rawLang = String(params.lang || "ko");
   const lang: AppLang = isSupportedLang(rawLang) ? rawLang : "ko";
   const ui = COPY[lang];
+  const extra = COPY_EXTRA[lang];
 
   const [email, setEmail]           = useState("");
   const [message, setMessage]       = useState("");
   const [error, setError]           = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [cooldown, setCooldown]     = useState(0);
+
+  // 재전송 쿨다운 카운트다운 (1초 단위)
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const t = setTimeout(() => setCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [cooldown]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (submitting || cooldown > 0) return;
     if (!email.trim()) { setError(ui.errorDefault); return; }
 
     setSubmitting(true);
@@ -154,12 +224,28 @@ export default function LoginPage() {
         body: JSON.stringify({ email: email.trim(), redirectTo, lang }),
       });
 
-      const data = await res.json() as { ok: boolean; error?: string };
-      if (!data.ok) throw new Error(data.error ?? ui.errorDefault);
+      const data = await res.json() as {
+        ok: boolean; code?: string; retryAfter?: number; error?: string;
+      };
+
+      if (!data.ok) {
+        // 서버 원문 에러(영어)는 화면에 노출하지 않고, 코드별 현지화 문구만 보여준다.
+        if (res.status === 429) {
+          const wait = data.retryAfter && data.retryAfter > 0 ? data.retryAfter : DEFAULT_COOLDOWN_SEC;
+          setCooldown(wait);
+          setError(extra.rateLimited.replace("{n}", String(wait)));
+        } else if (res.status === 400) {
+          setError(extra.invalidEmail);
+        } else {
+          setError(ui.errorDefault);
+        }
+        return;
+      }
 
       setMessage(ui.success);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : ui.errorDefault);
+      setCooldown(DEFAULT_COOLDOWN_SEC);
+    } catch {
+      setError(ui.errorDefault);
     } finally {
       setSubmitting(false);
     }
@@ -241,23 +327,28 @@ export default function LoginPage() {
                 fontSize: 13, color: "#856A2A", lineHeight: 1.6,
               }}>
                 ✓ {message}
+                <div style={{ marginTop: 6, fontSize: 12, color: "#6B5A2A" }}>{extra.hint}</div>
               </div>
             )}
 
             <button
               type="submit"
-              disabled={submitting}
+              disabled={submitting || cooldown > 0}
               style={{
                 marginTop: 18, width: "100%", padding: "14px",
                 borderRadius: 12, border: "none",
-                background: submitting ? "#D4B96A" : "#C9A84C",
+                background: submitting || cooldown > 0 ? "#D4B96A" : "#C9A84C",
                 color: "#FFFFFF", fontSize: 15, fontWeight: 700,
-                cursor: submitting ? "not-allowed" : "pointer",
+                cursor: submitting || cooldown > 0 ? "not-allowed" : "pointer",
                 letterSpacing: "0.04em", transition: "background 0.2s",
                 fontFamily: sans,
               }}
             >
-              {submitting ? ui.sending : ui.submit}
+              {submitting
+                ? ui.sending
+                : cooldown > 0
+                  ? extra.resendIn.replace("{n}", String(cooldown))
+                  : ui.submit}
             </button>
           </form>
         </div>
