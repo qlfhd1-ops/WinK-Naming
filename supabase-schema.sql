@@ -135,6 +135,14 @@ CREATE TABLE IF NOT EXISTS public.naming_briefs (
 -- 기존 DB에 이미 테이블이 있던 경우를 위한 재실행 안전 컬럼 추가
 ALTER TABLE public.naming_briefs ADD COLUMN IF NOT EXISTS session_token TEXT;
 
+-- 이름카드 자동 발송 기록 — 처음 선택한 이름 1건만 발송하기 위한 서버측 중복 방지 키.
+-- card_sent_at 이 NULL 일 때만 발송 권한을 선점(원자적 UPDATE)한다.
+ALTER TABLE public.naming_briefs ADD COLUMN IF NOT EXISTS card_sent_at   TIMESTAMPTZ;
+ALTER TABLE public.naming_briefs ADD COLUMN IF NOT EXISTS card_sent_name TEXT;
+ALTER TABLE public.naming_briefs ADD COLUMN IF NOT EXISTS card_sent_to   TEXT;
+CREATE INDEX IF NOT EXISTS naming_briefs_card_sent_to_idx
+  ON public.naming_briefs (card_sent_to, card_sent_at) WHERE card_sent_at IS NOT NULL;
+
 ALTER TABLE public.naming_briefs ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "briefs_insert_own" ON public.naming_briefs;

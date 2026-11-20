@@ -40,6 +40,7 @@ type BriefPayload = {
   needsDoorplatePackage: boolean;
   needsGiftCardPackage: boolean;
   lang: "ko" | "en" | "ja" | "zh" | "es" | "ru" | "fr" | "ar" | "hi";
+  guestEmail?: string;
 };
 
 type NameResult = {
@@ -1427,6 +1428,7 @@ type NextCopy = {
   cardTitle: string; cardDesc: string; sendBtn: string; sending: string;
   sendTo: (e: string) => string; emailPh: string; previewBtn: string;
   sent: (e: string) => string; failed: string; invalid: string;
+  already: (n: string, e: string) => string;
   revTitle: string; revSub: string; revTap: string; revLoginHint: string;
   loginSent: (e: string) => string; loginReview: string; revEmailPh: string; sendingShort: string;
   previewCardBtn: string; shortlist: string; shortlistSaved: string; shortlistDup: string;
@@ -1443,6 +1445,7 @@ const NEXT_STEP_COPY: Record<string, NextCopy> = {
     previewBtn: "🪪 카드 미리보기 · 이미지 저장",
     sent: (e) => `✓ 이름카드를 ${e} 로 보냈어요. 메일함(스팸함 포함)을 확인해 주세요.`,
     failed: "전송에 실패했어요. 잠시 후 다시 시도해 주세요.", invalid: "올바른 이메일 주소를 입력해 주세요.",
+    already: (n, e) => `처음 선택하신 '${n}' 이름카드는 이미 ${e} 로 보내드렸어요. 다른 이름은 아래 미리보기에서 이미지로 저장할 수 있어요.`,
     revTitle: "생성된 한국식 이름이 마음에 드셨나요?",
     revSub: "솔직한 한 줄 리뷰를 부탁드려요. 30초면 충분하고, 이름을 찾는 다른 분들께 큰 도움이 됩니다 🙏",
     revTap: "별점을 눌러 바로 시작하세요",
@@ -1462,6 +1465,7 @@ const NEXT_STEP_COPY: Record<string, NextCopy> = {
     previewBtn: "🪪 Preview & save as image",
     sent: (e) => `✓ Name card sent to ${e}. Please check your inbox (and spam folder).`,
     failed: "Couldn't send it. Please try again in a moment.", invalid: "Please enter a valid email address.",
+    already: (n, e) => `Your name card for '${n}' (your first pick) was already sent to ${e}. You can save other names as images from the preview below.`,
     revTitle: "Did you like your Korean name?",
     revSub: "A quick, honest review would mean a lot — it takes under 30 seconds and helps others who are looking for a name 🙏",
     revTap: "Tap a star to get started",
@@ -1481,6 +1485,7 @@ const NEXT_STEP_COPY: Record<string, NextCopy> = {
     previewBtn: "🪪 カードをプレビュー・画像保存",
     sent: (e) => `✓ 名前カードを ${e} に送りました。受信箱（迷惑メールも）をご確認ください。`,
     failed: "送信に失敗しました。しばらくしてからもう一度お試しください。", invalid: "有効なメールアドレスを入力してください。",
+    already: (n, e) => `最初に選んだ「${n}」の名前カードは ${e} に送信済みです。他の名前は下のプレビューから画像として保存できます。`,
     revTitle: "生成された韓国式の名前は気に入っていただけましたか？",
     revSub: "正直な一言レビューをお願いします。30秒で完了し、名前を探している方の助けになります 🙏",
     revTap: "星をタップして開始",
@@ -1500,6 +1505,7 @@ const NEXT_STEP_COPY: Record<string, NextCopy> = {
     previewBtn: "🪪 预览名字卡并保存为图片",
     sent: (e) => `✓ 名字卡已发送至 ${e}，请查看收件箱（包括垃圾邮件箱）。`,
     failed: "发送失败，请稍后重试。", invalid: "请输入有效的邮箱地址。",
+    already: (n, e) => `您首次选择的「${n}」名字卡已发送至 ${e}。其他名字可在下方预览中保存为图片。`,
     revTitle: "您喜欢生成的韩式名字吗？",
     revSub: "请留下一句真实的评价。只需30秒，对正在寻找名字的人帮助很大 🙏",
     revTap: "点击星星即可开始",
@@ -1519,6 +1525,7 @@ const NEXT_STEP_COPY: Record<string, NextCopy> = {
     previewBtn: "🪪 Vista previa y guardar como imagen",
     sent: (e) => `✓ Tarjeta enviada a ${e}. Revisa tu bandeja de entrada (y la carpeta de spam).`,
     failed: "No se pudo enviar. Inténtalo de nuevo en un momento.", invalid: "Introduce un correo electrónico válido.",
+    already: (n, e) => `La tarjeta de '${n}' (tu primera elección) ya se envió a ${e}. Puedes guardar otros nombres como imagen desde la vista previa.`,
     revTitle: "¿Te gustó tu nombre coreano?",
     revSub: "Una reseña breve y sincera significa mucho: lleva menos de 30 segundos y ayuda a quienes buscan un nombre 🙏",
     revTap: "Toca una estrella para empezar",
@@ -1538,6 +1545,7 @@ const NEXT_STEP_COPY: Record<string, NextCopy> = {
     previewBtn: "🪪 Просмотр и сохранение как изображение",
     sent: (e) => `✓ Карточка отправлена на ${e}. Проверьте входящие (и папку «Спам»).`,
     failed: "Не удалось отправить. Попробуйте ещё раз чуть позже.", invalid: "Введите корректный адрес email.",
+    already: (n, e) => `Карточка для «${n}» (ваш первый выбор) уже отправлена на ${e}. Остальные имена можно сохранить как изображение в предпросмотре ниже.`,
     revTitle: "Понравилось ли вам ваше корейское имя?",
     revSub: "Короткий честный отзыв очень важен: он займёт меньше 30 секунд и поможет тем, кто ищет имя 🙏",
     revTap: "Нажмите на звезду, чтобы начать",
@@ -1557,6 +1565,7 @@ const NEXT_STEP_COPY: Record<string, NextCopy> = {
     previewBtn: "🪪 Aperçu et enregistrement en image",
     sent: (e) => `✓ Carte envoyée à ${e}. Vérifiez votre boîte de réception (et le dossier spam).`,
     failed: "L'envoi a échoué. Veuillez réessayer dans un instant.", invalid: "Veuillez saisir une adresse email valide.",
+    already: (n, e) => `La carte de « ${n} » (votre premier choix) a déjà été envoyée à ${e}. Vous pouvez enregistrer les autres prénoms en image depuis l'aperçu ci-dessous.`,
     revTitle: "Votre nom coréen vous plaît-il ?",
     revSub: "Un avis court et sincère compte beaucoup : moins de 30 secondes, et cela aide ceux qui cherchent un nom 🙏",
     revTap: "Touchez une étoile pour commencer",
@@ -1576,6 +1585,7 @@ const NEXT_STEP_COPY: Record<string, NextCopy> = {
     previewBtn: "🪪 معاينة وحفظ كصورة",
     sent: (e) => `✓ تم إرسال البطاقة إلى ${e}. تحقق من صندوق الوارد (ومجلد البريد العشوائي).`,
     failed: "تعذّر الإرسال. حاول مرة أخرى بعد قليل.", invalid: "يرجى إدخال بريد إلكتروني صالح.",
+    already: (n, e) => `تم إرسال بطاقة «${n}» (اختيارك الأول) إلى ${e} بالفعل. يمكنك حفظ الأسماء الأخرى كصورة من المعاينة أدناه.`,
     revTitle: "هل أعجبك اسمك الكوري؟",
     revSub: "تقييم قصير وصادق يعني لنا الكثير — يستغرق أقل من 30 ثانية ويساعد من يبحثون عن اسم 🙏",
     revTap: "اضغط على نجمة للبدء",
@@ -1595,6 +1605,7 @@ const NEXT_STEP_COPY: Record<string, NextCopy> = {
     previewBtn: "🪪 प्रीव्यू देखें और इमेज के रूप में सहेजें",
     sent: (e) => `✓ नेम कार्ड ${e} पर भेज दिया गया है। कृपया इनबॉक्स (और स्पैम फ़ोल्डर) देखें।`,
     failed: "भेजा नहीं जा सका। कृपया थोड़ी देर बाद फिर कोशिश करें।", invalid: "कृपया मान्य ईमेल पता दर्ज करें।",
+    already: (n, e) => `आपके पहले चुने नाम '${n}' का नेम कार्ड ${e} पर पहले ही भेजा जा चुका है। अन्य नाम नीचे प्रिव्यू से इमेज के रूप में सेव करें।`,
     revTitle: "क्या आपको अपना कोरियाई नाम पसंद आया?",
     revSub: "एक छोटी, ईमानदार समीक्षा हमारे लिए बहुत मायने रखती है — 30 सेकंड से कम समय लगता है और नाम खोज रहे लोगों की मदद होती है 🙏",
     revTap: "शुरू करने के लिए किसी तारे पर टैप करें",
@@ -1711,9 +1722,12 @@ export default function ResultPage() {
   // 이름카드 이메일 전송
   const [sendCardOpen, setSendCardOpen] = useState(false);
   const [sendCardEmail, setSendCardEmail] = useState("");
-  const [cardCtaEmail, setCardCtaEmail] = useState("");
-  const [cardCtaStatus, setCardCtaStatus] = useState<"idle" | "sending" | "sent" | "error" | "invalid">("idle");
+  const [cardCtaStatus, setCardCtaStatus] = useState<"idle" | "sending" | "sent" | "already" | "error" | "invalid">("idle");
   const [cardCtaSentTo, setCardCtaSentTo] = useState("");
+  // 처음 선택한 이름(자동 발송 대상) — 이후 선택을 바꿔도 이 이름만 발송된다.
+  const [cardCtaFirstIdx, setCardCtaFirstIdx] = useState<number | null>(null);
+  const [cardCtaSentName, setCardCtaSentName] = useState("");
+  const autoCardSentRef = useRef(false);
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewHoverStar, setReviewHoverStar] = useState(0);
   const [sendCardLoading, setSendCardLoading] = useState(false);
@@ -2299,15 +2313,17 @@ export default function ResultPage() {
     }
   };
 
-  // ─── 이름 선택 직후 CTA: 로그인한 본인 이메일로 이름카드 발송 ───
-  const handleCardCtaSend = async () => {
-    const target = (cardCtaEmail || userEmail || "").trim();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(target)) { setCardCtaStatus("invalid"); return; }
-    if (cardCtaStatus === "sending" || results.length === 0) return;
+  // ─── 이름 선택 직후 이름카드 자동 발송 ───
+  // 처음 선택한 이름 1건만 발송한다. 수신 주소는 서버가 brief(폼에 입력한 이메일)에서 직접 조회하고,
+  // 중복 방지도 서버(naming_briefs.card_sent_at)에서 처리하므로 선택을 바꾸거나 새로고침해도 다시 발송되지 않는다.
+  const handleCardCtaSend = async (idx?: number) => {
+    if (cardCtaStatus === "sending" || results.length === 0 || !briefId) return;
     setCardCtaStatus("sending");
     try {
       const allResults = [...results, ...extraResults];
-      const item = allResults[selectedNameIndex ?? 0];
+      const pick = idx ?? cardCtaFirstIdx ?? selectedNameIndex ?? 0;
+      const item = allResults[pick];
+      if (!item) { setCardCtaStatus("error"); return; }
       let token = "";
       if (supabaseRef.current) {
         const { data: { session } } = await supabaseRef.current.auth.getSession();
@@ -2316,14 +2332,29 @@ export default function ResultPage() {
       const res = await fetch("/api/send-card", {
         method: "POST",
         headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-        body: JSON.stringify({ email: target, item, lang, brief }),
+        body: JSON.stringify({ item, lang, brief, briefId, sessionToken: getSessionToken() }),
       });
-      if (res.ok) { setCardCtaSentTo(target); setCardCtaStatus("sent"); }
-      else setCardCtaStatus("error");
+      const json = await res.json().catch(() => ({}));
+      if (res.ok && json?.ok) {
+        setCardCtaSentTo(String(json.sentTo ?? ""));
+        setCardCtaSentName(String(json.sentName ?? item.name ?? ""));
+        setCardCtaStatus(json.already ? "already" : "sent");
+      } else {
+        setCardCtaStatus("error");
+      }
     } catch {
       setCardCtaStatus("error");
     }
   };
+
+  // 처음 이름을 선택하는 순간(결과 저장 완료 후) 한 번만 자동 발송
+  useEffect(() => {
+    if (selectedNameIndex === null || !briefId || autoCardSentRef.current) return;
+    autoCardSentRef.current = true;
+    setCardCtaFirstIdx(selectedNameIndex);
+    handleCardCtaSend(selectedNameIndex);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedNameIndex, briefId]);
 
   // ─── 이미지 다운로드 ─────────────────────────────────────
   const handleDownload = async () => {
@@ -3104,7 +3135,7 @@ export default function ResultPage() {
         {selectedNameIndex !== null && allResultsForDisplay[selectedNameIndex] && (() => {
           const cc = nx;
           const chosen = allResultsForDisplay[selectedNameIndex];
-          const targetEmail = (cardCtaEmail || userEmail || "").trim();
+          const recipientHint = (brief?.guestEmail || userEmail || "").trim();
           return (
             <section
               id="wink-card-cta"
@@ -3126,51 +3157,49 @@ export default function ResultPage() {
                 {cc.cardDesc}
               </div>
 
-              {cardCtaStatus === "sent" ? (
-                <div style={{
-                  padding: "14px 16px", borderRadius: 14, fontSize: 14, fontWeight: 700, lineHeight: 1.6,
-                  color: "#1f7a4a", background: "rgba(47,158,98,0.12)", border: "1.5px solid #2f9e62",
-                  maxWidth: 440, marginInline: "auto",
-                }}>
-                  {cc.sent(cardCtaSentTo)}
+              {cardCtaStatus === "sent" || cardCtaStatus === "already" ? (
+                <div style={{ maxWidth: 440, marginInline: "auto" }}>
+                  {cardCtaStatus === "sent" && (
+                    <div style={{
+                      padding: "14px 16px", borderRadius: 14, fontSize: 14, fontWeight: 700, lineHeight: 1.6,
+                      color: "#1f7a4a", background: "rgba(47,158,98,0.12)", border: "1.5px solid #2f9e62",
+                    }}>
+                      {cc.sent(cardCtaSentTo)}
+                    </div>
+                  )}
+                  {(cardCtaStatus === "already" || (cardCtaFirstIdx !== null && selectedNameIndex !== cardCtaFirstIdx)) && (
+                    <div style={{
+                      marginTop: cardCtaStatus === "sent" ? 10 : 0,
+                      padding: "12px 14px", borderRadius: 14, fontSize: 13, lineHeight: 1.6,
+                      color: "var(--text-main)", background: "var(--bg-panel)", border: "1.5px solid var(--line-strong)",
+                    }}>
+                      {cc.already(cardCtaSentName || (allResultsForDisplay[cardCtaFirstIdx ?? 0]?.name ?? ""), cardCtaSentTo || recipientHint)}
+                    </div>
+                  )}
                 </div>
               ) : (
                 <>
-                  {!userEmail && (
-                    <input
-                      className="wink-input"
-                      type="email"
-                      value={cardCtaEmail}
-                      onChange={(e) => { setCardCtaEmail(e.target.value); if (cardCtaStatus === "invalid") setCardCtaStatus("idle"); }}
-                      placeholder={cc.emailPh}
-                      autoComplete="email"
-                      style={{ maxWidth: 360, marginInline: "auto", marginBottom: 12, textAlign: "center" }}
-                    />
-                  )}
                   <button
                     type="button"
-                    onClick={handleCardCtaSend}
-                    disabled={cardCtaStatus === "sending"}
+                    onClick={() => handleCardCtaSend()}
+                    disabled={cardCtaStatus === "sending" || !briefId}
                     style={{
                       display: "block", width: "100%", maxWidth: 360, marginInline: "auto",
                       padding: "17px 24px", borderRadius: 16, border: "none",
                       background: "linear-gradient(135deg,#F0CF7A,#C9A84C)",
                       color: "#0B1634", fontSize: 17, fontWeight: 900, letterSpacing: "0.02em",
-                      cursor: cardCtaStatus === "sending" ? "default" : "pointer",
-                      opacity: cardCtaStatus === "sending" ? 0.7 : 1,
+                      cursor: cardCtaStatus === "sending" || !briefId ? "default" : "pointer",
+                      opacity: cardCtaStatus === "sending" || !briefId ? 0.7 : 1,
                       boxShadow: "0 8px 26px rgba(201,168,76,0.45)",
                     }}
                   >
-                    {cardCtaStatus === "sending" ? cc.sending : cc.sendBtn}
+                    {cardCtaStatus === "sending" || !briefId ? cc.sending : cc.sendBtn}
                   </button>
-                  {userEmail && (
-                    <div style={{ marginTop: 8, fontSize: 12, color: "var(--text-dim)" }}>{cc.sendTo(userEmail)}</div>
+                  {recipientHint && (
+                    <div style={{ marginTop: 8, fontSize: 12, color: "var(--text-dim)" }}>{cc.sendTo(recipientHint)}</div>
                   )}
                   {cardCtaStatus === "error" && (
                     <div role="alert" style={{ marginTop: 10, fontSize: 13, fontWeight: 700, color: "#c0392b" }}>{cc.failed}</div>
-                  )}
-                  {cardCtaStatus === "invalid" && (
-                    <div role="alert" style={{ marginTop: 10, fontSize: 13, fontWeight: 700, color: "#c0392b" }}>{cc.invalid}</div>
                   )}
                 </>
               )}
