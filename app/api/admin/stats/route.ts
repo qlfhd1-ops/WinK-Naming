@@ -40,8 +40,11 @@ async function checkAuth(req: Request): Promise<boolean> {
   }
 }
 
+const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
+
+/** 한국 시간(KST) 기준 YYYY-MM-DD — 서버(Vercel)는 UTC라 toISOString()을 그대로 쓰면 9시간 어긋난다. */
 function isoDay(date: Date): string {
-  return date.toISOString().slice(0, 10);
+  return new Date(date.getTime() + KST_OFFSET_MS).toISOString().slice(0, 10);
 }
 
 function isoMonth(date: Date): string {
@@ -69,8 +72,8 @@ export async function GET(req: Request) {
   const now = new Date();
 
   // 날짜 경계
-  const todayStart = new Date(now); todayStart.setHours(0, 0, 0, 0);
-  const weekAgoStart = new Date(todayStart); weekAgoStart.setDate(weekAgoStart.getDate() - 6);
+  const todayStart = new Date(`${isoDay(now)}T00:00:00+09:00`); // 한국 시간 오늘 0시
+  const weekAgoStart = new Date(todayStart.getTime() - 6 * 24 * 60 * 60 * 1000);
   const twelveMonthsAgo = new Date(now);
   twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 11);
   twelveMonthsAgo.setDate(1); twelveMonthsAgo.setHours(0, 0, 0, 0);
@@ -132,9 +135,7 @@ export async function GET(req: Request) {
   // ── 7일 일별 집계 ──
   const dailyMap: Record<string, number> = {};
   for (let i = 0; i < 7; i++) {
-    const d = new Date(weekAgoStart);
-    d.setDate(d.getDate() + i);
-    dailyMap[isoDay(d)] = 0;
+    dailyMap[isoDay(new Date(weekAgoStart.getTime() + i * 24 * 60 * 60 * 1000))] = 0;
   }
   for (const row of (weekBriefsRes.data ?? [])) {
     const day = isoDay(new Date(row.created_at));
@@ -185,7 +186,13 @@ export async function GET(req: Request) {
   const totalGenerations = totalBriefsRes.count ?? 0;
   const todayGenerations = dailyMap[isoDay(now)] ?? 0;
   const paidUsers        = paidUsersRes.count ?? 0;
-  const totalUsers       = totalUsersRes.count ?? 0;
+  // 총 가입자 — user_plans 는 첫 이름 생성 시에만 만들어져 실제 가입자보다 적으므로 auth.users 총수를 사용.
+  let totalUsers = totalUsersRes.count ?? 0;
+  try {
+    const { data: authList, error: authListErr } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1 });
+    const authTotal = (authList as { total?: number } | null)?.total;
+    if (!authListErr && typeof authTotal === "number") totalUsers = authTotal;
+  } catch { /* 실패하면 user_plans 기준 값 유지 */ }
   const totalOrders      = totalOrdersRes.count ?? 0;
   const weekTotal        = weeklyGenerations.reduce((s, d) => s + d.count, 0);
   const weekAvg          = Math.round(weekTotal / 7);
