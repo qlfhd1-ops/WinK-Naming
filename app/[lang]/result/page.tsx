@@ -1425,9 +1425,9 @@ function TrustPill({ text }: { text: string }) {
 // 이름 선택 직후 이름카드 이메일 발송 CTA / 후기 유도 / 선택 카드 버튼 문구 (9개 언어)
 type NextCopy = {
   chosen: (n: string) => string;
-  cardTitle: string; cardDesc: string; sendBtn: string; sending: string;
+  cardTitle: string; cardDesc: string; sendBtn: (n: string) => string; sending: string; once: string;
   sendTo: (e: string) => string; emailPh: string; previewBtn: string;
-  sent: (e: string) => string; failed: string; invalid: string;
+  sent: (e: string, n: string) => string; failed: string; invalid: string;
   already: (n: string, e: string) => string;
   revTitle: string; revSub: string; revTap: string; revLoginHint: string;
   loginSent: (e: string) => string; loginReview: string; revEmailPh: string; sendingShort: string;
@@ -1440,12 +1440,13 @@ const NEXT_STEP_COPY: Record<string, NextCopy> = {
     chosen: (n) => `✓ '${n}' 선택 완료`,
     cardTitle: "이름카드가 완성됐어요",
     cardDesc: "영어·중국어·일본어 표기가 담긴 이름카드를 이메일로 보내드려요. 이미지로 저장해 친구에게 공유할 수도 있어요.",
-    sendBtn: "✉ 내 이메일로 이름카드 받기", sending: "보내는 중...",
+    sendBtn: (n) => `✉ '${n}' 이름카드 이메일로 받기`, sending: "보내는 중...",
+    once: "이름카드는 한 번만 보내드려요. 마음에 드는 이름을 고른 뒤 누르면, 선택하신 이름으로 발송됩니다.",
     sendTo: (e) => `${e} 로 보내드려요`, emailPh: "받으실 이메일 주소",
     previewBtn: "🪪 카드 미리보기 · 이미지 저장",
-    sent: (e) => `✓ 이름카드를 ${e} 로 보냈어요. 메일함(스팸함 포함)을 확인해 주세요.`,
+    sent: (e, n) => `✓ '${n}' 이름카드를 ${e} 로 보냈어요. 메일함(스팸함 포함)을 확인해 주세요.`,
     failed: "전송에 실패했어요. 잠시 후 다시 시도해 주세요.", invalid: "올바른 이메일 주소를 입력해 주세요.",
-    already: (n, e) => `처음 선택하신 '${n}' 이름카드는 이미 ${e} 로 보내드렸어요. 다른 이름은 아래 미리보기에서 이미지로 저장할 수 있어요.`,
+    already: (n, e) => `'${n}' 이름카드는 이미 ${e} 로 보내드렸어요. 이름카드는 한 번만 발송돼요. 다른 이름은 아래 미리보기에서 이미지로 저장할 수 있어요.`,
     revTitle: "생성된 한국식 이름이 마음에 드셨나요?",
     revSub: "솔직한 한 줄 리뷰를 부탁드려요. 30초면 충분하고, 이름을 찾는 다른 분들께 큰 도움이 됩니다 🙏",
     revTap: "별점을 눌러 바로 시작하세요",
@@ -1460,12 +1461,13 @@ const NEXT_STEP_COPY: Record<string, NextCopy> = {
     chosen: (n) => `✓ You chose '${n}'`,
     cardTitle: "Your name card is ready",
     cardDesc: "We'll email you a name card with English, Chinese and Japanese spellings. You can also save it as an image to share with friends.",
-    sendBtn: "✉ Email me my name card", sending: "Sending...",
+    sendBtn: (n) => `✉ Email me the '${n}' name card`, sending: "Sending...",
+    once: "Your name card is sent only once. Choose the name you like, then tap — the card is sent for the name you picked.",
     sendTo: (e) => `Will be sent to ${e}`, emailPh: "Email address to send to",
     previewBtn: "🪪 Preview & save as image",
-    sent: (e) => `✓ Name card sent to ${e}. Please check your inbox (and spam folder).`,
+    sent: (e, n) => `✓ The '${n}' name card was sent to ${e}. Please check your inbox (and spam folder).`,
     failed: "Couldn't send it. Please try again in a moment.", invalid: "Please enter a valid email address.",
-    already: (n, e) => `Your name card for '${n}' (your first pick) was already sent to ${e}. You can save other names as images from the preview below.`,
+    already: (n, e) => `The name card for '${n}' was already sent to ${e}. Only one card is sent. You can save other names as images from the preview below.`,
     revTitle: "Did you like your Korean name?",
     revSub: "A quick, honest review would mean a lot — it takes under 30 seconds and helps others who are looking for a name 🙏",
     revTap: "Tap a star to get started",
@@ -1480,12 +1482,13 @@ const NEXT_STEP_COPY: Record<string, NextCopy> = {
     chosen: (n) => `✓ 「${n}」を選びました`,
     cardTitle: "名前カードが完成しました",
     cardDesc: "英語・中国語・日本語の表記入りの名前カードをメールでお送りします。画像として保存して友達に共有することもできます。",
-    sendBtn: "✉ 名前カードをメールで受け取る", sending: "送信中...",
+    sendBtn: (n) => `✉ 「${n}」の名前カードをメールで受け取る`, sending: "送信中...",
+    once: "名前カードは一度だけお送りします。気に入った名前を選んで押すと、選んだ名前で送信されます。",
     sendTo: (e) => `${e} に送信します`, emailPh: "送信先のメールアドレス",
     previewBtn: "🪪 カードをプレビュー・画像保存",
-    sent: (e) => `✓ 名前カードを ${e} に送りました。受信箱（迷惑メールも）をご確認ください。`,
+    sent: (e, n) => `✓ 「${n}」の名前カードを ${e} に送りました。受信箱（迷惑メールも）をご確認ください。`,
     failed: "送信に失敗しました。しばらくしてからもう一度お試しください。", invalid: "有効なメールアドレスを入力してください。",
-    already: (n, e) => `最初に選んだ「${n}」の名前カードは ${e} に送信済みです。他の名前は下のプレビューから画像として保存できます。`,
+    already: (n, e) => `「${n}」の名前カードは ${e} に送信済みです。名前カードは一度だけ送信されます。他の名前は下のプレビューから画像として保存できます。`,
     revTitle: "生成された韓国式の名前は気に入っていただけましたか？",
     revSub: "正直な一言レビューをお願いします。30秒で完了し、名前を探している方の助けになります 🙏",
     revTap: "星をタップして開始",
@@ -1500,12 +1503,13 @@ const NEXT_STEP_COPY: Record<string, NextCopy> = {
     chosen: (n) => `✓ 已选择「${n}」`,
     cardTitle: "您的名字卡已准备好",
     cardDesc: "我们会将包含英文、中文和日文写法的名字卡发送到您的邮箱，您也可以保存为图片分享给朋友。",
-    sendBtn: "✉ 将名字卡发送到我的邮箱", sending: "发送中...",
+    sendBtn: (n) => `✉ 将「${n}」名字卡发送到我的邮箱`, sending: "发送中...",
+    once: "名字卡仅发送一次。请选好喜欢的名字后再点击，将按您选择的名字发送。",
     sendTo: (e) => `将发送至 ${e}`, emailPh: "接收名字卡的邮箱地址",
     previewBtn: "🪪 预览名字卡并保存为图片",
-    sent: (e) => `✓ 名字卡已发送至 ${e}，请查看收件箱（包括垃圾邮件箱）。`,
+    sent: (e, n) => `✓「${n}」名字卡已发送至 ${e}，请查看收件箱（包括垃圾邮件箱）。`,
     failed: "发送失败，请稍后重试。", invalid: "请输入有效的邮箱地址。",
-    already: (n, e) => `您首次选择的「${n}」名字卡已发送至 ${e}。其他名字可在下方预览中保存为图片。`,
+    already: (n, e) => `「${n}」名字卡已发送至 ${e}。名字卡仅发送一次。其他名字可在下方预览中保存为图片。`,
     revTitle: "您喜欢生成的韩式名字吗？",
     revSub: "请留下一句真实的评价。只需30秒，对正在寻找名字的人帮助很大 🙏",
     revTap: "点击星星即可开始",
@@ -1520,12 +1524,13 @@ const NEXT_STEP_COPY: Record<string, NextCopy> = {
     chosen: (n) => `✓ Has elegido '${n}'`,
     cardTitle: "Tu tarjeta de nombre está lista",
     cardDesc: "Te enviaremos por correo una tarjeta de nombre con las grafías en inglés, chino y japonés. También puedes guardarla como imagen para compartirla con tus amigos.",
-    sendBtn: "✉ Enviarme mi tarjeta de nombre", sending: "Enviando...",
+    sendBtn: (n) => `✉ Enviarme la tarjeta de '${n}'`, sending: "Enviando...",
+    once: "La tarjeta se envía una sola vez. Elige el nombre que te guste y pulsa: se enviará con el nombre elegido.",
     sendTo: (e) => `Se enviará a ${e}`, emailPh: "Correo al que enviarla",
     previewBtn: "🪪 Vista previa y guardar como imagen",
-    sent: (e) => `✓ Tarjeta enviada a ${e}. Revisa tu bandeja de entrada (y la carpeta de spam).`,
+    sent: (e, n) => `✓ La tarjeta de '${n}' se envió a ${e}. Revisa tu bandeja de entrada (y la carpeta de spam).`,
     failed: "No se pudo enviar. Inténtalo de nuevo en un momento.", invalid: "Introduce un correo electrónico válido.",
-    already: (n, e) => `La tarjeta de '${n}' (tu primera elección) ya se envió a ${e}. Puedes guardar otros nombres como imagen desde la vista previa.`,
+    already: (n, e) => `La tarjeta de '${n}' ya se envió a ${e}. Solo se envía una tarjeta. Puedes guardar otros nombres como imagen desde la vista previa.`,
     revTitle: "¿Te gustó tu nombre coreano?",
     revSub: "Una reseña breve y sincera significa mucho: lleva menos de 30 segundos y ayuda a quienes buscan un nombre 🙏",
     revTap: "Toca una estrella para empezar",
@@ -1540,12 +1545,13 @@ const NEXT_STEP_COPY: Record<string, NextCopy> = {
     chosen: (n) => `✓ Вы выбрали «${n}»`,
     cardTitle: "Ваша именная карточка готова",
     cardDesc: "Мы отправим вам на email карточку с написанием имени на английском, китайском и японском. Её также можно сохранить как изображение и поделиться с друзьями.",
-    sendBtn: "✉ Отправить карточку мне на email", sending: "Отправка...",
+    sendBtn: (n) => `✉ Отправить карточку «${n}» мне на email`, sending: "Отправка...",
+    once: "Карточка отправляется только один раз. Выберите понравившееся имя и нажмите — карточка придёт с выбранным именем.",
     sendTo: (e) => `Будет отправлено на ${e}`, emailPh: "Email для отправки",
     previewBtn: "🪪 Просмотр и сохранение как изображение",
-    sent: (e) => `✓ Карточка отправлена на ${e}. Проверьте входящие (и папку «Спам»).`,
+    sent: (e, n) => `✓ Карточка «${n}» отправлена на ${e}. Проверьте входящие (и папку «Спам»).`,
     failed: "Не удалось отправить. Попробуйте ещё раз чуть позже.", invalid: "Введите корректный адрес email.",
-    already: (n, e) => `Карточка для «${n}» (ваш первый выбор) уже отправлена на ${e}. Остальные имена можно сохранить как изображение в предпросмотре ниже.`,
+    already: (n, e) => `Карточка «${n}» уже отправлена на ${e}. Отправляется только одна карточка. Остальные имена можно сохранить как изображение в предпросмотре ниже.`,
     revTitle: "Понравилось ли вам ваше корейское имя?",
     revSub: "Короткий честный отзыв очень важен: он займёт меньше 30 секунд и поможет тем, кто ищет имя 🙏",
     revTap: "Нажмите на звезду, чтобы начать",
@@ -1560,12 +1566,13 @@ const NEXT_STEP_COPY: Record<string, NextCopy> = {
     chosen: (n) => `✓ Vous avez choisi « ${n} »`,
     cardTitle: "Votre carte de nom est prête",
     cardDesc: "Nous vous enverrons par email une carte de nom avec les graphies en anglais, chinois et japonais. Vous pouvez aussi l'enregistrer en image pour la partager avec vos amis.",
-    sendBtn: "✉ Recevoir ma carte de nom par email", sending: "Envoi...",
+    sendBtn: (n) => `✉ Recevoir la carte de « ${n} » par email`, sending: "Envoi...",
+    once: "La carte n'est envoyée qu'une seule fois. Choisissez le prénom qui vous plaît puis appuyez : la carte sera envoyée avec ce prénom.",
     sendTo: (e) => `Envoi à ${e}`, emailPh: "Adresse email d'envoi",
     previewBtn: "🪪 Aperçu et enregistrement en image",
-    sent: (e) => `✓ Carte envoyée à ${e}. Vérifiez votre boîte de réception (et le dossier spam).`,
+    sent: (e, n) => `✓ La carte de « ${n} » a été envoyée à ${e}. Vérifiez votre boîte de réception (et le dossier spam).`,
     failed: "L'envoi a échoué. Veuillez réessayer dans un instant.", invalid: "Veuillez saisir une adresse email valide.",
-    already: (n, e) => `La carte de « ${n} » (votre premier choix) a déjà été envoyée à ${e}. Vous pouvez enregistrer les autres prénoms en image depuis l'aperçu ci-dessous.`,
+    already: (n, e) => `La carte de « ${n} » a déjà été envoyée à ${e}. Une seule carte est envoyée. Vous pouvez enregistrer les autres prénoms en image depuis l'aperçu ci-dessous.`,
     revTitle: "Votre nom coréen vous plaît-il ?",
     revSub: "Un avis court et sincère compte beaucoup : moins de 30 secondes, et cela aide ceux qui cherchent un nom 🙏",
     revTap: "Touchez une étoile pour commencer",
@@ -1580,12 +1587,13 @@ const NEXT_STEP_COPY: Record<string, NextCopy> = {
     chosen: (n) => `✓ لقد اخترت «${n}»`,
     cardTitle: "بطاقة اسمك جاهزة",
     cardDesc: "سنرسل إلى بريدك الإلكتروني بطاقة الاسم مع الكتابة بالإنجليزية والصينية واليابانية. ويمكنك أيضًا حفظها كصورة ومشاركتها مع أصدقائك.",
-    sendBtn: "✉ أرسل بطاقة الاسم إلى بريدي", sending: "جارٍ الإرسال...",
+    sendBtn: (n) => `✉ أرسل بطاقة «${n}» إلى بريدي`, sending: "جارٍ الإرسال...",
+    once: "تُرسل البطاقة مرة واحدة فقط. اختر الاسم الذي يعجبك ثم اضغط، وستُرسل البطاقة بالاسم الذي اخترته.",
     sendTo: (e) => `سيتم الإرسال إلى ${e}`, emailPh: "البريد الإلكتروني للإرسال",
     previewBtn: "🪪 معاينة وحفظ كصورة",
-    sent: (e) => `✓ تم إرسال البطاقة إلى ${e}. تحقق من صندوق الوارد (ومجلد البريد العشوائي).`,
+    sent: (e, n) => `✓ تم إرسال بطاقة «${n}» إلى ${e}. تحقق من صندوق الوارد (ومجلد البريد العشوائي).`,
     failed: "تعذّر الإرسال. حاول مرة أخرى بعد قليل.", invalid: "يرجى إدخال بريد إلكتروني صالح.",
-    already: (n, e) => `تم إرسال بطاقة «${n}» (اختيارك الأول) إلى ${e} بالفعل. يمكنك حفظ الأسماء الأخرى كصورة من المعاينة أدناه.`,
+    already: (n, e) => `تم إرسال بطاقة «${n}» إلى ${e} بالفعل. تُرسل بطاقة واحدة فقط. يمكنك حفظ الأسماء الأخرى كصورة من المعاينة أدناه.`,
     revTitle: "هل أعجبك اسمك الكوري؟",
     revSub: "تقييم قصير وصادق يعني لنا الكثير — يستغرق أقل من 30 ثانية ويساعد من يبحثون عن اسم 🙏",
     revTap: "اضغط على نجمة للبدء",
@@ -1600,12 +1608,13 @@ const NEXT_STEP_COPY: Record<string, NextCopy> = {
     chosen: (n) => `✓ आपने '${n}' चुना`,
     cardTitle: "आपका नेम कार्ड तैयार है",
     cardDesc: "हम आपको अंग्रेज़ी, चीनी और जापानी वर्तनी वाला नेम कार्ड ईमेल से भेजेंगे। आप इसे इमेज के रूप में सहेजकर दोस्तों के साथ साझा भी कर सकते हैं।",
-    sendBtn: "✉ मुझे मेरा नेम कार्ड ईमेल करें", sending: "भेज रहे हैं...",
+    sendBtn: (n) => `✉ '${n}' का नेम कार्ड मुझे ईमेल करें`, sending: "भेज रहे हैं...",
+    once: "नेम कार्ड केवल एक बार भेजा जाता है। अपना पसंदीदा नाम चुनकर दबाएँ — कार्ड आपके चुने हुए नाम से भेजा जाएगा।",
     sendTo: (e) => `${e} पर भेजा जाएगा`, emailPh: "जिस ईमेल पर भेजना है",
     previewBtn: "🪪 प्रीव्यू देखें और इमेज के रूप में सहेजें",
-    sent: (e) => `✓ नेम कार्ड ${e} पर भेज दिया गया है। कृपया इनबॉक्स (और स्पैम फ़ोल्डर) देखें।`,
+    sent: (e, n) => `✓ '${n}' का नेम कार्ड ${e} पर भेज दिया गया है। कृपया इनबॉक्स (और स्पैम फ़ोल्डर) देखें।`,
     failed: "भेजा नहीं जा सका। कृपया थोड़ी देर बाद फिर कोशिश करें।", invalid: "कृपया मान्य ईमेल पता दर्ज करें।",
-    already: (n, e) => `आपके पहले चुने नाम '${n}' का नेम कार्ड ${e} पर पहले ही भेजा जा चुका है। अन्य नाम नीचे प्रिव्यू से इमेज के रूप में सेव करें।`,
+    already: (n, e) => `'${n}' का नेम कार्ड ${e} पर पहले ही भेजा जा चुका है। केवल एक कार्ड भेजा जाता है। अन्य नाम नीचे प्रिव्यू से इमेज के रूप में सेव करें।`,
     revTitle: "क्या आपको अपना कोरियाई नाम पसंद आया?",
     revSub: "एक छोटी, ईमानदार समीक्षा हमारे लिए बहुत मायने रखती है — 30 सेकंड से कम समय लगता है और नाम खोज रहे लोगों की मदद होती है 🙏",
     revTap: "शुरू करने के लिए किसी तारे पर टैप करें",
@@ -1727,7 +1736,6 @@ export default function ResultPage() {
   // 처음 선택한 이름(자동 발송 대상) — 이후 선택을 바꿔도 이 이름만 발송된다.
   const [cardCtaFirstIdx, setCardCtaFirstIdx] = useState<number | null>(null);
   const [cardCtaSentName, setCardCtaSentName] = useState("");
-  const autoCardSentRef = useRef(false);
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewHoverStar, setReviewHoverStar] = useState(0);
   const [sendCardLoading, setSendCardLoading] = useState(false);
@@ -2313,17 +2321,19 @@ export default function ResultPage() {
     }
   };
 
-  // ─── 이름 선택 직후 이름카드 자동 발송 ───
-  // 처음 선택한 이름 1건만 발송한다. 수신 주소는 서버가 brief(폼에 입력한 이메일)에서 직접 조회하고,
-  // 중복 방지도 서버(naming_briefs.card_sent_at)에서 처리하므로 선택을 바꾸거나 새로고침해도 다시 발송되지 않는다.
-  const handleCardCtaSend = async (idx?: number) => {
+  // ─── 이름카드 이메일 발송 ───
+  // 사용자가 "이 이름으로 받기"를 직접 누른 시점에 선택돼 있는 이름 1건만 발송한다(선택만으로는 발송하지 않음).
+  // 수신 주소는 서버가 brief(폼에 입력한 이메일)에서 직접 조회하고, 중복 방지도 서버(naming_briefs.card_sent_at)에서
+  // 처리하므로 새로고침하거나 이름을 바꿔 다시 눌러도 두 번째 메일은 나가지 않는다.
+  const handleCardCtaSend = async () => {
     if (cardCtaStatus === "sending" || results.length === 0 || !briefId) return;
     setCardCtaStatus("sending");
     try {
       const allResults = [...results, ...extraResults];
-      const pick = idx ?? cardCtaFirstIdx ?? selectedNameIndex ?? 0;
+      const pick = selectedNameIndex ?? 0;
       const item = allResults[pick];
       if (!item) { setCardCtaStatus("error"); return; }
+      setCardCtaFirstIdx(pick); // 발송 대상으로 확정된 이름
       let token = "";
       if (supabaseRef.current) {
         const { data: { session } } = await supabaseRef.current.auth.getSession();
@@ -2346,15 +2356,6 @@ export default function ResultPage() {
       setCardCtaStatus("error");
     }
   };
-
-  // 처음 이름을 선택하는 순간(결과 저장 완료 후) 한 번만 자동 발송
-  useEffect(() => {
-    if (selectedNameIndex === null || !briefId || autoCardSentRef.current) return;
-    autoCardSentRef.current = true;
-    setCardCtaFirstIdx(selectedNameIndex);
-    handleCardCtaSend(selectedNameIndex);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedNameIndex, briefId]);
 
   // ─── 이미지 다운로드 ─────────────────────────────────────
   const handleDownload = async () => {
@@ -3164,7 +3165,7 @@ export default function ResultPage() {
                       padding: "14px 16px", borderRadius: 14, fontSize: 14, fontWeight: 700, lineHeight: 1.6,
                       color: "#1f7a4a", background: "rgba(47,158,98,0.12)", border: "1.5px solid #2f9e62",
                     }}>
-                      {cc.sent(cardCtaSentTo)}
+                      {cc.sent(cardCtaSentTo, cardCtaSentName || chosen.name)}
                     </div>
                   )}
                   {(cardCtaStatus === "already" || (cardCtaFirstIdx !== null && selectedNameIndex !== cardCtaFirstIdx)) && (
@@ -3179,9 +3180,12 @@ export default function ResultPage() {
                 </div>
               ) : (
                 <>
+                  <div style={{ maxWidth: 400, marginInline: "auto", marginBottom: 12, fontSize: 12.5, lineHeight: 1.6, color: "var(--text-dim)" }}>
+                    {cc.once}
+                  </div>
                   <button
                     type="button"
-                    onClick={() => handleCardCtaSend()}
+                    onClick={handleCardCtaSend}
                     disabled={cardCtaStatus === "sending" || !briefId}
                     style={{
                       display: "block", width: "100%", maxWidth: 360, marginInline: "auto",
@@ -3193,7 +3197,7 @@ export default function ResultPage() {
                       boxShadow: "0 8px 26px rgba(201,168,76,0.45)",
                     }}
                   >
-                    {cardCtaStatus === "sending" || !briefId ? cc.sending : cc.sendBtn}
+                    {cardCtaStatus === "sending" || !briefId ? cc.sending : cc.sendBtn(chosen.name)}
                   </button>
                   {recipientHint && (
                     <div style={{ marginTop: 8, fontSize: 12, color: "var(--text-dim)" }}>{cc.sendTo(recipientHint)}</div>
