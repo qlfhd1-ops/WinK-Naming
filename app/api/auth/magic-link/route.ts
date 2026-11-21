@@ -41,20 +41,20 @@ function escapeHtml(s: string): string {
 }
 
 // ── 메일 문구 (9개 언어) ───────────────────────────────────────
-type MailCopy = { subject: string; title: string; body: string; button: string; note: string; ignore: string };
+type MailCopy = { subject: string; title: string; body: string; button: string; note: string; latest: string; ignore: string };
 const MAIL: Record<string, MailCopy> = {
-  ko: { subject: "[윙크 네이밍] 로그인 링크", title: "로그인", body: "아래 버튼을 눌러 로그인을 완료해 주세요. 이 링크는 한 번만 사용할 수 있고 곧 만료됩니다.", button: "로그인하기", note: "버튼을 누르면 열리는 페이지에서 ‘로그인 확인’을 한 번 더 눌러 주세요.", ignore: "본인이 요청하지 않았다면 이 메일을 무시해 주세요." },
-  en: { subject: "[Wink Naming] Your sign-in link", title: "Sign in", body: "Tap the button below to finish signing in. This link can be used once and expires soon.", button: "Sign in", note: "On the page that opens, tap “Confirm Login” once more.", ignore: "If you didn't request this, you can ignore this email." },
-  ja: { subject: "[Wink Naming] ログインリンク", title: "ログイン", body: "下のボタンを押してログインを完了してください。このリンクは一度だけ使用でき、まもなく期限が切れます。", button: "ログインする", note: "開いたページで「ログイン確認」をもう一度押してください。", ignore: "お心当たりがない場合は、このメールを無視してください。" },
-  zh: { subject: "[Wink Naming] 登录链接", title: "登录", body: "请点击下方按钮完成登录。此链接仅可使用一次，且很快过期。", button: "登录", note: "在打开的页面中，请再点击一次“确认登录”。", ignore: "如果这不是您本人的操作，请忽略此邮件。" },
-  es: { subject: "[Wink Naming] Tu enlace de acceso", title: "Iniciar sesión", body: "Pulsa el botón de abajo para completar el acceso. El enlace solo se puede usar una vez y caduca pronto.", button: "Iniciar sesión", note: "En la página que se abre, pulsa «Confirmar acceso» una vez más.", ignore: "Si no lo solicitaste, puedes ignorar este correo." },
-  ru: { subject: "[Wink Naming] Ссылка для входа", title: "Вход", body: "Нажмите кнопку ниже, чтобы завершить вход. Ссылка одноразовая и скоро истекает.", button: "Войти", note: "На открывшейся странице нажмите «Подтвердить вход» ещё раз.", ignore: "Если вы не запрашивали вход, просто проигнорируйте это письмо." },
-  fr: { subject: "[Wink Naming] Votre lien de connexion", title: "Connexion", body: "Appuyez sur le bouton ci-dessous pour terminer la connexion. Ce lien est à usage unique et expire bientôt.", button: "Se connecter", note: "Sur la page qui s'ouvre, appuyez une fois de plus sur « Confirmer la connexion ».", ignore: "Si vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail." },
-  ar: { subject: "[Wink Naming] رابط تسجيل الدخول", title: "تسجيل الدخول", body: "اضغط على الزر أدناه لإكمال تسجيل الدخول. يمكن استخدام هذا الرابط مرة واحدة فقط وتنتهي صلاحيته قريبًا.", button: "تسجيل الدخول", note: "في الصفحة التي ستفتح، اضغط «تأكيد تسجيل الدخول» مرة أخرى.", ignore: "إذا لم تطلب ذلك، يمكنك تجاهل هذه الرسالة." },
-  hi: { subject: "[Wink Naming] आपका साइन-इन लिंक", title: "साइन इन", body: "साइन-इन पूरा करने के लिए नीचे दिया बटन दबाएँ। यह लिंक केवल एक बार उपयोग हो सकता है और जल्द समाप्त हो जाता है।", button: "साइन इन करें", note: "खुलने वाले पेज पर एक बार फिर “लॉगिन की पुष्टि करें” दबाएँ।", ignore: "यदि आपने यह अनुरोध नहीं किया है, तो इस ईमेल को अनदेखा करें।" },
+  ko: { subject: "[윙크 네이밍] 로그인 링크", title: "로그인", body: "아래 버튼을 눌러 로그인을 완료해 주세요. 이 링크는 한 번만 사용할 수 있고 곧 만료됩니다.", button: "로그인하기", note: "버튼을 누르면 열리는 페이지에서 ‘로그인 확인’을 한 번 더 눌러 주세요.", latest: "가장 최근에 받은 메일의 링크만 사용할 수 있어요. 새 링크를 받으면 이전 링크는 만료됩니다.", ignore: "본인이 요청하지 않았다면 이 메일을 무시해 주세요." },
+  en: { subject: "[Wink Naming] Your sign-in link", title: "Sign in", body: "Tap the button below to finish signing in. This link can be used once and expires soon.", button: "Sign in", note: "On the page that opens, tap “Confirm Login” once more.", latest: "Only the link in your most recent email works. Requesting a new link makes older ones expire.", ignore: "If you didn't request this, you can ignore this email." },
+  ja: { subject: "[Wink Naming] ログインリンク", title: "ログイン", body: "下のボタンを押してログインを完了してください。このリンクは一度だけ使用でき、まもなく期限が切れます。", button: "ログインする", note: "開いたページで「ログイン確認」をもう一度押してください。", latest: "最新のメールのリンクのみ使えます。新しいリンクを受け取ると、以前のリンクは無効になります。", ignore: "お心当たりがない場合は、このメールを無視してください。" },
+  zh: { subject: "[Wink Naming] 登录链接", title: "登录", body: "请点击下方按钮完成登录。此链接仅可使用一次，且很快过期。", button: "登录", note: "在打开的页面中，请再点击一次“确认登录”。", latest: "只有最新一封邮件中的链接有效。申请新链接后，旧链接将失效。", ignore: "如果这不是您本人的操作，请忽略此邮件。" },
+  es: { subject: "[Wink Naming] Tu enlace de acceso", title: "Iniciar sesión", body: "Pulsa el botón de abajo para completar el acceso. El enlace solo se puede usar una vez y caduca pronto.", button: "Iniciar sesión", note: "En la página que se abre, pulsa «Confirmar acceso» una vez más.", latest: "Solo funciona el enlace del correo más reciente. Al pedir un enlace nuevo, los anteriores caducan.", ignore: "Si no lo solicitaste, puedes ignorar este correo." },
+  ru: { subject: "[Wink Naming] Ссылка для входа", title: "Вход", body: "Нажмите кнопку ниже, чтобы завершить вход. Ссылка одноразовая и скоро истекает.", button: "Войти", note: "На открывшейся странице нажмите «Подтвердить вход» ещё раз.", latest: "Работает только ссылка из самого последнего письма. После запроса новой ссылки прежние перестают действовать.", ignore: "Если вы не запрашивали вход, просто проигнорируйте это письмо." },
+  fr: { subject: "[Wink Naming] Votre lien de connexion", title: "Connexion", body: "Appuyez sur le bouton ci-dessous pour terminer la connexion. Ce lien est à usage unique et expire bientôt.", button: "Se connecter", note: "Sur la page qui s'ouvre, appuyez une fois de plus sur « Confirmer la connexion ».", latest: "Seul le lien du e-mail le plus récent fonctionne. Demander un nouveau lien invalide les précédents.", ignore: "Si vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail." },
+  ar: { subject: "[Wink Naming] رابط تسجيل الدخول", title: "تسجيل الدخول", body: "اضغط على الزر أدناه لإكمال تسجيل الدخول. يمكن استخدام هذا الرابط مرة واحدة فقط وتنتهي صلاحيته قريبًا.", button: "تسجيل الدخول", note: "في الصفحة التي ستفتح، اضغط «تأكيد تسجيل الدخول» مرة أخرى.", latest: "يعمل الرابط الموجود في أحدث رسالة فقط. عند طلب رابط جديد تنتهي صلاحية الروابط السابقة.", ignore: "إذا لم تطلب ذلك، يمكنك تجاهل هذه الرسالة." },
+  hi: { subject: "[Wink Naming] आपका साइन-इन लिंक", title: "साइन इन", body: "साइन-इन पूरा करने के लिए नीचे दिया बटन दबाएँ। यह लिंक केवल एक बार उपयोग हो सकता है और जल्द समाप्त हो जाता है।", button: "साइन इन करें", note: "खुलने वाले पेज पर एक बार फिर “लॉगिन की पुष्टि करें” दबाएँ।", latest: "केवल सबसे नई ईमेल का लिंक काम करता है। नया लिंक मँगाने पर पुराने लिंक समाप्त हो जाते हैं।", ignore: "यदि आपने यह अनुरोध नहीं किया है, तो इस ईमेल को अनदेखा करें।" },
 };
 
-function buildMail(lang: string, link: string): { subject: string; html: string; text: string } {
+function buildMail(lang: string, link: string, code: string): { subject: string; html: string; text: string } {
   const c = MAIL[lang] ?? MAIL.en;
   const dir = lang === "ar" ? "rtl" : "ltr";
   const safe = escapeHtml(link);
@@ -68,11 +68,13 @@ function buildMail(lang: string, link: string): { subject: string; html: string;
     <p style="margin:0 0 24px;font-size:14px;line-height:1.7;color:#444;">${escapeHtml(c.body)}</p>
     <a href="${safe}" style="display:inline-block;padding:14px 34px;border-radius:12px;background:#C9A84C;color:#ffffff;font-size:16px;font-weight:700;text-decoration:none;">${escapeHtml(c.button)}</a>
     <p style="margin:22px 0 0;font-size:12px;line-height:1.7;color:#777;">${escapeHtml(c.note)}</p>
+    <p style="margin:10px 0 0;font-size:12px;line-height:1.7;color:#B8923A;font-weight:700;">${escapeHtml(c.latest)}</p>
   </div>
   <p style="margin:18px 6px 0;font-size:11px;line-height:1.7;color:#999;text-align:center;">${escapeHtml(c.ignore)}</p>
 </div></body></html>`;
-  const text = `${c.title}\n\n${c.body}\n\n${link}\n\n${c.note}\n${c.ignore}`;
-  return { subject: c.subject, html, text };
+  const text = `${c.title}\n\n${c.body}\n\n${link}\n\n${c.note}\n${c.latest}\n${c.ignore}`;
+  // 같은 제목의 메일은 Gmail이 한 대화로 묶어 예전 메일이 먼저 보이므로, 요청마다 다른 4자리 번호를 제목에 붙인다.
+  return { subject: `${c.subject} · #${code}`, html, text };
 }
 
 // ── 이메일별 재요청 쿨다운 (Upstash 우선, 없으면 인메모리) ──────────────
@@ -160,7 +162,7 @@ export async function POST(req: NextRequest) {
         const link =
           `${CANONICAL_BASE_URL}/auth/confirm?token_hash=${encodeURIComponent(hashed)}` +
           `&type=${encodeURIComponent(vtype)}&redirect_to=${encodeURIComponent(emailRedirectTo)}`;
-        const mail = buildMail(safeLang, link);
+        const mail = buildMail(safeLang, link, String(1000 + Math.floor(Math.random() * 9000)));
 
         const res = await fetch("https://api.resend.com/emails", {
           method: "POST",
