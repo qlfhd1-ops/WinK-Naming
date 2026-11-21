@@ -88,6 +88,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','${GTM_ID}');`,
           }}
         />
+        {/* 로그인 링크가 어떤 페이지로 돌아오든(#access_token 해시 포함) /auth/callback 으로 모아 세션을 저장한다.
+            브라우저 Supabase 클라이언트(PKCE 고정)는 이 해시를 거부해 로그인이 반복되기 때문. hydration 전에 실행. */}
+        <script
+          id="auth-hash-redirect"
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var h=location.hash;if(h&&h.indexOf('access_token=')>-1&&h.indexOf('refresh_token=')>-1&&location.pathname.indexOf('/auth/callback')!==0){var m=location.pathname.match(/^\\/(ko|en|ja|zh|es|ru|fr|ar|hi)(\\/|$)/);var l=m?m[1]:'';location.replace('/auth/callback?next='+encodeURIComponent(location.pathname+location.search)+(l?'&lang='+l:'')+h);}}catch(e){}})();`,
+          }}
+        />
       </head>
       <body className={`${notoSerifKR.variable} ${notoSansKR.variable}`}>
         {/* Google Tag Manager (noscript) — body 시작 직후 */}

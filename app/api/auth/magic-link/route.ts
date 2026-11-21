@@ -50,8 +50,13 @@ export async function POST(req: NextRequest) {
       auth: { persistSession: false },
     });
 
+    // 로그인 링크는 /auth/callback 으로 돌아오게 한다. 이 페이지가 URL 해시의 토큰을 세션으로 저장한 뒤
+    // 원래 가려던 경로(next)로 이동시킨다(브라우저 클라이언트가 해시를 그대로는 받지 못해 로그인이 반복되던 문제 해결).
     const rawDestination = redirectTo ?? `/?lang=${lang}`;
-    const emailRedirectTo = `${CANONICAL_BASE_URL}${toCanonicalPath(rawDestination)}`;
+    const destPath = toCanonicalPath(rawDestination);
+    const nextPath = destPath.startsWith("/") && !destPath.startsWith("//") ? destPath : "/";
+    const emailRedirectTo =
+      `${CANONICAL_BASE_URL}/auth/callback?next=${encodeURIComponent(nextPath)}&lang=${encodeURIComponent(lang)}`;
 
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim(),
