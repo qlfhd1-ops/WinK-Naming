@@ -2031,7 +2031,9 @@ export default function ResultPage() {
 
   // Save results to DB
   useEffect(() => {
-    if (!brief || results.length === 0 || briefId || isSavingResult) return;
+    // 이름이 스트리밍으로 하나씩 도착하는 동안에는 저장하지 않는다. 첫 이름 도착 시점에 저장하면
+    // 3개 중 1개만 DB에 남기 때문에(통계·중복 분석 왜곡), 생성이 끝난 뒤 전체를 한 번에 저장한다.
+    if (!brief || results.length === 0 || briefId || isSavingResult || isGenerating) return;
     const save = async () => {
       setIsSavingResult(true);
       setMessage(ui.saving);
@@ -2089,7 +2091,7 @@ export default function ResultPage() {
     // 실패 시(finally에서 false로 바뀌는 순간) 이 effect가 즉시 재실행되어
     // 무한 재시도 루프가 발생한다. 그래서 의도적으로 제외한다.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [brief, results, briefId, leadBriefId, ui.saving, ui.saveDone, ui.saveFailed]);
+  }, [brief, results, briefId, leadBriefId, isGenerating, ui.saving, ui.saveDone, ui.saveFailed]);
 
   // Record free usage once briefId is saved, then show privacy → upgrade flow
   useEffect(() => {

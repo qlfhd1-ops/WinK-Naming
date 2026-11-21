@@ -53,6 +53,71 @@ async function isUserPaid(userId: string): Promise<boolean> {
   }
 }
 
+// ─── 이름 중복 방지 ───────────────────────────────────────────
+// 같은 이름이 반복되는 원인: (1) 선택지 문구에 든 예시 이름(하늘, 새벽)이 결과로 새어 나옴,
+// (2) 프롬프트의 예시 이름(민준, 서연 등), (3) 매번 비슷한 조건 → 비슷한 후보.
+// 대응: ① 선택지 예시를 프롬프트에서 제거 ② 최근 결과에서 너무 자주 나온 이름을 "피할 이름"으로 자동 전달
+//       ③ 요청마다 다른 영감 음절을 제시 ④ 예시 문구를 그대로 쓰지 말라고 명시.
+const OVERUSE_WINDOW = 1000;   // 최근 1,000개 결과 기준
+const OVERUSE_MAX_NAMES = 40;  // 프롬프트에 넘길 최대 개수
+const overuseCache = new Map<string, { at: number; names: string[] }>();
+
+/** 같은 카테고리의 최근 1,000개 결과 중 서로 다른 입력(고객)에게 2번 이상 나온 이름 */
+async function getOverusedNames(category: string): Promise<string[]> {
+  const hit = overuseCache.get(category);
+  if (hit && Date.now() - hit.at < 5 * 60_000) return hit.names;
+  try {
+    const { data, error } = await getAdminClient()
+      .from("naming_results")
+      .select("name, brief_id, naming_briefs!inner(category, target_name, status)")
+      .eq("naming_briefs.category", category)
+      .eq("naming_briefs.status", "completed")
+      .order("created_at", { ascending: false })
+      .limit(OVERUSE_WINDOW);
+    if (error) throw error;
+    // 같은 외국 이름(예: Alex)이 같은 한국어 표기(알렉스)를 받는 것은 정상이므로, 입력(target_name 또는 brief)별로 센다.
+    const owners = new Map<string, Set<string>>();
+    for (const row of (data ?? []) as unknown as Array<{ name: string; brief_id: string; naming_briefs: { target_name?: string | null } | null }>) {
+      const name = (row.name ?? "").trim();
+      if (!name) continue;
+      // 외국 이름은 성을 빼고 이름(첫 단어)만 본다: Emma Johnson / Emma Smith → 같은 "emma" → "에마" 중복은 정상
+      const owner = (row.naming_briefs?.target_name ?? "").trim().toLowerCase().split(/\s+/)[0] || row.brief_id;
+      if (!owners.has(name)) owners.set(name, new Set());
+      owners.get(name)!.add(owner);
+    }
+    const names = [...owners.entries()]
+      .filter(([, set]) => set.size >= 2)
+      .sort((a, b) => b[1].size - a[1].size)
+      .slice(0, OVERUSE_MAX_NAMES)
+      .map(([name]) => name);
+    overuseCache.set(category, { at: Date.now(), names });
+    return names;
+  } catch (e) {
+    console.error("[naming] overused names lookup failed:", e instanceof Error ? e.message : e);
+    return hit?.names ?? [];
+  }
+}
+
+const SYLLABLES = [
+  "건","결","겸","규","노","단","담","대","도","동","라","란","로","루","리","린","마","명","모","무","미","민","바","범","별","보","빈",
+  "사","산","상","새","서","석","선","설","성","소","솔","송","수","슬","승","시","신","아","안","여","연","영","예","오","온","완","용",
+  "우","운","원","위","유","윤","율","은","이","인","재","정","제","조","주","준","지","진","찬","채","천","초","태","하","한","해","혜","호","화","휘",
+];
+
+function pickRandom<T>(arr: readonly T[], n: number): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a.slice(0, n);
+}
+
+/** 선택지 라벨 끝의 괄호 예시("순수 한글 이름 (하늘, 새벽)")가 결과로 그대로 나오지 않도록 제거 */
+function stripExampleParen(text: string): string {
+  return text.replace(/\s*[（(][^)）]*[)）]\s*$/, "").trim() || text;
+}
+
 function stripTags(value: unknown): string {
   if (typeof value !== "string") return "";
   return value.replace(/<[^>]*>/g, "").slice(0, 500);
@@ -63,7 +128,7 @@ export async function POST(req: Request) {
     const body = await req.json();
     const rawBrief = body?.brief ?? body;
     const userId: string | undefined = typeof body?.userId === "string" ? body.userId : undefined;
-    const excludeNames: string[] = Array.isArray(body?.excludeNames) ? body.excludeNames : [];
+    const clientExclude: string[] = Array.isArray(body?.excludeNames) ? body.excludeNames.filter((n: unknown) => typeof n === "string").slice(0, 60) : [];
 
     // XSS / 입력값 sanitize
     const brief = rawBrief ? {
@@ -125,7 +190,7 @@ export async function POST(req: Request) {
     const {
       familyName = "",
       category = "child",
-      purpose,
+      purpose: purposeRaw,
       styleKeywords,
       avoidKeywords = "",
       memo = "",
@@ -144,6 +209,19 @@ export async function POST(req: Request) {
     const isKTF   = category === "korean_to_foreign";
     const isFTK   = category === "foreign_to_korean";
     const isBrand = category === "brand";
+
+    // ─── 중복 방지 ───────────────────────────────────────────
+    // 외국이름→한국이름의 "변환 방법" 선택지에는 예시 이름이 들어 있어(하늘, 새벽) 결과가 그쪽으로 쏠리므로 제거한다.
+    const purpose = isFTK ? stripExampleParen(String(purposeRaw ?? "")) : purposeRaw;
+    const overused = await getOverusedNames(String(category));
+    const excludeNames = [...new Set([...clientExclude, ...overused])];
+    // 발음 기반 변환(외국이름→한국이름, 한국이름→외국이름)과 브랜드는 입력에서 이름이 정해지므로 음절 힌트를 주지 않는다.
+    const varietyLine =
+      !isFTK && !isKTF && !isBrand
+        ? `\n- 이번 설계의 영감 음절(참고용, 자연스러울 때만 활용): ${pickRandom(SYLLABLES, 8).join(", ")}`
+        : "";
+    const noExampleLine =
+      "\n- 안내 문구·예시에 나온 이름/단어(하늘, 새벽, 민준, 서연, 다온, 하린, 아영, 도윤, 태현, 준혁 등)를 그대로 쓰지 말고, 입력 조건에서 새로 설계할 것.";
 
     // ─── 사주 오행 계산 (child 또는 birthDate가 입력된 경우 모두 반영) ───
     const sajuText = birthDate
@@ -193,7 +271,7 @@ export async function POST(req: Request) {
 - 표기 방향: ${preferredScript || "한글+영문 병행"}
 - 추가 요청: ${memo || "없음"}
 - UI 언어: ${lang}
-${excludeNames.length > 0 ? `- 제외할 이름 (이미 제안한 이름, 반드시 다른 이름 설계): ${excludeNames.join(", ")}` : ""}
+${excludeNames.length > 0 ? `- 제외할 이름 (이미 제안했거나 최근 너무 자주 나온 이름, 반드시 다른 이름 설계): ${excludeNames.join(", ")}` : ""}${varietyLine}${noExampleLine}
 
 [출력 형식 — JSON 배열만, 순수 텍스트로]
 [
@@ -292,7 +370,7 @@ ${excludeNames.length > 0 ? `- 제외할 이름 (이미 제안한 이름, 반드
 - 피하고 싶은 느낌: ${avoidKeywords || "없음"}
 - 추가 메모: ${memo || "없음"}
 - UI 언어: ${lang}
-${excludeNames.length > 0 ? `- 제외할 이름 (이미 제안한 이름, 반드시 다른 이름 설계): ${excludeNames.join(", ")}` : ""}
+${excludeNames.length > 0 ? `- 제외할 이름 (이미 제안했거나 최근 너무 자주 나온 이름, 반드시 다른 이름 설계): ${excludeNames.join(", ")}` : ""}${varietyLine}${noExampleLine}
 ${sajuText ? `\n${sajuText}` : ""}
 
 [출력 형식 — JSON 배열만, 순수 텍스트로]
@@ -432,7 +510,7 @@ ${sajuText ? `\n${sajuText}` : ""}
 - 원하는 분위기: ${styleKeywords || "없음"}
 - 추가 메모: ${memo || "없음"}
 - UI 언어: ${lang}
-${excludeNames.length > 0 ? `- 제외할 이름 (이미 제안한 이름, 반드시 다른 이름 설계): ${excludeNames.join(", ")}` : ""}
+${excludeNames.length > 0 ? `- 제외할 이름 (이미 제안했거나 최근 너무 자주 나온 이름, 반드시 다른 이름 설계): ${excludeNames.join(", ")}` : ""}${varietyLine}${noExampleLine}
 
 [출력 형식 — JSON 배열만, 순수 텍스트로]
 [
@@ -481,7 +559,7 @@ ${excludeNames.length > 0 ? `- 제외할 이름 (이미 제안한 이름, 반드
 - 생년월일: ${birthDate || "미입력"}
 - 태어난 시간: ${birthTime || "미입력"}
 - UI 언어: ${lang}
-${excludeNames.length > 0 ? `- 제외할 이름 (이미 제안한 이름, 반드시 다른 이름 설계): ${excludeNames.join(", ")}` : ""}
+${excludeNames.length > 0 ? `- 제외할 이름 (이미 제안했거나 최근 너무 자주 나온 이름, 반드시 다른 이름 설계): ${excludeNames.join(", ")}` : ""}${varietyLine}${noExampleLine}
 ${sajuText ? `\n${sajuText}` : ""}
 
 [출력 형식 — JSON 배열만, 순수 텍스트로]
