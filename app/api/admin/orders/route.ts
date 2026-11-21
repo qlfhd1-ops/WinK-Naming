@@ -16,9 +16,10 @@ function getAdminClient() {
 
 /** stats/route.ts와 동일한 이중 인증 (X-Admin-Password 또는 Bearer 토큰) */
 async function checkAuth(req: Request): Promise<boolean> {
-  const adminPw = process.env.ADMIN_PASSWORD;
+  // Vercel 환경변수 값 끝에 공백/개행이 섞여도 로그인 API·proxy.ts와 같은 기준으로 비교한다(trim).
+  const adminPw = process.env.ADMIN_PASSWORD?.trim();
   if (adminPw) {
-    const pw = req.headers.get("x-admin-password") ?? "";
+    const pw = (req.headers.get("x-admin-password") ?? "").trim();
     if (pw === adminPw) return true;
   }
 
