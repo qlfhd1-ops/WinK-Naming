@@ -2325,12 +2325,12 @@ export default function ResultPage() {
   // 사용자가 "이 이름으로 받기"를 직접 누른 시점에 선택돼 있는 이름 1건만 발송한다(선택만으로는 발송하지 않음).
   // 수신 주소는 서버가 brief(폼에 입력한 이메일)에서 직접 조회하고, 중복 방지도 서버(naming_briefs.card_sent_at)에서
   // 처리하므로 새로고침하거나 이름을 바꿔 다시 눌러도 두 번째 메일은 나가지 않는다.
-  const handleCardCtaSend = async () => {
+  const handleCardCtaSend = async (idx?: number, cardImage?: string | null) => {
     if (cardCtaStatus === "sending" || results.length === 0 || !briefId) return;
     setCardCtaStatus("sending");
     try {
       const allResults = [...results, ...extraResults];
-      const pick = selectedNameIndex ?? 0;
+      const pick = idx ?? selectedNameIndex ?? 0;
       const item = allResults[pick];
       if (!item) { setCardCtaStatus("error"); return; }
       setCardCtaFirstIdx(pick); // 발송 대상으로 확정된 이름
@@ -2342,7 +2342,7 @@ export default function ResultPage() {
       const res = await fetch("/api/send-card", {
         method: "POST",
         headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-        body: JSON.stringify({ item, lang, brief, briefId, sessionToken: getSessionToken() }),
+        body: JSON.stringify({ item, lang, brief, briefId, sessionToken: getSessionToken(), ...(cardImage ? { cardImage } : {}) }),
       });
       const json = await res.json().catch(() => ({}));
       if (res.ok && json?.ok) {
@@ -3185,7 +3185,7 @@ export default function ResultPage() {
                   </div>
                   <button
                     type="button"
-                    onClick={handleCardCtaSend}
+                    onClick={() => setNameCardIdx(selectedNameIndex)}
                     disabled={cardCtaStatus === "sending" || !briefId}
                     style={{
                       display: "block", width: "100%", maxWidth: 360, marginInline: "auto",
@@ -3946,6 +3946,17 @@ export default function ResultPage() {
         lang={lang}
         targetCountry={brief?.targetCountry}
         onClose={() => setNameCardIdx(null)}
+        email={briefId ? {
+          label: nx.sendBtn(results[nameCardIdx].name),
+          sendingLabel: nx.sending,
+          status: cardCtaStatus === "invalid" ? "idle" : cardCtaStatus,
+          message:
+            cardCtaStatus === "sent" ? nx.sent(cardCtaSentTo, cardCtaSentName || results[nameCardIdx].name)
+            : cardCtaStatus === "already" ? nx.already(cardCtaSentName, cardCtaSentTo)
+            : cardCtaStatus === "error" ? nx.failed
+            : "",
+          onSend: (img) => handleCardCtaSend(nameCardIdx, img),
+        } : undefined}
       />
     )}
     </>

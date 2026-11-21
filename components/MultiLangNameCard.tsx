@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { toPng } from "html-to-image";
+import { toJpeg, toPng } from "html-to-image";
 import WinkMarkClassic from "@/components/WinkMarkClassic";
 import { PLAQUES, PLAQUE_KEYS, LIGHT_PLAQUE_KEYS, OHAENG_COLORS, type PlaqueKey, type PlaqueStyle } from "@/lib/plaques";
 import { CARD_BACKGROUNDS } from "@/lib/card-backgrounds";
@@ -30,6 +30,19 @@ const PHOTO_STYLE: PlaqueStyle = {
   label: "Landmark",
 };
 
+/** 카드 창 문구 (ko/en/ja/zh/es/ru/fr/ar/hi) */
+const MODAL_COPY: Record<string, { listen: string; global: string; korean: string; english: string; chinese: string; japanese: string; five: string; save: string; saving: string; share: string; copied: string; close: string }> = {
+  ko: { listen: "이름 발음 듣기", global: "다국어 발음", korean: "한국어", english: "영어", chinese: "중국어", japanese: "일본어", five: "오행 밸런스 · 목화토금수", save: "⬇ 이미지 저장", saving: "저장 중...", share: "↗ 공유하기", copied: "✓ 복사됨", close: "닫기" },
+  en: { listen: "Listen to pronunciation", global: "Global Pronunciation", korean: "Korean", english: "English", chinese: "Chinese", japanese: "Japanese", five: "Five Elements Balance", save: "⬇ Save image", saving: "Saving...", share: "↗ Share", copied: "✓ Copied", close: "Close" },
+  ja: { listen: "名前の発音を聞く", global: "多言語の発音", korean: "韓国語", english: "英語", chinese: "中国語", japanese: "日本語", five: "五行バランス", save: "⬇ 画像を保存", saving: "保存中...", share: "↗ 共有", copied: "✓ コピーしました", close: "閉じる" },
+  zh: { listen: "收听名字发音", global: "多语言发音", korean: "韩语", english: "英语", chinese: "中文", japanese: "日语", five: "五行平衡", save: "⬇ 保存图片", saving: "保存中...", share: "↗ 分享", copied: "✓ 已复制", close: "关闭" },
+  es: { listen: "Escuchar pronunciación", global: "Pronunciación global", korean: "Coreano", english: "Inglés", chinese: "Chino", japanese: "Japonés", five: "Equilibrio de los cinco elementos", save: "⬇ Guardar imagen", saving: "Guardando...", share: "↗ Compartir", copied: "✓ Copiado", close: "Cerrar" },
+  ru: { listen: "Послушать произношение", global: "Произношение на разных языках", korean: "Корейский", english: "Английский", chinese: "Китайский", japanese: "Японский", five: "Баланс пяти стихий", save: "⬇ Сохранить изображение", saving: "Сохранение...", share: "↗ Поделиться", copied: "✓ Скопировано", close: "Закрыть" },
+  fr: { listen: "Écouter la prononciation", global: "Prononciation internationale", korean: "Coréen", english: "Anglais", chinese: "Chinois", japanese: "Japonais", five: "Équilibre des cinq éléments", save: "⬇ Enregistrer l'image", saving: "Enregistrement...", share: "↗ Partager", copied: "✓ Copié", close: "Fermer" },
+  ar: { listen: "الاستماع إلى النطق", global: "النطق بلغات متعددة", korean: "الكورية", english: "الإنجليزية", chinese: "الصينية", japanese: "اليابانية", five: "توازن العناصر الخمسة", save: "⬇ حفظ الصورة", saving: "جارٍ الحفظ...", share: "↗ مشاركة", copied: "✓ تم النسخ", close: "إغلاق" },
+  hi: { listen: "उच्चारण सुनें", global: "बहुभाषी उच्चारण", korean: "कोरियाई", english: "अंग्रेज़ी", chinese: "चीनी", japanese: "जापानी", five: "पाँच तत्वों का संतुलन", save: "⬇ इमेज सेव करें", saving: "सेव हो रहा है...", share: "↗ शेयर करें", copied: "✓ कॉपी हो गया", close: "बंद करें" },
+};
+
 export interface NameCardData {
   name: string;
   hanja?: string;
@@ -44,17 +57,28 @@ export interface NameCardData {
   score?: number;
 }
 
+/** 카드 창 안의 "이메일로 받기" 동작 — 고객이 고른 스타일 그대로 이미지를 만들어 부모에 넘긴다 */
+export interface NameCardEmailAction {
+  label: string;
+  sendingLabel: string;
+  status: "idle" | "sending" | "sent" | "already" | "error";
+  message: string;
+  onSend: (imageDataUrl: string | null) => void;
+}
+
 interface Props {
   data: NameCardData;
   lang?: string;
   targetCountry?: string;
   onClose: () => void;
+  email?: NameCardEmailAction;
 }
 
-export default function MultiLangNameCard({ data, lang = "ko", targetCountry, onClose }: Props) {
+export default function MultiLangNameCard({ data, lang = "ko", targetCountry, onClose, email }: Props) {
   const cardRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
+  const [capturing, setCapturing] = useState(false);
   const [copied, setCopied] = useState(false);
   const [plaqueKey, setPlaqueKey] = useState<CardStyleKey>("giwa");
   // closing: true → opacity 0 트랜지션 시작, onTransitionEnd에서 onClose() 호출
@@ -62,7 +86,7 @@ export default function MultiLangNameCard({ data, lang = "ko", targetCountry, on
   // 중복 호출 방지
   const closingRef = useRef(false);
 
-  const isKo = lang === "ko";
+  const t = MODAL_COPY[lang] ?? MODAL_COPY.en;
   const koreanRomanized = data.english || data.name;
   const isFrameExample = plaqueKey === FRAME_EXAMPLE.id;
   const photoBg = isFrameExample ? FRAME_EXAMPLE : CARD_BACKGROUNDS.find((b) => b.id === plaqueKey) ?? null;
@@ -141,6 +165,35 @@ export default function MultiLangNameCard({ data, lang = "ko", targetCountry, on
         "body > iframe[style*='visibility:hidden'], body > canvas[style*='display:none']"
       ).forEach((el) => el.remove());
     }
+  }
+
+  /** 지금 보이는 카드(고객이 고른 스타일)를 JPEG 이미지로 만들어 메일 발송 동작에 넘긴다. 실패하면 이미지 없이 넘긴다. */
+  async function handleEmail() {
+    if (!email || capturing || email.status === "sending" || email.status === "sent" || email.status === "already") return;
+    setCapturing(true);
+    let dataUrl: string | null = null;
+    try {
+      if (cardRef.current) {
+        dataUrl = await toJpeg(cardRef.current, {
+          cacheBust: true,
+          pixelRatio: 2,
+          quality: 0.9,
+          // 메일 본문 배경색과 맞춰 둥근 모서리 뒤에 어두운 배경이 비치지 않게 한다
+          backgroundColor: "#F3EEE4",
+          // 메일 속 이미지에서는 눌러도 소리가 나지 않는 🔊 버튼은 제외한다
+          filter: (node) => !(node instanceof HTMLElement && /발음|pronunciation/i.test(node.getAttribute("aria-label") ?? "")),
+        });
+      }
+    } catch (e) {
+      console.error("[namecard email capture]", e);
+      dataUrl = null;
+    } finally {
+      document.querySelectorAll<HTMLElement>(
+        "body > iframe[style*='visibility:hidden'], body > canvas[style*='display:none']"
+      ).forEach((el) => el.remove());
+      setCapturing(false);
+    }
+    email.onSend(dataUrl);
   }
 
   async function handleShare() {
@@ -363,7 +416,7 @@ export default function MultiLangNameCard({ data, lang = "ko", targetCountry, on
                   <button
                     type="button"
                     onClick={handleSpeak}
-                    aria-label={isKo ? "이름 발음 듣기" : "Listen to pronunciation"}
+                    aria-label={t.listen}
                     style={{
                       width: 34, height: 34, borderRadius: "50%", flexShrink: 0,
                       border: "1px solid rgba(217,188,122,0.6)",
@@ -461,7 +514,7 @@ export default function MultiLangNameCard({ data, lang = "ko", targetCountry, on
             <button
               type="button"
               onClick={handleSpeak}
-              aria-label={isKo ? "이름 발음 듣기" : "Listen to pronunciation"}
+              aria-label={t.listen}
               style={{
                 position: "absolute",
                 top: 0,
@@ -540,14 +593,14 @@ export default function MultiLangNameCard({ data, lang = "ko", targetCountry, on
                 fontSize: 10, letterSpacing: "0.15em",
                 color: plaque.sub, fontWeight: 700, textTransform: "uppercase",
               }}>
-                {isKo ? "다국어 발음" : "Global Pronunciation"}
+                {t.global}
               </div>
 
               {[
-                { flag: "🇰🇷", label: isKo ? "한국어" : "Korean",  main: data.name,              sub: koreanRomanized !== data.name ? koreanRomanized : "" },
-                { flag: "🇺🇸", label: isKo ? "영어"   : "English", main: data.english || "—",    sub: "" },
-                { flag: "🇨🇳", label: isKo ? "중국어" : "Chinese", main: data.chinese || "—",    sub: data.chinese_pinyin || "" },
-                { flag: "🇯🇵", label: isKo ? "일본어" : "Japanese",main: data.japanese_kana || "—", sub: data.japanese_reading || "" },
+                { flag: "🇰🇷", label: t.korean,  main: data.name,              sub: koreanRomanized !== data.name ? koreanRomanized : "" },
+                { flag: "🇺🇸", label: t.english, main: data.english || "—",    sub: "" },
+                { flag: "🇨🇳", label: t.chinese, main: data.chinese || "—",    sub: data.chinese_pinyin || "" },
+                { flag: "🇯🇵", label: t.japanese,main: data.japanese_kana || "—", sub: data.japanese_reading || "" },
               ].map((row, i, arr) => (
                 <div key={row.label} style={{
                   display: "flex", alignItems: "center", gap: 12,
@@ -574,7 +627,7 @@ export default function MultiLangNameCard({ data, lang = "ko", targetCountry, on
           {/* 오행 밸런스 미니 바 */}
           <div style={{ padding: "0 28px 14px", position: "relative" }}>
             <div style={{ fontSize: 9, letterSpacing: "0.14em", color: textSecondary, marginBottom: 6, textTransform: "uppercase" }}>
-              {isKo ? "오행 밸런스 · 목화토금수" : "Five Elements Balance"}
+              {t.five}
             </div>
             <div style={{ display: "flex", gap: 3, height: 5, borderRadius: 4, overflow: "hidden" }}>
               {Object.values(OHAENG_COLORS).map((c) => (
@@ -637,7 +690,7 @@ export default function MultiLangNameCard({ data, lang = "ko", targetCountry, on
               display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
             }}
           >
-            {downloading ? "저장 중..." : "⬇ 이미지 저장"}
+            {downloading ? t.saving : t.save}
           </button>
 
           <button
@@ -652,9 +705,40 @@ export default function MultiLangNameCard({ data, lang = "ko", targetCountry, on
               display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
             }}
           >
-            {copied ? "✓ 복사됨" : "↗ 공유하기"}
+            {copied ? t.copied : t.share}
           </button>
         </div>
+
+        {/* 이메일로 받기 (이름카드는 한 번만 발송) */}
+        {email && (
+          <div style={{ width: "100%" }}>
+            {email.status === "sent" || email.status === "already" ? (
+              <div role="status" style={{ padding: "12px 14px", borderRadius: 12, fontSize: 13, fontWeight: 700, lineHeight: 1.6, color: "#BFE9CF", background: "rgba(47,158,98,0.18)", border: "1px solid rgba(47,158,98,0.55)", textAlign: "center" }}>
+                {email.message}
+              </div>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={handleEmail}
+                  disabled={capturing || email.status === "sending"}
+                  style={{
+                    width: "100%", padding: "15px 0", borderRadius: 12, border: "none",
+                    background: "linear-gradient(135deg,#F0CF7A,#C9A84C)", color: "#0B1634",
+                    fontWeight: 900, fontSize: 15, letterSpacing: "0.02em",
+                    cursor: capturing || email.status === "sending" ? "not-allowed" : "pointer",
+                    opacity: capturing || email.status === "sending" ? 0.7 : 1,
+                  }}
+                >
+                  {capturing || email.status === "sending" ? email.sendingLabel : email.label}
+                </button>
+                {email.status === "error" && (
+                  <div role="alert" style={{ marginTop: 8, fontSize: 12.5, fontWeight: 700, color: "#FF9B8F", textAlign: "center" }}>{email.message}</div>
+                )}
+              </>
+            )}
+          </div>
+        )}
 
         {/* 닫기 */}
         <button
@@ -667,7 +751,7 @@ export default function MultiLangNameCard({ data, lang = "ko", targetCountry, on
             WebkitTapHighlightColor: "transparent",
           }}
         >
-          ✕ {isKo ? "닫기" : "Close"}
+          ✕ {t.close}
         </button>
       </div>
     </div>

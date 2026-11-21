@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { buildNameCardEmail } from "@/lib/name-card-email";
 
 function getAdminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -155,7 +156,6 @@ export async function POST(req: Request) {
     const hanja: string = stripTags(item.hanja) || "";
     const hanjaMeaning: string = stripTags(item.hanja_meaning) || "";
     const meaning: string = stripTags(item.meaning) || "";
-    const isKo = lang === "ko";
     const story: string = stripTags(item.story) || "";
     const english: string = stripTags(item.english) || "";
     const chinese: string = stripTags(item.chinese) || "";
@@ -164,76 +164,31 @@ export async function POST(req: Request) {
     const fiveElements: string = stripTags(item.five_elements) || "";
     const hanjaStrokes: string = stripTags(item.hanja_strokes) || "";
 
-    const subject = lang === "ko"
-      ? `윙크 네이밍 — "${name}" 이름 설계 카드`
-      : `Wink Naming — Name Design Card: "${name}"`;
+    // ── 카드 이미지(선택): 사이트의 네임카드를 고객 화면에서 이미지로 만들어 함께 보낸 경우 ──
+    //    data URL(jpeg/png, base64)만 허용하고 크기를 제한한다.
+    let imageBase64 = "";
+    let imageType = "image/jpeg";
+    const rawImage = typeof body?.cardImage === "string" ? body.cardImage : "";
+    const imgMatch = /^data:(image\/(?:jpeg|png));base64,([A-Za-z0-9+/=]+)$/.exec(rawImage);
+    if (imgMatch && imgMatch[2].length <= 4_500_000) {
+      imageType = imgMatch[1];
+      imageBase64 = imgMatch[2];
+    }
 
-    const html = `<!DOCTYPE html>
-<html lang="${lang}">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>${subject}</title>
-<style>
-  body { margin:0; padding:0; background:#0B1634; font-family: 'Noto Sans KR','Noto Sans',sans-serif; color:#f0f4ff; }
-  .wrap { max-width:560px; margin:0 auto; padding:32px 20px; }
-  .header { background:linear-gradient(135deg,#1B2A5E,#0D1A3E); border-radius:16px 16px 0 0; padding:32px 28px 24px; border-bottom:3px solid #C9A84C; }
-  .brand { font-size:11px; letter-spacing:0.18em; color:rgba(201,168,76,0.75); font-weight:700; margin-bottom:16px; text-transform:uppercase; }
-  .name-ko { font-size:52px; font-weight:900; letter-spacing:8px; color:#fff; font-family:serif; margin:0 0 8px; }
-  .hanja { font-size:22px; letter-spacing:5px; color:rgba(201,168,76,0.85); margin:0 0 6px; }
-  .hanja-meaning { font-size:13px; color:rgba(201,168,76,0.6); margin:0; }
-  .body { background:#0F1A42; padding:28px; border-radius:0 0 16px 16px; }
-  .section { margin-bottom:20px; }
-  .label { font-size:10px; text-transform:uppercase; letter-spacing:0.14em; color:rgba(201,168,76,0.7); font-weight:700; margin-bottom:6px; }
-  .text { font-size:14px; color:rgba(200,215,240,0.88); line-height:1.75; }
-  .global-grid { display:flex; gap:10px; }
-  .mini { flex:1; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:10px; text-align:center; }
-  .mini-title { font-size:10px; color:rgba(201,168,76,0.65); font-weight:700; margin-bottom:4px; }
-  .divider { height:1px; background:rgba(201,168,76,0.18); margin:20px 0; }
-  .footer { margin-top:28px; text-align:center; font-size:11px; color:rgba(200,215,240,0.35); line-height:1.8; }
-  .social { margin-top:20px; padding:16px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:12px; font-size:13px; color:rgba(200,215,240,0.55); line-height:1.8; text-align:center; white-space:pre-line; }
-</style>
-</head>
-<body>
-<div class="wrap">
-  <div class="header">
-    <p class="brand">WINK NAMING · NAME DESIGN CARD</p>
-    <h1 class="name-ko">${name}</h1>
-    ${hanja ? `<p class="hanja">${hanja}</p>` : ""}
-    ${hanjaMeaning ? `<p class="hanja-meaning">${hanjaMeaning}</p>` : ""}
-  </div>
-  <div class="body">
-    ${fiveElements ? `<div class="section"><div class="label">오행 / Five Elements</div><div class="text">${fiveElements}</div></div>` : ""}
-    ${hanjaStrokes ? `<div class="section"><div class="label">획수 / Strokes</div><div class="text">${hanjaStrokes}</div></div>` : ""}
-    <div class="section">
-      <div class="label">${lang === "ko" ? "이름 의미" : "Meaning"}</div>
-      <div class="text">${meaning}</div>
-    </div>
-    <div class="section">
-      <div class="label">${lang === "ko" ? "설계 배경" : "Design Story"}</div>
-      <div class="text">${story}</div>
-    </div>
-    <div class="divider"></div>
-    <div class="section">
-      <div class="label">${lang === "ko" ? "다국어 표기" : "Global Script"}</div>
-      <div class="global-grid">
-        <div class="mini"><div class="mini-title">EN</div><div>${english}</div></div>
-        <div class="mini"><div class="mini-title">中文</div><div>${chinese}</div><div style="font-size:11px;opacity:0.6">${chinesePinyin}</div></div>
-        <div class="mini"><div class="mini-title">日本語</div><div>${japaneseKana}</div></div>
-      </div>
-    </div>
-    <div class="social">고객님이 선물하신 이름을 통해\n이름 없이 버려진 아이에게 선물을 줄 수 있게 되었습니다.\n윙크 네이밍은 소외된 아이들이 웃을 수 있게 돕고 있습니다. 🤍</div>
-  </div>
-  <div class="footer">
-    ${isKo
-      ? "이 메일은 이름 선택 시 요청하신 이름카드입니다. 보이지 않으면 스팸함을 확인해 주세요."
-      : "This is the name card you requested when you chose your name. If you can't find it later, check your spam folder."}<br/>
-    윙크 네이밍 · Korean-style naming that elevates life's value<br/>
-    ${brief?.familyName ? `성씨 · ${brief.familyName} |` : ""} ${brief?.purpose ? `목적 · ${String(brief.purpose).slice(0, 40)}` : ""}
-  </div>
-</div>
-</body>
-</html>`;
+    const baseUrl = "https://wink-naming.com";
+    const listenUrl =
+      `${baseUrl}/listen?n=${encodeURIComponent(name)}` +
+      `${english ? `&r=${encodeURIComponent(english)}` : ""}&lang=${encodeURIComponent(lang)}`;
+
+    const { subject, html } = buildNameCardEmail({
+      lang,
+      item: { name, hanja, hanjaMeaning, meaning, story, english, chinese, chinesePinyin, japaneseKana, fiveElements, hanjaStrokes },
+      familyName: stripTags(brief?.familyName),
+      purpose: stripTags(brief?.purpose),
+      hasImage: !!imageBase64,
+      listenUrl,
+      siteUrl: `${baseUrl}/${lang}`,
+    });
 
     // ── 5. Send via Resend ───────────────────────────────
     let res: Response;
@@ -250,6 +205,18 @@ export async function POST(req: Request) {
         to: [recipient],
         subject,
         html,
+        ...(imageBase64
+          ? {
+              attachments: [
+                {
+                  filename: `wink-namecard-${name.replace(/[^\p{L}\p{N}_-]/gu, "")}.${imageType === "image/png" ? "png" : "jpg"}`,
+                  content: imageBase64,
+                  content_type: imageType,
+                  content_id: "namecard",
+                },
+              ],
+            }
+          : {}),
       }),
       });
     } catch (netErr) {
