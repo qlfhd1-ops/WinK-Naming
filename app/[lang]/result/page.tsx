@@ -1829,15 +1829,17 @@ export default function ResultPage() {
       setReviewLoginError(lang === "ko" ? "이메일을 입력해 주세요." : "Please enter your email.");
       return;
     }
-    if (!supabaseRef.current) return;
     setReviewLoginSending(true);
     try {
-      const redirectTo = `${window.location.origin}${window.location.pathname}?openReview=1`;
-      const { error } = await supabaseRef.current.auth.signInWithOtp({
-        email,
-        options: { emailRedirectTo: redirectTo },
+      // 다른 로그인과 같은 서버 API(Resend 발송, 요청 한도·쿨다운 포함)를 사용한다.
+      // Supabase 기본 메일러를 직접 호출하면 시간당 발송 한도에 걸리고 링크 방식이 달라 로그인이 반복될 수 있다.
+      const redirectTo = `${window.location.pathname}?openReview=1`;
+      const res = await fetch("/api/auth/magic-link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, redirectTo, lang }),
       });
-      if (error) {
+      if (!res.ok) {
         setReviewLoginError(lang === "ko" ? "로그인 링크 전송에 실패했습니다." : "Failed to send the login link.");
       } else {
         setReviewLoginSent(true);
