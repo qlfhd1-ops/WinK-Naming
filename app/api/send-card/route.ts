@@ -186,6 +186,7 @@ export async function POST(req: Request) {
       familyName: stripTags(brief?.familyName),
       purpose: stripTags(brief?.purpose),
       hasImage: !!imageBase64,
+      cardStyle: typeof body?.cardStyle === "string" ? body.cardStyle.slice(0, 40) : "",
       listenUrl,
       siteUrl: `${baseUrl}/${lang}`,
     });
@@ -212,7 +213,6 @@ export async function POST(req: Request) {
                   filename: `wink-namecard-${name.replace(/[^\p{L}\p{N}_-]/gu, "")}.${imageType === "image/png" ? "png" : "jpg"}`,
                   content: imageBase64,
                   content_type: imageType,
-                  content_id: "namecard",
                 },
               ],
             }

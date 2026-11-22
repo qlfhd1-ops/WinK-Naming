@@ -63,7 +63,7 @@ export interface NameCardEmailAction {
   sendingLabel: string;
   status: "idle" | "sending" | "sent" | "already" | "error";
   message: string;
-  onSend: (imageDataUrl: string | null) => void;
+  onSend: (imageDataUrl: string | null, styleKey?: string) => void;
 }
 
 interface Props {
@@ -193,7 +193,7 @@ export default function MultiLangNameCard({ data, lang = "ko", targetCountry, on
       ).forEach((el) => el.remove());
       setCapturing(false);
     }
-    email.onSend(dataUrl);
+    email.onSend(dataUrl, String(plaqueKey));
   }
 
   async function handleShare() {
