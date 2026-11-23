@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { buildNameCardEmail } from "@/lib/name-card-email";
+import { encodeGift } from "@/lib/gift-link";
 
 function getAdminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -180,15 +181,19 @@ export async function POST(req: Request) {
       `${baseUrl}/listen?n=${encodeURIComponent(name)}` +
       `${english ? `&r=${encodeURIComponent(english)}` : ""}&lang=${encodeURIComponent(lang)}`;
 
+    const cardStyle = typeof body?.cardStyle === "string" ? body.cardStyle.slice(0, 40) : "";
+    const giftUrl = `${baseUrl}/present?d=${encodeGift({ n: name, e: english, h: hanja, hm: hanjaMeaning, m: meaning, l: lang, s: cardStyle })}`;
+
     const { subject, html } = buildNameCardEmail({
       lang,
       item: { name, hanja, hanjaMeaning, meaning, story, english, chinese, chinesePinyin, japaneseKana, fiveElements, hanjaStrokes },
       familyName: stripTags(brief?.familyName),
       purpose: stripTags(brief?.purpose),
       hasImage: !!imageBase64,
-      cardStyle: typeof body?.cardStyle === "string" ? body.cardStyle.slice(0, 40) : "",
+      cardStyle,
       listenUrl,
-      siteUrl: `${baseUrl}/${lang}`,
+      giftUrl,
+      siteUrl: `${baseUrl}/?lang=${encodeURIComponent(lang)}`,
     });
 
     // ── 5. Send via Resend ───────────────────────────────

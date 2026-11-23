@@ -35,6 +35,8 @@ export type NameCardMailInput = {
   /** 고객이 카드 창에서 고른 스타일 id — 랜드마크 사진 스타일이면 같은 사진을 히어로에 쓴다 */
   cardStyle?: string;
   listenUrl: string;
+  /** 선물 열기 페이지(/present?d=…) */
+  giftUrl: string;
   siteUrl: string;
   /** 발급일(테스트용 주입). 기본은 현재 시각 */
   now?: Date;
@@ -51,6 +53,8 @@ type Copy = {
   certKicker: string;
   certLine: string;
   issued: string;
+  openGift: string;
+  openGiftSub: string;
   listen: string;
   listenSub: string;
   detailTitle: string;
@@ -77,6 +81,7 @@ const COPIES: Record<string, Copy> = {
     subject: (n) => `🎁 "${n}" — 당신의 한국 이름이 도착했어요`, brand: BRAND,
     heroKicker: "당신을 위한 선물", heroTitle: "당신의 한국 이름이\n도착했어요",
     certKicker: "한국 이름 증서", certLine: "윙크 네이밍이 정성껏 설계한, 오직 당신을 위한 이름입니다", issued: "발급일",
+    openGift: "🎁 선물 열기", openGiftSub: "소리와 함께 이름이 펼쳐져요",
     listen: "🔊 발음 듣기", listenSub: "누르면 사이트에서 한국어 발음이 재생돼요",
     detailTitle: "이름 이야기", hanja: "한자", meaning: "이름 의미", story: "설계 배경", elements: "오행", strokes: "획수", global: "다국어 표기",
     social: "고객님이 선물하신 이름을 통해\n이름 없이 버려진 아이에게 선물을 줄 수 있게 되었습니다.\n윙크 네이밍은 소외된 아이들이 웃을 수 있게 돕고 있습니다. 🤍",
@@ -89,6 +94,7 @@ const COPIES: Record<string, Copy> = {
     subject: (n) => `🎁 "${n}" — Your Korean name has arrived`, brand: BRAND,
     heroKicker: "A GIFT FOR YOU", heroTitle: "Your Korean name\nhas arrived",
     certKicker: "CERTIFICATE OF KOREAN NAME", certLine: "A name thoughtfully designed by Wink Naming, just for you", issued: "Issued",
+    openGift: "🎁 Open your gift", openGiftSub: "Your name unfolds with sound",
     listen: "🔊 Hear the pronunciation", listenSub: "Opens the site and plays the Korean pronunciation",
     detailTitle: "The story of your name", hanja: "Hanja", meaning: "Meaning", story: "Design story", elements: "Five elements", strokes: "Strokes", global: "Global script",
     social: "Through the name you chose,\nyou helped give a gift to a child who had no name.\nWink Naming helps children who are left out smile again. 🤍",
@@ -101,6 +107,7 @@ const COPIES: Record<string, Copy> = {
     subject: (n) => `🎁「${n}」— あなたの韓国名が届きました`, brand: BRAND,
     heroKicker: "あなたへの贈り物", heroTitle: "あなたの韓国名が\n届きました",
     certKicker: "韓国名 証書", certLine: "Wink Namingが心を込めて設計した、あなただけのお名前です", issued: "発行日",
+    openGift: "🎁 贈り物を開ける", openGiftSub: "音とともにお名前が現れます",
     listen: "🔊 発音を聞く", listenSub: "タップするとサイトで韓国語の発音が再生されます",
     detailTitle: "お名前のストーリー", hanja: "漢字", meaning: "名前の意味", story: "設計の背景", elements: "五行", strokes: "画数", global: "多言語表記",
     social: "お客様が贈ってくださったお名前を通じて、\n名前のない子どもに贈り物を届けることができました。\nWink Naming は、取り残された子どもたちが笑顔になれるよう支えています。🤍",
@@ -113,6 +120,7 @@ const COPIES: Record<string, Copy> = {
     subject: (n) => `🎁「${n}」— 您的韩文名字已送达`, brand: BRAND,
     heroKicker: "送给您的礼物", heroTitle: "您的韩文名字\n已送达",
     certKicker: "韩文名字证书", certLine: "由 Wink Naming 精心设计、只属于您的名字", issued: "颁发日期",
+    openGift: "🎁 打开礼物", openGiftSub: "名字将伴随声音展开",
     listen: "🔊 收听发音", listenSub: "点击后将在网站播放韩语发音",
     detailTitle: "名字的故事", hanja: "汉字", meaning: "名字含义", story: "设计背景", elements: "五行", strokes: "笔画", global: "多语言写法",
     social: "通过您赠送的名字，\n我们得以向没有名字的孩子送上一份礼物。\nWink Naming 正在帮助被忽视的孩子重拾笑容。🤍",
@@ -125,6 +133,7 @@ const COPIES: Record<string, Copy> = {
     subject: (n) => `🎁 «${n}» — Tu nombre coreano ha llegado`, brand: BRAND,
     heroKicker: "UN REGALO PARA TI", heroTitle: "Tu nombre coreano\nha llegado",
     certKicker: "CERTIFICADO DE NOMBRE COREANO", certLine: "Un nombre diseñado con esmero por Wink Naming, solo para ti", issued: "Emitido",
+    openGift: "🎁 Abrir tu regalo", openGiftSub: "Tu nombre se despliega con sonido",
     listen: "🔊 Escuchar la pronunciación", listenSub: "Abre el sitio y reproduce la pronunciación en coreano",
     detailTitle: "La historia de tu nombre", hanja: "Hanja", meaning: "Significado", story: "Historia del diseño", elements: "Cinco elementos", strokes: "Trazos", global: "Escritura internacional",
     social: "Gracias al nombre que elegiste,\npudiste regalarle algo a un niño que no tenía nombre.\nWink Naming ayuda a que los niños olvidados vuelvan a sonreír. 🤍",
@@ -137,6 +146,7 @@ const COPIES: Record<string, Copy> = {
     subject: (n) => `🎁 «${n}» — Ваше корейское имя прибыло`, brand: BRAND,
     heroKicker: "ПОДАРОК ДЛЯ ВАС", heroTitle: "Ваше корейское имя\nприбыло",
     certKicker: "СЕРТИФИКАТ КОРЕЙСКОГО ИМЕНИ", certLine: "Имя, бережно созданное Wink Naming специально для вас", issued: "Дата выдачи",
+    openGift: "🎁 Открыть подарок", openGiftSub: "Имя раскроется со звуком",
     listen: "🔊 Послушать произношение", listenSub: "Откроется сайт, где воспроизводится корейское произношение",
     detailTitle: "История вашего имени", hanja: "Ханча", meaning: "Значение", story: "История создания", elements: "Пять стихий", strokes: "Черты", global: "Написание на разных языках",
     social: "Благодаря выбранному вами имени\nвы смогли сделать подарок ребёнку, у которого не было имени.\nWink Naming помогает детям, оставшимся без внимания, снова улыбаться. 🤍",
@@ -149,6 +159,7 @@ const COPIES: Record<string, Copy> = {
     subject: (n) => `🎁 « ${n} » — Votre prénom coréen est arrivé`, brand: BRAND,
     heroKicker: "UN CADEAU POUR VOUS", heroTitle: "Votre prénom coréen\nest arrivé",
     certKicker: "CERTIFICAT DE PRÉNOM CORÉEN", certLine: "Un prénom conçu avec soin par Wink Naming, rien que pour vous", issued: "Délivré le",
+    openGift: "🎁 Ouvrir votre cadeau", openGiftSub: "Votre prénom se dévoile avec le son",
     listen: "🔊 Écouter la prononciation", listenSub: "Ouvre le site et lit la prononciation coréenne",
     detailTitle: "L'histoire de votre prénom", hanja: "Hanja", meaning: "Signification", story: "Histoire de la conception", elements: "Cinq éléments", strokes: "Traits", global: "Écriture internationale",
     social: "Grâce au prénom que vous avez choisi,\nvous avez pu offrir un cadeau à un enfant sans nom.\nWink Naming aide les enfants laissés de côté à retrouver le sourire. 🤍",
@@ -161,6 +172,7 @@ const COPIES: Record<string, Copy> = {
     subject: (n) => `🎁 «${n}» — وصل اسمك الكوري`, brand: BRAND,
     heroKicker: "هدية لك", heroTitle: "وصل اسمك الكوري",
     certKicker: "شهادة الاسم الكوري", certLine: "اسم صمّمته Wink Naming بعناية، لك وحدك", issued: "تاريخ الإصدار",
+    openGift: "🎁 افتح هديتك", openGiftSub: "ينكشف اسمك مع الصوت",
     listen: "🔊 استمع إلى النطق", listenSub: "يفتح الموقع ويشغّل النطق الكوري",
     detailTitle: "قصة اسمك", hanja: "الهانجا", meaning: "المعنى", story: "قصة التصميم", elements: "العناصر الخمسة", strokes: "عدد الخطوط", global: "الكتابة بلغات متعددة",
     social: "من خلال الاسم الذي اخترته،\nتمكنت من تقديم هدية لطفل بلا اسم.\nيساعد Wink Naming الأطفال المهمَّشين على الابتسام من جديد. 🤍",
@@ -173,6 +185,7 @@ const COPIES: Record<string, Copy> = {
     subject: (n) => `🎁 "${n}" — आपका कोरियाई नाम आ गया है`, brand: BRAND,
     heroKicker: "आपके लिए एक उपहार", heroTitle: "आपका कोरियाई नाम\nआ गया है",
     certKicker: "कोरियाई नाम प्रमाणपत्र", certLine: "Wink Naming द्वारा सोच-समझकर बनाया गया, सिर्फ़ आपके लिए नाम", issued: "जारी करने की तिथि",
+    openGift: "🎁 उपहार खोलें", openGiftSub: "आवाज़ के साथ आपका नाम सामने आएगा",
     listen: "🔊 उच्चारण सुनें", listenSub: "साइट खुलेगी और कोरियाई उच्चारण सुनाई देगा",
     detailTitle: "आपके नाम की कहानी", hanja: "हांजा", meaning: "अर्थ", story: "डिज़ाइन की कहानी", elements: "पाँच तत्व", strokes: "स्ट्रोक", global: "बहुभाषी लेखन",
     social: "आपके चुने हुए नाम के ज़रिए\nआप एक बिना नाम वाले बच्चे को उपहार दे पाए।\nWink Naming उपेक्षित बच्चों को फिर से मुस्कुराने में मदद करता है। 🤍",
@@ -304,8 +317,12 @@ export function buildNameCardEmail(input: NameCardMailInput): { subject: string;
     ${hero}
     ${certificate}
 
-    <tr><td align="center" style="padding:26px 0 8px;">
-      <a href="${esc(input.listenUrl)}" style="display:inline-block;padding:14px 34px;border-radius:999px;background:${NAVY};color:#ffffff;font-size:16px;font-weight:700;text-decoration:none;">${esc(c.listen)}</a>
+    <tr><td align="center" style="padding:28px 0 4px;">
+      <a href="${esc(input.giftUrl)}" style="display:inline-block;padding:16px 40px;border-radius:999px;background:#C9A45C;color:${NAVY};font-size:17px;font-weight:800;text-decoration:none;">${esc(c.openGift)}</a>
+      <div style="font-size:11px;color:#8A8372;margin-top:8px;">${esc(c.openGiftSub)}</div>
+    </td></tr>
+    <tr><td align="center" style="padding:20px 0 8px;">
+      <a href="${esc(input.listenUrl)}" style="display:inline-block;padding:12px 30px;border-radius:999px;background:${NAVY};color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;">${esc(c.listen)}</a>
       <div style="font-size:11px;color:#8A8372;margin-top:8px;">${esc(c.listenSub)}</div>
     </td></tr>
     ${input.hasImage ? `<tr><td align="center" style="padding:4px 12px 18px;font-size:12px;line-height:1.7;color:#6B6558;">📎 ${esc(c.attachHint)}</td></tr>` : `<tr><td style="padding:0 0 10px;"></td></tr>`}

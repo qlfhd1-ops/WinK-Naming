@@ -80,7 +80,7 @@ function ListenInner() {
             </>
           ) : null}
         </div>
-        <a href={`https://wink-naming.com/${lang}`} style={{ display: "inline-block", marginTop: 22, fontSize: 13, fontWeight: 700, color: "#1B2A5E", textDecoration: "underline" }}>
+        <a href={`https://wink-naming.com/?lang=${lang}`} style={{ display: "inline-block", marginTop: 22, fontSize: 13, fontWeight: 700, color: "#1B2A5E", textDecoration: "underline" }}>
           {ui.site}
         </a>
       </div>
