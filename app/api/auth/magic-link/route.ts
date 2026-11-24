@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { Redis } from "@upstash/redis";
 import { rateLimit } from "@/lib/rate-limiter";
+import { readUpstashEnv } from "@/lib/upstash";
 
 /**
  * POST /api/auth/magic-link
@@ -87,9 +88,9 @@ function buildMail(lang: string, link: string, code: string, otp: string | null)
 // ── 이메일별 재요청 쿨다운 (Upstash 우선, 없으면 인메모리) ──────────────
 let _redis: Redis | null = null;
 function getRedis(): Redis | null {
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
-  if (!url || !token) return null;
+  const env = readUpstashEnv();
+  if (!env) return null;
+  const { url, token } = env;
   if (!_redis) _redis = new Redis({ url, token, retry: false });
   return _redis;
 }
