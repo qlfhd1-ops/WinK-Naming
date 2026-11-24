@@ -175,6 +175,18 @@ html[data-theme="light"] .wink-mini-card {
   color: var(--text-main);
 }
 
+/* 선택된 이름 패널은 진한 남색 배경이라, 라이트 테마의 크림색 미니 카드를 어두운 카드로 바꿔 밝은 글씨가 보이게 한다 */
+html[data-theme="light"] .wink-name-selected .wink-mini-card {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(120, 160, 255, 0.24);
+  color: #f0f4ff;
+}
+
+html[data-theme="light"] .wink-name-selected .wink-mini-title,
+html[data-theme="light"] .wink-name-selected .wink-mini-sub {
+  color: rgba(190, 205, 235, 0.85);
+}
+
 html[data-theme="light"] .wink-trust-item {
   background: rgba(255, 251, 240, 0.96);
   border-color: var(--line-soft);

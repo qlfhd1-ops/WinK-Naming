@@ -1,6 +1,5 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import Script from "next/script";
 import { Noto_Serif_KR, Noto_Sans_KR } from "next/font/google";
 import AudioPlayer from "@/components/AudioPlayer";
 import { SERVICE_PRE_LAUNCH } from "@/lib/pricing";
@@ -125,29 +124,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         )}
         {children}
         <AudioPlayer />
-        {/* Kakao SDK — NEXT_PUBLIC_KAKAO_JS_KEY 설정 시 활성화 */}
-        {process.env.NEXT_PUBLIC_KAKAO_JS_KEY && (
-          <>
-            <Script
-              src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"
-              integrity="sha384-TiCUE00h649CAMonG018J2ujOgDKW/kVWlChEuu4jK2vxfAAD0eZxzCKakxg55G4"
-              crossOrigin="anonymous"
-              strategy="afterInteractive"
-            />
-            <Script id="kakao-init" strategy="afterInteractive">
-              {`
-                window.__kakaoKey = "${process.env.NEXT_PUBLIC_KAKAO_JS_KEY}";
-                (function tryInit() {
-                  if (window.Kakao && !window.Kakao.isInitialized()) {
-                    window.Kakao.init(window.__kakaoKey);
-                  } else if (!window.Kakao) {
-                    setTimeout(tryInit, 200);
-                  }
-                })();
-              `}
-            </Script>
-          </>
-        )}
       </body>
     </html>
   );

@@ -6,7 +6,6 @@ import { toPng } from "html-to-image";
 import { createClient } from "@/lib/supabase/browser";
 import { AppLang, isSupportedLang } from "@/lib/lang-config";
 import { addCartItem } from "@/lib/cart";
-import { addToShortlist, isInShortlist } from "@/lib/shortlist";
 import { getSessionToken } from "@/lib/session-token";
 import NameGenerationScene from "@/components/NameGenerationScene";
 import { GENERATION_STEPS } from "@/lib/generation-steps";
@@ -2353,6 +2352,13 @@ export default function ResultPage() {
         setCardCtaSentTo(String(json.sentTo ?? ""));
         setCardCtaSentName(String(json.sentName ?? item.name ?? ""));
         setCardCtaStatus(json.already ? "already" : "sent");
+        if (!json.already) {
+          // 발송 안내를 잠깐 보여 준 뒤 카드 창을 닫고 후기 영역으로 돌아와 자연스럽게 후기를 남기게 한다.
+          setTimeout(() => {
+            setNameCardIdx(null);
+            setTimeout(() => document.getElementById("wink-review-cta")?.scrollIntoView({ behavior: "smooth", block: "center" }), 300);
+          }, 1800);
+        }
       } else {
         setCardCtaStatus("error");
       }
@@ -2803,6 +2809,7 @@ export default function ResultPage() {
               return (
                 <article
                   key={`${item.name}-${item.rank_order}`}
+                  className={isSelected ? "wink-name-selected" : undefined}
                   style={{
                     borderRadius: 20,
                     overflow: "hidden",
@@ -3042,7 +3049,8 @@ export default function ResultPage() {
                     borderTop: isExpanded ? "1px solid var(--line-soft)" : "none",
                     paddingTop: isExpanded ? 16 : 0,
                   }}>
-                    {/* 선택 버튼 — 가장 눈에 띄는 주 행동 */}
+                    {/* 선택 버튼 — 아직 고르지 않은 이름에만 표시(고른 뒤에는 상태 표시용 버튼이 필요 없음) */}
+                    {!isSelected && (
                     <button
                       type="button"
                       onClick={() => {
@@ -3066,8 +3074,9 @@ export default function ResultPage() {
                         transition: "all 0.22s ease",
                       }}
                     >
-                      {isSelected ? `✓ ${ui.nameSelectedBadge}` : `✦ ${ui.selectThisName}`}
+                      {`✦ ${ui.selectThisName}`}
                     </button>
+                    )}
 
                     {/* 네임카드 버튼 */}
                     <button
@@ -3085,48 +3094,6 @@ export default function ResultPage() {
                     >
                       {nx.previewCardBtn}
                     </button>
-
-                    {/* 숏리스트 저장 버튼 */}
-                    {(() => {
-                      const saved = isInShortlist(item.name, brief?.category);
-                      return (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const ok = addToShortlist({
-                              name: item.name,
-                              hanja: item.hanja,
-                              hanja_meaning: item.hanja_meaning,
-                              hanja_strokes: item.hanja_strokes,
-                              five_elements: item.five_elements,
-                              phonetic_harmony: item.phonetic_harmony,
-                              meaning: item.meaning,
-                              story: item.story,
-                              fit_reason: item.fit_reason,
-                              english: item.english,
-                              track: item.track,
-                              score: item.score,
-                              category: brief?.category,
-                              lang: rawLang,
-                            });
-                            if (ok) setMessage(nx.shortlistSaved);
-                            else setMessage(nx.shortlistDup);
-                            setTimeout(() => setMessage(""), 2000);
-                          }}
-                          style={{
-                            width: "100%", padding: "10px 0", borderRadius: 12,
-                            fontSize: 13, fontWeight: 700, cursor: "pointer",
-                            border: saved ? "1.5px solid #2f9e62" : "1.5px solid var(--line-strong)",
-                            background: saved ? "rgba(47,158,98,0.12)" : "transparent",
-                            color: saved ? "#2f9e62" : "var(--text-dim)",
-                            display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
-                            transition: "all 0.18s",
-                          }}
-                        >
-                          {saved ? "✓" : "+"} {nx.shortlist}
-                        </button>
-                      );
-                    })()}
 
                   </div>
 
@@ -3811,14 +3778,6 @@ export default function ResultPage() {
                   style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
                 >
                   💬 {lang === "ko" ? "문자로 받기" : "Receive by SMS"}
-                </button>
-                <button
-                  type="button"
-                  className="wink-secondary-btn"
-                  onClick={() => handleGiftShare("kakao")}
-                  style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
-                >
-                  🟡 {lang === "ko" ? "카카오톡으로 받기" : "Receive via KakaoTalk"}
                 </button>
               </div>
             ) : (
