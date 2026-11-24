@@ -11,7 +11,6 @@ import { GuideSection } from "./_home/GuideSection";
 import { InfoSection } from "./_home/InfoSection";
 import { MarqueeBand } from "./_home/MarqueeBand";
 import { BigNameCard, MiniSpeakButton } from "./_home/NameCards";
-import { ReturnBanner, type ReturnInfo } from "./_home/ReturnBanner";
 import { ReviewsSection } from "./_home/ReviewsSection";
 import { ALL_CARDS, type ChildCard, type ForeignCard, type GoodsCard, type KoreanNameCard, type PetCard, type SelfCard, type StageCard, getCards } from "./_home/cards";
 import { CATS, CAT_DESC_BY_LANG, COMING_SOON_BY_LANG, type CatId, GOODS_DISCOUNT_BY_LANG, PRICE_MAP } from "./_home/categories";
@@ -27,8 +26,6 @@ export default function HomePage() {
   const [cardIdx, setCardIdx] = useState(0);
   const [animKey, setAnimKey] = useState(0);
   const [showLangPicker, setShowLangPicker] = useState(false);
-  const [returnInfo, setReturnInfo] = useState<ReturnInfo | null>(null);
-  const [showBanner, setShowBanner] = useState(false);
   const [videoPlaying, setVideoPlaying] = useState(false);
 
   useEffect(() => {
@@ -54,30 +51,6 @@ export default function HomePage() {
         if (LANGS.includes(code as Lang)) { setLang(code as Lang); return; }
       }
     } catch { /* ignore — fallback은 useState 기본값 "en" */ }
-  }, []);
-
-  useEffect(() => {
-    try {
-      const email = localStorage.getItem("wink-guest-email");
-      if (!email) return;
-      const sessionKey = "wink-visit-counted";
-      const alreadyCounted = sessionStorage.getItem(sessionKey);
-      fetch("/api/guest-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, countVisit: !alreadyCounted }),
-      })
-        .then(r => r.json())
-        .then(data => {
-          if (!data.ok) return;
-          if (!alreadyCounted) sessionStorage.setItem(sessionKey, "1");
-          const vc: number = data.visitCount ?? 1;
-          if (vc < 2) return;
-          setReturnInfo({ visitCount: vc, lastNameKr: data.lastNameKr ?? null, lastCategory: data.lastCategory ?? null });
-          setShowBanner(true);
-        })
-        .catch(() => {});
-    } catch { /* ignore */ }
   }, []);
 
   useEffect(() => {
@@ -144,11 +117,6 @@ export default function HomePage() {
           <span style={{ fontSize: 9, opacity: 0.85 }}>▾</span>
         </button>
       </header>
-
-      {/* ── 재방문 배너 ── */}
-      {showBanner && returnInfo && (
-        <ReturnBanner info={returnInfo} onClose={() => setShowBanner(false)} onCatSelect={handleCatSelect} router={router} />
-      )}
 
       {/* ── 히어로 섹션 ── */}
       <section className="lg-hero">
