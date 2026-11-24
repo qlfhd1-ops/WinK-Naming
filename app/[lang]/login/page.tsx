@@ -3,6 +3,8 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { AppLang, isSupportedLang } from "@/lib/lang-config";
+import { createClient } from "@/lib/supabase/browser";
+import { getSessionToken, clearSessionToken } from "@/lib/session-token";
 
 const COPY = {
   ko: {
@@ -131,54 +133,117 @@ const COPY_EXTRA = {
     rateLimited: "요청이 너무 잦습니다. {n}초 후에 다시 시도해 주세요.",
     invalidEmail: "올바른 이메일 주소를 입력해 주세요.",
     hint: "가장 최근에 받은 메일의 링크만 유효합니다. 메일이 보이지 않으면 스팸함을 확인해 주세요.",
+    whyEmail: "이메일은 로그인 링크·인증번호를 보내고, 만든 이름을 보관하는 데에만 사용해요.",
+    codeLabel: "인증번호로 로그인",
+    codeHelp: "메일 링크가 열리지 않나요? (인스타그램·카카오톡 앱 등) 메일에 적힌 인증번호를 입력하세요.",
+    codePlaceholder: "인증번호 6자리",
+    verify: "인증번호로 로그인",
+    verifying: "확인하는 중...",
+    codeInvalid: "인증번호가 올바르지 않거나 만료되었어요. 가장 최근 메일의 번호를 입력해 주세요.",
   },
   en: {
     resendIn: "Resend in {n}s",
     rateLimited: "Too many requests. Please try again in {n} seconds.",
     invalidEmail: "Please enter a valid email address.",
     hint: "Only the link in your most recent email works. If you can't find it, check your spam folder.",
+    whyEmail: "We only use your email to send the sign-in link or code and to keep the names you create.",
+    codeLabel: "Sign in with a code",
+    codeHelp: "Link won't open (Instagram or other in-app browsers)? Enter the code from the email.",
+    codePlaceholder: "6-digit code",
+    verify: "Sign in with code",
+    verifying: "Verifying...",
+    codeInvalid: "That code is incorrect or has expired. Enter the code from your most recent email.",
   },
   ja: {
     resendIn: "{n}秒後に再送信",
     rateLimited: "リクエストが多すぎます。{n}秒後にもう一度お試しください。",
     invalidEmail: "有効なメールアドレスを入力してください。",
     hint: "最新のメールのリンクのみ有効です。見つからない場合は迷惑メールフォルダをご確認ください。",
+    whyEmail: "メールアドレスは、ログインリンク・認証コードの送信と、作成した名前の保管にのみ使用します。",
+    codeLabel: "認証コードでログイン",
+    codeHelp: "リンクが開けませんか？（Instagram などのアプリ内ブラウザ）メールに記載のコードを入力してください。",
+    codePlaceholder: "認証コード（6桁）",
+    verify: "認証コードでログイン",
+    verifying: "確認中...",
+    codeInvalid: "認証コードが正しくないか、期限切れです。最新のメールのコードを入力してください。",
   },
   zh: {
     resendIn: "{n}秒后可重新发送",
     rateLimited: "请求过于频繁，请在{n}秒后重试。",
     invalidEmail: "请输入有效的邮箱地址。",
     hint: "只有最新一封邮件中的链接有效。如果没有收到，请检查垃圾邮件箱。",
+    whyEmail: "邮箱仅用于发送登录链接/验证码，以及保存您生成的名字。",
+    codeLabel: "使用验证码登录",
+    codeHelp: "链接打不开？（如 Instagram 等应用内浏览器）请输入邮件中的验证码。",
+    codePlaceholder: "6位验证码",
+    verify: "验证码登录",
+    verifying: "验证中...",
+    codeInvalid: "验证码错误或已过期。请输入最新一封邮件中的验证码。",
   },
   es: {
     resendIn: "Reenviar en {n}s",
     rateLimited: "Demasiadas solicitudes. Inténtelo de nuevo en {n} segundos.",
     invalidEmail: "Introduzca un correo electrónico válido.",
     hint: "Solo es válido el enlace del correo más reciente. Si no lo ve, revise la carpeta de spam.",
+    whyEmail: "Solo usamos tu correo para enviar el enlace o código de acceso y guardar los nombres que crees.",
+    codeLabel: "Acceder con un código",
+    codeHelp: "¿No se abre el enlace (Instagram u otros navegadores integrados)? Introduce el código del correo.",
+    codePlaceholder: "Código de 6 dígitos",
+    verify: "Acceder con código",
+    verifying: "Verificando...",
+    codeInvalid: "El código es incorrecto o ha caducado. Introduce el código del correo más reciente.",
   },
   ru: {
     resendIn: "Отправить снова через {n} с",
     rateLimited: "Слишком много запросов. Повторите через {n} с.",
     invalidEmail: "Введите корректный адрес email.",
     hint: "Действует только ссылка из самого последнего письма. Если письма нет, проверьте папку «Спам».",
+    whyEmail: "Email нужен только для отправки ссылки или кода для входа и для сохранения созданных вами имён.",
+    codeLabel: "Вход по коду",
+    codeHelp: "Ссылка не открывается (Instagram и другие встроенные браузеры)? Введите код из письма.",
+    codePlaceholder: "Код из 6 цифр",
+    verify: "Войти по коду",
+    verifying: "Проверяем...",
+    codeInvalid: "Код неверный или истёк. Введите код из самого последнего письма.",
   },
   fr: {
     resendIn: "Renvoyer dans {n} s",
     rateLimited: "Trop de demandes. Réessayez dans {n} secondes.",
     invalidEmail: "Veuillez saisir une adresse email valide.",
     hint: "Seul le lien du dernier email reçu est valide. Si vous ne le voyez pas, vérifiez vos spams.",
+    whyEmail: "Votre e-mail sert uniquement à envoyer le lien ou le code de connexion et à conserver les prénoms que vous créez.",
+    codeLabel: "Se connecter avec un code",
+    codeHelp: "Le lien ne s'ouvre pas (Instagram ou autres navigateurs intégrés) ? Saisissez le code reçu par e-mail.",
+    codePlaceholder: "Code à 6 chiffres",
+    verify: "Se connecter avec le code",
+    verifying: "Vérification...",
+    codeInvalid: "Code incorrect ou expiré. Saisissez le code de l'e-mail le plus récent.",
   },
   ar: {
     resendIn: "إعادة الإرسال بعد {n} ث",
     rateLimited: "طلبات كثيرة جدًا. حاول مرة أخرى بعد {n} ثانية.",
     invalidEmail: "يرجى إدخال بريد إلكتروني صالح.",
     hint: "الرابط في أحدث رسالة فقط هو الصالح. إذا لم تجدها، تحقق من مجلد البريد العشوائي.",
+    whyEmail: "نستخدم بريدك الإلكتروني فقط لإرسال رابط أو رمز تسجيل الدخول ولحفظ الأسماء التي تنشئها.",
+    codeLabel: "تسجيل الدخول بالرمز",
+    codeHelp: "لا يُفتح الرابط (إنستغرام أو المتصفحات المدمجة)؟ أدخل الرمز الموجود في البريد.",
+    codePlaceholder: "رمز من 6 أرقام",
+    verify: "تسجيل الدخول بالرمز",
+    verifying: "جارٍ التحقق...",
+    codeInvalid: "الرمز غير صحيح أو منتهي الصلاحية. أدخل الرمز من أحدث رسالة.",
   },
   hi: {
     resendIn: "{n} सेकंड में दोबारा भेजें",
     rateLimited: "बहुत अधिक अनुरोध। कृपया {n} सेकंड बाद पुनः प्रयास करें।",
     invalidEmail: "कृपया मान्य ईमेल पता दर्ज करें।",
     hint: "केवल सबसे हाल के ईमेल का लिंक मान्य है। न मिले तो स्पैम फ़ोल्डर देखें।",
+    whyEmail: "आपका ईमेल केवल साइन-इन लिंक/कोड भेजने और आपके बनाए नाम सहेजने के लिए उपयोग होता है।",
+    codeLabel: "कोड से साइन इन करें",
+    codeHelp: "लिंक नहीं खुल रहा (Instagram जैसे इन-ऐप ब्राउज़र)? ईमेल में दिया कोड दर्ज करें।",
+    codePlaceholder: "6 अंकों का कोड",
+    verify: "कोड से साइन इन करें",
+    verifying: "जाँच रहे हैं...",
+    codeInvalid: "कोड गलत है या समाप्त हो गया है। सबसे नई ईमेल का कोड दर्ज करें।",
   },
 } as const;
 
@@ -196,6 +261,9 @@ export default function LoginPage() {
   const [error, setError]           = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [cooldown, setCooldown]     = useState(0);
+  const [codeSent, setCodeSent]     = useState(false);
+  const [code, setCode]             = useState("");
+  const [verifying, setVerifying]   = useState(false);
 
   // 재전송 쿨다운 카운트다운 (1초 단위)
   useEffect(() => {
@@ -225,7 +293,7 @@ export default function LoginPage() {
       });
 
       const data = await res.json() as {
-        ok: boolean; code?: string; retryAfter?: number; error?: string;
+        ok: boolean; code?: string; retryAfter?: number; error?: string; codeSent?: boolean;
       };
 
       if (!data.ok) {
@@ -243,11 +311,54 @@ export default function LoginPage() {
       }
 
       setMessage(ui.success);
+      setCodeSent(data.codeSent === true);
+      setCode("");
       setCooldown(DEFAULT_COOLDOWN_SEC);
     } catch {
       setError(ui.errorDefault);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  // 메일에 적힌 인증번호로 로그인(인스타그램·카카오톡 등 앱 안 브라우저처럼 메일 링크가 다른 브라우저로 열리는 경우용)
+  const handleVerifyCode = async (e: FormEvent) => {
+    e.preventDefault();
+    const token = code.replace(/\s+/g, "");
+    if (verifying || !/^\d{6,10}$/.test(token)) { setError(extra.codeInvalid); return; }
+
+    setVerifying(true);
+    setError("");
+    try {
+      const supabase = createClient();
+      const { data, error: vErr } = await supabase.auth.verifyOtp({ email: email.trim(), token, type: "email" });
+      if (vErr || !data?.session) {
+        setError(extra.codeInvalid);
+        return;
+      }
+
+      // 로그인 전 게스트 상태에서 만든 이름/주문을 방금 로그인한 계정에 연결(실패해도 로그인은 계속)
+      try {
+        const sessionToken = getSessionToken();
+        if (sessionToken) {
+          await fetch("/api/auth/merge-session", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sessionToken, accessToken: data.session.access_token }),
+          });
+          clearSessionToken();
+        }
+      } catch (mergeError) {
+        console.error("[login] merge-session error:", mergeError);
+      }
+
+      const next = new URLSearchParams(window.location.search).get("next");
+      const safeNext = next && next.startsWith("/") && !next.startsWith("//") && !next.startsWith("/\\") ? next : `/?lang=${lang}`;
+      window.location.href = safeNext;
+    } catch {
+      setError(extra.codeInvalid);
+    } finally {
+      setVerifying(false);
     }
   };
 
@@ -314,6 +425,8 @@ export default function LoginPage() {
               onBlur={(e)  => { e.target.style.borderColor = "#E0E0E0"; e.target.style.background = "#FAFAFA"; }}
             />
 
+            <p style={{ fontSize: 12, color: "#888", lineHeight: 1.6, margin: "8px 2px 0" }}>{extra.whyEmail}</p>
+
             {error && (
               <p role="alert" style={{ fontSize: 13, color: "#C53030", marginTop: 10, marginBottom: 0, lineHeight: 1.5 }}>
                 {error}
@@ -351,6 +464,50 @@ export default function LoginPage() {
                   : ui.submit}
             </button>
           </form>
+
+          {codeSent && (
+            <form onSubmit={handleVerifyCode} style={{ marginTop: 24, paddingTop: 22, borderTop: "1px solid #EEE" }}>
+              <label
+                htmlFor="otp"
+                style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#1B2A5E", marginBottom: 6 }}
+              >
+                {extra.codeLabel}
+              </label>
+              <p style={{ fontSize: 12, color: "#777", lineHeight: 1.6, margin: "0 0 10px" }}>{extra.codeHelp}</p>
+              <input
+                id="otp"
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                pattern="[0-9]*"
+                maxLength={10}
+                value={code}
+                onChange={(e) => setCode(e.target.value.replace(/[^0-9]/g, ""))}
+                placeholder={extra.codePlaceholder}
+                dir="ltr"
+                style={{
+                  width: "100%", boxSizing: "border-box",
+                  padding: "13px 16px", borderRadius: 12,
+                  border: "1.5px solid #E0E0E0", fontSize: 20, letterSpacing: "0.3em", textAlign: "center",
+                  color: "#1B2A5E", outline: "none", fontFamily: sans, background: "#FAFAFA",
+                }}
+              />
+              <button
+                type="submit"
+                disabled={verifying || code.length < 6}
+                style={{
+                  marginTop: 12, width: "100%", padding: "13px",
+                  borderRadius: 12, border: "1.5px solid #1B2A5E",
+                  background: verifying || code.length < 6 ? "#F2F2F2" : "#1B2A5E",
+                  color: verifying || code.length < 6 ? "#AAA" : "#FFFFFF",
+                  fontSize: 15, fontWeight: 700, fontFamily: sans,
+                  cursor: verifying || code.length < 6 ? "not-allowed" : "pointer",
+                }}
+              >
+                {verifying ? extra.verifying : extra.verify}
+              </button>
+            </form>
+          )}
         </div>
 
         {/* 안내 */}
