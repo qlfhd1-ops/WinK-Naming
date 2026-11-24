@@ -15,7 +15,7 @@ const COPY = {
     sending: "보내는 중...",
     success: "로그인 링크를 보냈습니다. 이메일을 확인해 주세요.",
     errorDefault: "로그인 링크 발송에 실패했습니다.",
-    guide1: "이름 설계와 결과 확인은 로그인 없이도 가능합니다.",
+    guide1: "이름 설계에는 이메일 로그인이 필요해요. 결과 이름카드를 메일로 보내 드리고, 만든 이름을 보관하기 위해서예요.",
     guide2: "로그인하시면 주문 내역, 저장 이력, 향후 보관함 기능과 더 자연스럽게 연결됩니다.",
   },
   en: {
@@ -28,7 +28,7 @@ const COPY = {
     sending: "Sending...",
     success: "A login link has been sent. Please check your email.",
     errorDefault: "Failed to send the login link.",
-    guide1: "You can design names and view results without logging in.",
+    guide1: "Email sign-in is needed to design names, so we can send your name card by email and keep your names safe.",
     guide2: "Logging in connects your orders, saved history, and future archive features.",
   },
   ja: {
@@ -41,7 +41,7 @@ const COPY = {
     sending: "送信中...",
     success: "ログインリンクを送信しました。メールをご確認ください。",
     errorDefault: "ログインリンクの送信に失敗しました。",
-    guide1: "名前設計と結果確認はログインなしでも利用できます。",
+    guide1: "名前の設計にはメールログインが必要です。名前カードをメールでお届けし、作成した名前を保管するためです。",
     guide2: "ログインすると注文履歴・保存履歴・今後の保管機能と連携できます。",
   },
   zh: {
@@ -54,7 +54,7 @@ const COPY = {
     sending: "发送中...",
     success: "登录链接已发送，请检查您的邮箱。",
     errorDefault: "发送登录链接失败。",
-    guide1: "即使不登录，也可以进行命名设计和查看结果。",
+    guide1: "设计名字需要使用邮箱登录，以便通过邮件发送名字卡并为您保存已生成的名字。",
     guide2: "登录后可连接订单记录、保存历史和后续档案功能。",
   },
   es: {
@@ -67,7 +67,7 @@ const COPY = {
     sending: "Enviando...",
     success: "Se envió el enlace de acceso. Revise su correo.",
     errorDefault: "No se pudo enviar el enlace de acceso.",
-    guide1: "Puede diseñar nombres y ver resultados sin iniciar sesión.",
+    guide1: "Para diseñar nombres necesitas iniciar sesión con tu correo: así te enviamos la tarjeta del nombre y guardamos tus nombres.",
     guide2: "Iniciar sesión conecta pedidos, historial y funciones de archivo.",
   },
   ru: {
@@ -80,7 +80,7 @@ const COPY = {
     sending: "Отправляем...",
     success: "Ссылка для входа отправлена. Проверьте свой email.",
     errorDefault: "Не удалось отправить ссылку для входа.",
-    guide1: "Вы можете проектировать имена без входа в систему.",
+    guide1: "Для создания имён нужен вход по e-mail: так мы отправим карточку имени на почту и сохраним ваши имена.",
     guide2: "Вход помогает связать заказы, историю и функции архива.",
   },
   fr: {
@@ -93,7 +93,7 @@ const COPY = {
     sending: "Envoi en cours...",
     success: "Le lien de connexion a été envoyé. Vérifiez votre email.",
     errorDefault: "Échec de l'envoi du lien de connexion.",
-    guide1: "Vous pouvez concevoir des noms sans vous connecter.",
+    guide1: "La connexion par e-mail est nécessaire pour concevoir des noms : nous vous envoyons la carte du prénom et conservons vos prénoms.",
     guide2: "La connexion relie vos commandes, l'historique et les futures fonctions.",
   },
   ar: {
@@ -106,7 +106,7 @@ const COPY = {
     sending: "جارٍ الإرسال...",
     success: "تم إرسال رابط تسجيل الدخول. تحقق من بريدك.",
     errorDefault: "فشل إرسال رابط تسجيل الدخول.",
-    guide1: "يمكنك تصميم الأسماء دون تسجيل الدخول.",
+    guide1: "يلزم تسجيل الدخول بالبريد الإلكتروني لتصميم الأسماء، لنرسل لك بطاقة الاسم ونحفظ أسماءك.",
     guide2: "يساعد تسجيل الدخول على ربط الطلبات والتاريخ.",
   },
   hi: {
@@ -119,7 +119,7 @@ const COPY = {
     sending: "भेज रहे हैं...",
     success: "लॉगिन लिंक भेज दिया गया है। कृपया अपना ईमेल जांचें।",
     errorDefault: "लॉगिन लिंक भेजने में विफल।",
-    guide1: "आप बिना लॉगिन के नाम डिज़ाइन कर सकते हैं।",
+    guide1: "नाम डिज़ाइन करने के लिए ईमेल लॉगिन ज़रूरी है, ताकि हम नेम कार्ड ईमेल कर सकें और आपके नाम सुरक्षित रख सकें।",
     guide2: "लॉगिन करने से ऑर्डर और सहेजे गए इतिहास जुड़ते हैं।",
   },
 } as const;

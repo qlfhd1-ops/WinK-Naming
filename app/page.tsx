@@ -689,7 +689,7 @@ const HOME_COPY = {
     subline: "단순 생성이 아닌, 음운·한자·오행을 담은 진짜 이름 설계",
     ctaMain: "이름 만들기 시작 →",
     free: "첫 이름 무료", time: "약 2분 완성", later: "이후",
-    noLogin: "비로그인 상태에서도 1회 무료",
+    emailStart: "이메일 로그인으로 누구나 쉽게 이름을 만들 수 있어요 · 첫 설계 무료",
     trust1: "성명학·사주 반영", trust2: "다국어 동시 설계", trust3: "오행·음운 균형",
     badge: "한국 프리미엄 네이밍 서비스",
     infoTitle: "이름 트렌드 & 참고 정보", infoHanja: "名資料",
@@ -719,7 +719,7 @@ const HOME_COPY = {
     subline: "Not just generation — real name design with phonetics, hanja & ohaeng",
     ctaMain: "Start Designing →",
     free: "First name free", time: "~2 min", later: "After:",
-    noLogin: "1 free design without sign-in",
+    emailStart: "Anyone can start easily with email sign-in · First design free",
     trust1: "Saju & Phonetics", trust2: "Multi-language", trust3: "Ohaeng Balance",
     badge: "Korean Premium Naming",
     infoTitle: "Name Trends & Reference", infoHanja: "名資料",
@@ -749,7 +749,7 @@ const HOME_COPY = {
     subline: "不只是生成 — 融合音韵、汉字、五行的真正名字设计",
     ctaMain: "开始名字设计 →",
     free: "首次免费", time: "约2分钟", later: "之后",
-    noLogin: "无需登录即可免费使用一次",
+    emailStart: "只需邮箱登录，人人都能轻松取名 · 首次设计免费",
     trust1: "四柱·音韵", trust2: "多语言设计", trust3: "五行平衡",
     badge: "韩国高端命名服务",
     infoTitle: "名字趋势 & 参考资料", infoHanja: "名資料",
@@ -779,7 +779,7 @@ const HOME_COPY = {
     subline: "単なる生成ではなく、音韻・漢字・五行を込めた本物の名前設計",
     ctaMain: "名前設計を始める →",
     free: "初回無料", time: "約2分", later: "以降",
-    noLogin: "ログイン不要で1回無料",
+    emailStart: "メールログインで誰でも簡単に名前を作れます · 初回設計は無料",
     trust1: "四柱·音韻", trust2: "多言語対応", trust3: "五行バランス",
     badge: "韓国プレミアムネーミング",
     infoTitle: "名前トレンド & 参考情報", infoHanja: "名資料",
@@ -809,7 +809,7 @@ const HOME_COPY = {
     subline: "Diseño real con fonética, hanja y ohaeng — no solo generación",
     ctaMain: "Empezar diseño →",
     free: "Primero gratis", time: "~2 min", later: "Después:",
-    noLogin: "1 diseño gratis sin registro",
+    emailStart: "Con tu correo, cualquiera puede crear su nombre fácilmente · Primer diseño gratis",
     trust1: "Saju·Fonética", trust2: "Multilingüe", trust3: "Balance Ohaeng",
     badge: "Nomenclatura Coreana Premium",
     infoTitle: "Tendencias & Referencia", infoHanja: "名資料",
@@ -839,7 +839,7 @@ const HOME_COPY = {
     subline: "Conception réelle avec phonétique, hanja et ohaeng",
     ctaMain: "Commencer →",
     free: "Premier gratuit", time: "~2 min", later: "Ensuite:",
-    noLogin: "1 conception gratuite sans connexion",
+    emailStart: "Avec une simple connexion par e-mail, créez votre nom facilement · Première conception gratuite",
     trust1: "Saju·Phonétique", trust2: "Multilingue", trust3: "Balance Ohaeng",
     badge: "Nommage Coréen Premium",
     infoTitle: "Tendances & Référence", infoHanja: "名資料",
@@ -869,7 +869,7 @@ const HOME_COPY = {
     subline: "Настоящий дизайн имени с фонетикой, ханджа и пятью элементами",
     ctaMain: "Начать дизайн →",
     free: "Первое бесплатно", time: "~2 мин", later: "Далее:",
-    noLogin: "1 раз бесплатно без входа",
+    emailStart: "Войдите по e-mail и легко создайте имя · Первый дизайн бесплатно",
     trust1: "Саджу·Фонетика", trust2: "Мультиязычный", trust3: "Баланс Охэн",
     badge: "Корейский Премиум Нейминг",
     infoTitle: "Тенденции имён & Справка", infoHanja: "名資料",
@@ -899,7 +899,7 @@ const HOME_COPY = {
     subline: "تصميم حقيقي بالصوتيات والهانجا والعناصر الخمسة",
     ctaMain: "ابدأ التصميم →",
     free: "الأول مجاني", time: "~دقيقتان", later: "بعدها:",
-    noLogin: "تصميم مجاني واحد بدون تسجيل",
+    emailStart: "سجّل الدخول بالبريد الإلكتروني وأنشئ اسمك بسهولة · أول تصميم مجاني",
     trust1: "ساجو·الصوتيات", trust2: "متعدد اللغات", trust3: "توازن أوهيج",
     badge: "التسمية الكورية الفاخرة",
     infoTitle: "اتجاهات الأسماء & مرجع", infoHanja: "名資料",
@@ -929,7 +929,7 @@ const HOME_COPY = {
     subline: "केवल जेनरेशन नहीं — ध्वन्यात्मकता, हांजा और पांच तत्वों के साथ असली नाम डिज़ाइन",
     ctaMain: "डिज़ाइन शुरू करें →",
     free: "पहला नाम मुफ़्त", time: "~2 मिनट", later: "बाद में:",
-    noLogin: "बिना लॉगिन 1 बार मुफ़्त",
+    emailStart: "ईमेल लॉगिन से कोई भी आसानी से नाम बना सकता है · पहला डिज़ाइन मुफ़्त",
     trust1: "साजू·ध्वन्यात्मकता", trust2: "बहुभाषी", trust3: "ओहेंग संतुलन",
     badge: "कोरियाई प्रीमियम नामकरण",
     infoTitle: "नाम ट्रेंड्स & संदर्भ", infoHanja: "名資料",
@@ -2628,8 +2628,8 @@ export default function HomePage() {
               <div style={{ fontSize: 13, color: "#888" }}>
                 {selectedId !== "goods"
                   ? (SERVICE_PRE_LAUNCH
-                      ? `${copy.noLogin} · ${COMING_SOON_BY_LANG[lang] ?? COMING_SOON_BY_LANG.ko}`
-                      : `${copy.noLogin} · ${copy.later} ${price.symbol}${price.amount}`)
+                      ? `${copy.emailStart} · ${COMING_SOON_BY_LANG[lang] ?? COMING_SOON_BY_LANG.ko}`
+                      : `${copy.emailStart} · ${copy.later} ${price.symbol}${price.amount}`)
                   : <span style={{ color: theme.accent, fontWeight: 700 }}>{GOODS_DISCOUNT_BY_LANG[lang] ?? GOODS_DISCOUNT_BY_LANG.ko}</span>
                 }
               </div>
